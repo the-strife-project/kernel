@@ -23,4 +23,8 @@ SECTIONS {
 		*(COMMON)
 		*(.bss*)
 	}
+
+	.stack ALIGN(4K) : {
+		KEEP(*(.stack))
+	}
 }
