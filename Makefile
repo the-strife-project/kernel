@@ -28,3 +28,6 @@ $(OBJPATH)/%.o: $(SRCPATH)/%.cpp $(OBJPATH)
 
 $(OBJPATH):
 	cd src && find . -type d -exec mkdir -p ../$(OBJPATH)/{} \;
+
+clean:
+	rm -rf $(RESULT) $(OBJPATH)/
