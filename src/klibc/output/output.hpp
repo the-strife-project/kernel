@@ -14,7 +14,12 @@ extreme failure. Most of the time:
 */
 
 void _writec(char c);
-void _writes(const char* str);
+
+inline void _writes(const char* str) {
+	while(*str)
+		_writec(*str++);
+}
+
 void printf(const char* fmt, ...);
 
 #endif

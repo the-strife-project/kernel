@@ -1,7 +1,9 @@
 #ifndef KLIBC_CONVERSIONS_HPP
 #define KLIBC_CONVERSIONS_HPP
 
-char* itoa(int);
-char* htoa(size_t);
+#include <common.hpp>
+
+//void itoa(int);
+void htoa(size_t n, char* buffer, size_t sz);
 
 #endif

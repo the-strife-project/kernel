@@ -18,20 +18,17 @@ inline char* getVideo() {
 	return ((char*)VIDEO_BASE) + (COLS*row + col)*2;
 }
 
+// This will never implement scroll. Shouldn't be used that often.
+
 void _writec(char c) {
+	if(c == '\n') {
+		++row;
+		col = 0;
+		return;
+	}
+
 	char* video = getVideo();
 	*video++ = c;
 	*video = color;
 	goAhead();
-}
-
-void _writes(const char* str) {
-	char* video = getVideo();
-	size_t count = 0;
-	for(;str[count];++count) {
-		*video++ = str[count];
-		*video++ = color;
-	}
-
-	goAhead(count);
 }

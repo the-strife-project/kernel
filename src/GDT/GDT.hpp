@@ -17,21 +17,8 @@
 	based on the fact that this is for long mode.
 */
 
-// Counting from the right!
-/*inline bool setBit(size_t& bitmap, size_t bit, bool value) {
-	if(value)
-		bitmap |= (1 << bit);
-	else
-		bitmap &= ~(1 << bit);
-}*/
-
 class GDT {
 private:
-	struct Pointer {
-		uint16_t limit;
-		uint64_t base;
-	} __attribute__((packed));
-
 	struct LameDescriptor {
 		uint16_t limit_lo16;
 		uint16_t base_lo16;
@@ -41,7 +28,6 @@ private:
 	} __attribute__((packed));
 
 	LameDescriptor* gdt;
-	Pointer gdtptr;
 	size_t ctr = 0;
 
 public:
@@ -56,7 +42,7 @@ public:
 		uint32_t limit = ~0;
 
 		inline void setPresent() { access |= 1 << GDT_ACCESS_PRESENT; }
-		inline void setSystem() { access |= 1 << GDT_ACCESS_CODE; }
+		inline void setSystem() { access |= 1 << GDT_ACCESS_SYSTEM; }
 		inline void setRing3() { access |= 3 << GDT_ACCESS_DPL; }
 
 		inline void setCode() {
@@ -64,10 +50,10 @@ public:
 			flags |= (1 << GDT_FLAG_LONG);
 		}
 
-		LameDescriptor getLame();
+		LameDescriptor getLame() const;
 	};
 
-	GDT(uint64_t* gdt) : gdt((LameDescriptor*)gdt) {}
+	inline void setGDT(uint64_t* x) { gdt = (LameDescriptor*)x; }
 	void addDescriptor(CoolDescriptor);
 	void load();
 };

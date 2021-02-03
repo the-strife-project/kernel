@@ -1,6 +1,7 @@
 #include "GDT.hpp"
+#include <klibc/klibc.hpp>
 
-GDT::LameDescriptor GDT::CoolDescriptor::getLame() {
+GDT::LameDescriptor GDT::CoolDescriptor::getLame() const {
 	LameDescriptor lame;
 	lame.limit_lo16 = (uint16_t)(limit & 0xFFFF);
 	lame.base_lo16 = (uint16_t)(base & 0xFFFF);
@@ -16,8 +17,8 @@ void GDT::addDescriptor(GDT::CoolDescriptor cool) {
 	gdt[ctr++] = cool.getLame();
 }
 
+extern "C" void __loadGDT(uint64_t, uint64_t);
 void GDT::load() {
-	gdtptr.base = (uint64_t)gdt;
-	gdtptr.limit = (ctr * sizeof(LameDescriptor)) - 1;
-	asm volatile ("lgdt (%0)" : : "r"(&gdtptr));
+	uint16_t limit = (ctr * sizeof(LameDescriptor)) - 1;
+	__loadGDT(limit, (uint64_t)gdt);
 }
