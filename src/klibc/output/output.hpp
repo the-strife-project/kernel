@@ -21,5 +21,7 @@ inline void _writes(const char* str) {
 }
 
 void printf(const char* fmt, ...);
+void setColor(uint8_t color);
+void resetColor();
 
 #endif

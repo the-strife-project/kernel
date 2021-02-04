@@ -1,6 +1,5 @@
 #include "PMM.hpp"
-#include <klibc/klibc.hpp>
-#include <asm.hpp>
+#include <panic/panic.hpp>
 
 #define PAGE_SIZE 4096
 
@@ -30,22 +29,16 @@ void PMM::init(MemoryMap& memmap) {
 			pushToQueue(x.base, x.length);
 
 	// Now we have some memory, hopefully
-	if(!first) {
-		// TODO: Actually panic
-		printf("PANIC: No memory to initialize the PMM :(");
-		hlt(); while(true);
-	}
+	if(!first)
+		panic(Panic::PMM_INITIALIZE);
 
 	memmap.invalidate();	// That MemoryMap object should not be used anymore
 }
 
 uint64_t PMM::alloc() {
 	// Is there any memory left?
-	if(!first) {
-		// TODO: Actually panic
-		printf("PANIC: Out of physical memory");
-		hlt(); while(true);
-	}
+	if(!first)
+		panic(Panic::OUT_OF_MEMORY);
 
 	// Grab the first region
 	auto* ret = first;

@@ -32,3 +32,6 @@ void _writec(char c) {
 	*video = color;
 	goAhead();
 }
+
+void setColor(uint8_t c) { color = c; }
+void resetColor() { color = DEFAULT_COLOR; }
