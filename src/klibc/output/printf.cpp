@@ -2,11 +2,11 @@
 #include "../conversions/conversions.hpp"
 
 void printHex(uint64_t n) {
-	char buffer[9] = {0};
-	htoa(n, buffer, 8);
+	char buffer[17] = {0};
+	htoa(n, buffer, 16);
 
 	size_t begin = 0;
-	while(begin < 6 && buffer[begin] == '0')
+	while(begin < 15 && buffer[begin] == '0')
 		++begin;
 
 	_writes(buffer+begin);
