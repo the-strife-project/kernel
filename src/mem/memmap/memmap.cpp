@@ -10,3 +10,10 @@ MemoryMap::MemoryMap(stivale2_struct* bootData) {
 	entries = tag->entries;
 	data = tag->memmap;
 }
+
+void MemoryMap::move(stivale2_mmap_entry* x) {
+	// TODO: memcpy
+	for(size_t i=0; i<entries; ++i)
+		x[i] = data[i];
+	data = x;
+}

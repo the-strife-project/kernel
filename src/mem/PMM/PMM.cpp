@@ -1,5 +1,6 @@
 #include "PMM.hpp"
 #include <panic/panic.hpp>
+#include <klibc/klibc.hpp>
 
 #define PAGE_SIZE 4096
 
@@ -31,8 +32,6 @@ void PMM::init(MemoryMap& memmap) {
 	// Now we have some memory, hopefully
 	if(!first)
 		panic(Panic::PMM_INITIALIZE);
-
-	memmap.invalidate();	// That MemoryMap object should not be used anymore
 }
 
 uint64_t PMM::alloc() {
@@ -68,7 +67,6 @@ uint64_t PMM::calloc() {
 // This is trivial
 void PMM::free(uint64_t addr) { pushToQueue(addr & ~0xFFF, PAGE_SIZE); }
 
-#include <klibc/klibc.hpp>
 void PMM::_walk() {
 	printf("Free (addr, npages): ");
 	for(auto* it=first; it; it=it->next)

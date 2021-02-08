@@ -15,7 +15,9 @@ public:
 	inline iterator begin() const { return data; }
 	inline iterator end() const { return data+entries; }
 	inline bool empty() { return !data; }
-	inline void invalidate() { entries = 0; data = nullptr; }
+	inline uint64_t getn() { return entries; }
+
+	void move(stivale2_mmap_entry*);
 };
 
 #endif

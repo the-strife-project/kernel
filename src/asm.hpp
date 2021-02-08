@@ -21,6 +21,34 @@ inline void cli() { asm volatile("cli"); }
 inline void sti() { asm volatile("sti"); }
 inline void hlt() { asm volatile("hlt"); }
 
+inline uint64_t getCR3() {
+	uint64_t ret = ~0;
+	asm volatile("mov %%cr3, %0" : "=a"(ret));
+	return ret;
+}
+inline void setCR3(uint64_t v) {
+	asm volatile("mov %0, %%cr3" : : "a"(v));
+}
+
+inline uint64_t getCR4() {
+	uint64_t ret = ~0;
+	asm volatile("mov %%cr4, %0" : "=a"(ret));
+	return ret;
+}
+inline void setCR4(uint64_t v) {
+	asm volatile("mov %0, %%cr4" : : "a"(v));
+}
+
+inline uint32_t* higherHalf_uint64(uint64_t* x) { return ((uint32_t*)x) + 1; }
+inline uint64_t rdmsr(uint32_t addr) {
+	uint64_t ret;
+	asm volatile("rdmsr" : "=d"(*higherHalf_uint64(&ret)), "=a"(ret) : "c"(addr));
+	return ret;
+}
+inline void wrmsr(uint32_t addr, uint64_t contents) {
+	asm volatile("wrmsr" : : "c"(addr), "d"(*higherHalf_uint64(&contents)), "a"(contents));
+}
+
 // I/O
 inline uint8_t inb(uint16_t port) {
 	uint8_t ret;

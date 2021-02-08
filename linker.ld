@@ -27,4 +27,8 @@ SECTIONS {
 	.stack ALIGN(4K) : {
 		KEEP(*(.stack))
 	}
+
+	.memmap ALIGN(4K) : {
+		KEEP(*(.memmap))
+	}
 }
