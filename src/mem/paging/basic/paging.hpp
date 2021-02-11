@@ -9,7 +9,7 @@
 class Paging {
 public:
 	#include "pagingStructs.hpp"
-	#include "map.hpp"
+	#include "../map/map.hpp"
 	friend class PageMapping;
 
 	struct MapFlag {
@@ -23,8 +23,10 @@ private:
 
 public:
 	inline void setData(PML4E* x) { data = x; }
-
 	static void getIndexes(uint64_t addr, uint64_t& pml4_i, uint64_t& pdp_i, uint64_t& pd_i, uint64_t& pt_i);
+
+	PTE* getPTE(uint64_t addr);
+	static void extendPDE(PDE*);
 	void map(uint64_t virt, uint64_t phys, uint64_t size, uint64_t flags=0);
 	inline void reload() { setCR3((uint64_t)data); }
 

@@ -14,23 +14,26 @@ LINKER_FLAGS=-T linker.ld -nostdlib -pie -z max-page-size=0x1000
 
 CXX_OBJS = $(shell cd src && find . -type f -iname '*.cpp' | sed 's/\.cpp/\.o/g' | xargs -I {} echo "$(OBJPATH)/"{})
 ASM_OBJS = $(shell cd src && find . -type f -iname '*.asm' | sed 's/\.asm/\.o/g' | xargs -I {} echo "$(OBJPATH)/"{})
+ALL_OBJS = $(CXX_OBJS) $(ASM_OBJS)
 
-.PHONY: all
+.PHONY: all clean
 all: $(RESULT)
 
-$(RESULT): $(OBJPATH) $(CXX_OBJS) $(ASM_OBJS)
+$(RESULT): $(ALL_OBJS)
 	$(LINKER) `find $(OBJPATH) -type f -iname '*.o'` -o $@ $(LINKER_FLAGS)
 	strip $(RESULT)
 
 -include $(CXX_OBJS:.o=.o.d)
 
-$(OBJPATH)/%.o: $(SRCPATH)/%.cpp
+$(ALL_OBJS): | $(OBJPATH)
+
+$(CXX_OBJS): $(OBJPATH)/%.o: $(SRCPATH)/%.cpp
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
 	$(CXX) -MM $< -o $@.d.tmp $(CXXFLAGS)
 	@sed -e 's|.*:|$@:|' < $@.d.tmp > $@.d
 	@rm -f $@.d.tmp
 
-$(OBJPATH)/%.o: $(SRCPATH)/%.asm
+$(ASM_OBJS): $(OBJPATH)/%.o: $(SRCPATH)/%.asm
 	$(ASM) $< -o $@ $(ASMFLAGS)
 
 $(OBJPATH):

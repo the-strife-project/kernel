@@ -9,6 +9,8 @@ struct FreePage {
 	FreePage* next;
 };
 
+// TODO: should only need "first" (aka "top") like in Allocator :^)
+
 FreePage* first = nullptr;
 FreePage* last = nullptr;
 
@@ -67,9 +69,9 @@ uint64_t PMM::calloc() {
 // This is trivial
 void PMM::free(uint64_t addr) { pushToQueue(addr & ~0xFFF, PAGE_SIZE); }
 
-void PMM::_walk() {
+/*void PMM::_walk() {
 	printf("Free (addr, npages): ");
 	for(auto* it=first; it; it=it->next)
 		printf("(0x%x, 0x%x) ", it, it->npages);
 	printf("\n");
-}
+}*/

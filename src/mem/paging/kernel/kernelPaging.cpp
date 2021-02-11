@@ -3,7 +3,6 @@
 #include <klibc/klibc.hpp>
 
 #define CR4_PAGE_GLOBAL 7
-#define HIGHER_HALF 0xFFFFFFFF80000000
 
 #define EFER_ADDR 0xC0000080
 #define EFER_BIT_NX 11

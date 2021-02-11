@@ -1,6 +1,6 @@
 This physical memory manager sets up free regions as a queue.
 A free region has the number of pages it contains and a pointer to the next free region (FreePage).
-It can only allocate and free full pages (PAGE_SIZE bytes), and does not guarantee that consecutive allocations give consecutive pages.
+It can only allocate and free full pages (PAGE_SIZE bytes), and does not guarantee that consecutive allocations give consecutive pages. For this, a free list allocator has been implemented.
 
 When an alloc() ocurrs, the first free region is modified so that, in case it has still free pages on it, reduces its size. Either way, the pointer to the first free region is updated.
 

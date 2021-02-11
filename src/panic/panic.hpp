@@ -1,7 +1,6 @@
 #ifndef PANIC_HPP
 #define PANIC_HPP
 
-#include <klibc/klibc.hpp>
 #include <asm.hpp>
 
 struct Panic {
@@ -12,8 +11,11 @@ struct Panic {
 		PMM_INITIALIZE,
 		OUT_OF_MEMORY,
 		TOO_MANY_REGIONS,
-		PDE_EXTENSION_NOT_IMPLEMENTED,
-		PAGE_RETRACTION
+		PAGE_RETRACTION,
+		NO_ELF_PARSER,
+		ELF_PARSER_NOT_USU,
+		GET_PTE_NO_PAGE,
+		ALLOCATOR_INVALID_SIZE
 	};
 };
 

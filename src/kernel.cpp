@@ -1,10 +1,13 @@
+#include <klibc/klibc.hpp>
 #include <panic/panic.hpp>
+#include <boot/modules/modules.hpp>
 #include <GDT/MyGDT.hpp>
 #include <IDT/MyIDT.hpp>
 #include <drivers/PIC8259/PIC8259.hpp>
 #include <mem/memmap/memmap.hpp>
 #include <mem/PMM/PMM.hpp>
 #include <mem/paging/paging.hpp>
+#include <tasks/loader/loader.hpp>
 
 __attribute__((section(".memmap"), used))
 stivale2_mmap_entry savedmemmap[PAGE_SIZE / sizeof(stivale2_mmap_entry)];
@@ -21,25 +24,15 @@ extern "C" void kmain(stivale2_struct* bootData) {
 	// Let's move the memory map somewhere safe
 	memmap.move(savedmemmap);
 
-	printf("Setting GDT... ");
-	initGDT();
-	printf("[OK]\n");
+	// Now, save the modules (next commit)
+	//stivale2Modules::save(bootData);
 
-	printf("Setting IDT... ");
-	initIDT();
-	printf("[OK]\n");
-
-	printf("Resetting the PIC... ");
-	PIC::init();
-	printf("[OK]\n");
-
-	printf("Initializing PMM... ");
-	PMM::init(memmap);
-	printf("[OK]\n");
-
-	printf("Paging memory... ");
-	initKernelPaging(memmap);
-	printf("[OK]\n");
+	printf("Setting GDT... "); initGDT(); printf("[OK]\n");
+	printf("Setting IDT... "); initIDT(); printf("[OK]\n");
+	printf("Resetting the PIC... "); PIC::init(); printf("[OK]\n");
+	printf("Initializing PMM... "); PMM::init(memmap); printf("[OK]\n");
+	printf("Paging memory... "); initKernelPaging(memmap); printf("[OK]\n");
+	//printf("Loading ELF parser... "); ELF::startParser(); printf("[OK]\n");
 
 	printf("\nThat's all for now folks.");
 

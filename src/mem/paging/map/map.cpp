@@ -56,9 +56,9 @@ void Paging::PageMapping::nextPDE(bool huge) {
 
 		if(!huge)
 			pde->setNext(clear(PMM::calloc() >> 12));
-	} else if(pde->getHuge() && !huge) {
-		panic(Panic::PDE_EXTENSION_NOT_IMPLEMENTED);
-	} else if(!pde->getHuge() && huge) {
+	} else if(pde->isHuge() && !huge) {
+		extendPDE(pde);
+	} else if(!pde->isHuge() && huge) {
 		panic(Panic::PAGE_RETRACTION);
 	}
 
@@ -84,7 +84,7 @@ void Paging::PageMapping::map4K(uint64_t phys) {
 	if(global) pte->setGlobal();
 	if(user) pte->setUser();
 	if(ro) pte->setRO();
-	if(nx) pte->setExecutable(false);
+	if(nx) pte->setNX();
 }
 
 void Paging::PageMapping::map2M(uint64_t phys) {
@@ -94,5 +94,5 @@ void Paging::PageMapping::map2M(uint64_t phys) {
 	if(global) pde->setGlobal();
 	if(user) pde->setUser();
 	if(ro) pde->setRO();
-	if(nx) pde->setExecutable(false);
+	if(nx) pde->setNX();
 }
