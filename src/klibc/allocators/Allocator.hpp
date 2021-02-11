@@ -1,8 +1,14 @@
 #ifndef ALLOCATOR_HPP
 #define ALLOCATOR_HPP
 
+#define ALLOCATOR_MIN_SIZE 16
+#define ALLOCATOR_MAX_SIZE 2048
+
+#define PRIVATE false
+#define PUBLIC true
+
 #include <mem/VMM/VMM.hpp>
-#include <klibc/hacks.hpp>
+#include <klibc/utils.hpp>
 #include <panic/panic.hpp>
 
 // A fixed size, power of two, O(1) allocator based on a stack
@@ -13,7 +19,7 @@ private:
 		Node *prev, *next;
 	} __attribute__((aligned(_SIZE)));
 
-	const size_t entriesPerPage = PAGE_SIZE / _SIZE;
+	static const size_t entriesPerPage = PAGE_SIZE / _SIZE;
 	Node* top = nullptr;
 
 	inline void push(uint64_t addr) {
@@ -29,7 +35,8 @@ private:
 
 	inline void pop() {
 		top = top->next;
-		top->prev = nullptr;
+		if(top)
+			top->prev = nullptr;
 	}
 
 	void more() {
@@ -47,7 +54,7 @@ private:
 
 public:
 	Allocator() {
-		if(!(isPowerOfTwo(_SIZE) && _SIZE >= 16 && _SIZE <= 2048))
+		if(!(isPowerOfTwo(_SIZE) && _SIZE >= ALLOCATOR_MIN_SIZE && _SIZE <= ALLOCATOR_MAX_SIZE))
 			panic(Panic::ALLOCATOR_INVALID_SIZE);
 	}
 
