@@ -14,6 +14,7 @@ private:
 
 	Node* first = nullptr;
 	Node* last = nullptr;
+	size_t _size = 0;
 
 public:
 	void push_front(const T& x) {
@@ -23,6 +24,7 @@ public:
 		first = node;
 		if(!last)
 			last = node;
+		++_size;
 	}
 
 	void push_back(const T& x) {
@@ -34,18 +36,44 @@ public:
 		last = node;
 		if(!first)
 			first = node;
+		++_size;
 	}
 
 	inline void pop_front() {
 		Node* node = first;
 		first = first->next;
 		free(node, sizeof(Node), _VISIBILITY);
+		--_size;
 	}
 
 	inline void clear() {
 		while(first)
 			pop_front();
 		last = nullptr;
+	}
+
+	inline size_t size() const { return _size; }
+	inline T& front() { return first->tag; }
+	inline T& back() { return last->tag; }
+	inline const T& front() const { return first->tag; }
+	inline const T& back() const { return last->tag; }
+
+	// -- Class stuff ---
+
+	List() {}
+
+	List(const List& other) {
+		for(auto const& x : other)
+			push_back(x);
+	}
+
+	List(List&& other) {
+		first = other.first;
+		other.first = nullptr;
+		first = other.last;
+		other.last = nullptr;
+		_size = other._size;
+		other._size = 0;
 	}
 
 	inline ~List() { clear(); }
@@ -55,7 +83,7 @@ public:
 	private:
 		Node* node = nullptr;
 		iterator(Node* n) : node(n) {}
-		friend class List<T, _VISIBILITY>;
+		friend class List;
 
 	public:
 		iterator() {}
@@ -90,5 +118,7 @@ public:
 	const_iterator cbegin() const { return first; }
 	const_iterator cend() const { return nullptr; }
 };
+
+template<typename T> using PrivList = List<T, PRIVATE>;
 
 #endif

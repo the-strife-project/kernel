@@ -13,7 +13,8 @@ const char* const msgs[] = {
 	"The loaded ELF.usu file is not an USU file",
 	"Paging::getPTE() received an address that wasn't present",
 	"A bad size was given to construct an Allocator object",
-	"A bad size was given to alloc() or free()"
+	"A bad size was given to alloc() or free()",
+	"A pure virtual function has been called inside the kernel"
 };
 
 void panic(size_t id, bool doNotHalt) {

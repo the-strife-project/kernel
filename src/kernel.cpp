@@ -25,14 +25,14 @@ extern "C" void kmain(stivale2_struct* bootData) {
 	memmap.move(savedmemmap);
 
 	// Now, save the modules (next commit)
-	//stivale2Modules::save(bootData);
+	stivale2Modules::save(bootData);
 
 	printf("Setting GDT... "); initGDT(); printf("[OK]\n");
 	printf("Setting IDT... "); initIDT(); printf("[OK]\n");
 	printf("Resetting the PIC... "); PIC::init(); printf("[OK]\n");
 	printf("Initializing PMM... "); PMM::init(memmap); printf("[OK]\n");
 	printf("Paging memory... "); initKernelPaging(memmap); printf("[OK]\n");
-	//printf("Loading ELF parser... "); ELF::startParser(); printf("[OK]\n");
+	printf("Loading ELF parser... "); Loader::startELFParser(); printf("[OK]\n");
 
 	printf("\nThat's all for now folks.");
 

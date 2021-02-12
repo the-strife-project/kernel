@@ -6,5 +6,6 @@
 #include "utils.hpp"
 #include "allocators/allocators.hpp"
 #include "list.hpp"
+#include "memory.hpp"
 
 #endif
