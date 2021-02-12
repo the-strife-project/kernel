@@ -1,6 +1,8 @@
 #ifndef PIC8259_HPP
 #define PIC8259_HPP
 
+// TODO: I've just realized this doesn't have to be in the kernel :^)
+
 #include <asm.hpp>
 
 #define PIC1_IO   0x20

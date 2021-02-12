@@ -15,7 +15,7 @@ void USU::parse() {
 	mapping.orig = rawbegin + sizeof(Header);
 	mapping.dst = 0;
 	mapping.size = size;
-	mapping.flags = PARSER_FLAGS_RWX;
+	mapping.flags = PARSER_FLAGS_WX;
 
 	mappings.push_back(mapping);
 }

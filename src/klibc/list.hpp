@@ -98,7 +98,7 @@ public:
 	private:
 		const Node* node = nullptr;
 		const_iterator(const Node* n) : node(n) {}
-		friend class List<T, _VISIBILITY>;
+		friend class List;
 
 	public:
 		const_iterator() {}
@@ -106,7 +106,7 @@ public:
 		inline void operator++() { node = node->next; }
 		inline const T& operator*() const { return node->tag; }
 		inline bool operator==(const const_iterator& other) const { return node == other.node; }
-		inline bool operator!=(const const_iterator& other) const { return node == other.node; }
+		inline bool operator!=(const const_iterator& other) const { return node != other.node; }
 	};
 
 	iterator begin() { return first; }

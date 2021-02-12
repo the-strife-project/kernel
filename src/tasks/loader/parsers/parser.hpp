@@ -4,11 +4,10 @@
 #include <common.hpp>
 #include <klibc/klibc.hpp>
 
-#define PARSER_FLAGS_R 0b001
-#define PARSER_FLAGS_W 0b010
-#define PARSER_FLAGS_X 0b100
+#define PARSER_FLAGS_W 0b01
+#define PARSER_FLAGS_X 0b10
 
-#define PARSER_FLAGS_RWX 0b111
+#define PARSER_FLAGS_WX 0b11
 
 class Parser {
 public:
