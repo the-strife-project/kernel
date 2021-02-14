@@ -78,7 +78,7 @@ void Paging::PageMapping::nextPTE() {
 
 void Paging::PageMapping::map4K(uint64_t phys) {
 	nextPTE();
-	pte->setPresent();
+	if(present) pte->setPresent();
 	pte->setPhys(phys >> 12);
 
 	if(global) pte->setGlobal();

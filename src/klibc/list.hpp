@@ -119,6 +119,7 @@ public:
 	const_iterator cend() const { return nullptr; }
 };
 
+template<typename T> using PubList = List<T, PUBLIC>;
 template<typename T> using PrivList = List<T, PRIVATE>;
 
 #endif

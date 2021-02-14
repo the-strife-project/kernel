@@ -14,7 +14,7 @@ inline uint64_t rflags_read() {
 
 inline void rflags_write(uint64_t flags) {
 	asm volatile("pushq %0\n"
-				 "popfq" : : "a"(flags));
+				 "popfq" :: "a"(flags));
 }
 
 inline void cli() { asm volatile("cli"); }
@@ -27,7 +27,7 @@ inline uint64_t getCR3() {
 	return ret;
 }
 inline void setCR3(uint64_t v) {
-	asm volatile("mov %0, %%cr3" : : "a"(v));
+	asm volatile("mov %0, %%cr3" :: "a"(v));
 }
 
 inline uint64_t getCR4() {
@@ -36,7 +36,11 @@ inline uint64_t getCR4() {
 	return ret;
 }
 inline void setCR4(uint64_t v) {
-	asm volatile("mov %0, %%cr4" : : "a"(v));
+	asm volatile("mov %0, %%cr4" :: "a"(v));
+}
+
+inline void invlpg(uint64_t page) {
+	asm volatile("invlpg (%0)" :: "r"(page));
 }
 
 inline uint32_t* higherHalf_uint64(uint64_t* x) { return ((uint32_t*)x) + 1; }
@@ -46,7 +50,7 @@ inline uint64_t rdmsr(uint32_t addr) {
 	return ret;
 }
 inline void wrmsr(uint32_t addr, uint64_t contents) {
-	asm volatile("wrmsr" : : "c"(addr), "d"(*higherHalf_uint64(&contents)), "a"(contents));
+	asm volatile("wrmsr" :: "c"(addr), "d"(*higherHalf_uint64(&contents)), "a"(contents));
 }
 
 // I/O
@@ -69,15 +73,15 @@ inline uint32_t inl(uint16_t port) {
 }
 
 inline void outb(uint16_t port, uint8_t value) {
-	asm volatile("outb %1, %0" : : "dN"(port), "a"(value));
+	asm volatile("outb %1, %0" :: "dN"(port), "a"(value));
 }
 
 inline void outw(uint16_t port, uint16_t value) {
-	asm volatile("outw %1, %0" : : "dN"(port), "a"(value));
+	asm volatile("outw %1, %0" :: "dN"(port), "a"(value));
 }
 
 inline void outl(uint16_t port, uint32_t value) {
-	asm volatile("outl %1, %0" : : "dN"(port), "a"(value));
+	asm volatile("outl %1, %0" :: "dN"(port), "a"(value));
 }
 
 #endif
