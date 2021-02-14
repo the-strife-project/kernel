@@ -6,8 +6,8 @@
 void Loader::startELFParser() {
 	USU usu(stivale2Modules::elf_beg, stivale2Modules::elf_end);
 	usu.parse();
-	Paging paging = Loader::load(usu.mappings);
-	Task task(paging, usu.entrypoint);
+	LoaderInfo info = Loader::load(usu.mappings);
+	Task task(info.paging, info.base + usu.entrypoint, info.stack);
 	// TODO: Send to the scheduler
 	task.resume();
 }

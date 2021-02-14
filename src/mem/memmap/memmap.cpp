@@ -1,5 +1,6 @@
 #include "memmap.hpp"
 #include <panic/panic.hpp>
+#include <klibc/klibc.hpp>
 
 MemoryMap::MemoryMap(stivale2_struct* bootData) {
 	auto* tag = (stivale2_struct_tag_memmap*)stivale2_get_tag(bootData, STIVALE2_STRUCT_TAG_MEMMAP_ID);
@@ -12,8 +13,6 @@ MemoryMap::MemoryMap(stivale2_struct* bootData) {
 }
 
 void MemoryMap::move(stivale2_mmap_entry* x) {
-	// TODO: memcpy
-	for(size_t i=0; i<entries; ++i)
-		x[i] = data[i];
+	memcpy(x, data, entries*sizeof(stivale2_mmap_entry));
 	data = x;
 }

@@ -5,7 +5,8 @@
 #include <mem/memmap/memmap.hpp>
 
 namespace PMM {
-	void init(MemoryMap&);
+	void init(const MemoryMap&);
+	void finalizeInit(const MemoryMap&);
 
 	uint64_t alloc();
 	uint64_t calloc();

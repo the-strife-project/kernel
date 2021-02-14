@@ -9,49 +9,47 @@ struct FreePage {
 	FreePage* next;
 };
 
-// TODO: should only need "first" (aka "top") like in Allocator :^)
-
-FreePage* first = nullptr;
-FreePage* last = nullptr;
+FreePage* top = nullptr;
 
 void pushToQueue(uint64_t base, uint64_t size) {
 	auto* freePage = (FreePage*)base;
-
-	if(!first)
-		first = freePage;
 	freePage->npages = size / PAGE_SIZE;
-	freePage->next = nullptr;
-	if(last)
-		last->next = freePage;
-	last = freePage;
+	freePage->next = top;
+	top = freePage;
 }
 
-void PMM::init(MemoryMap& memmap) {
+void PMM::init(const MemoryMap& memmap) {
 	for(auto const& x : memmap)
-		if(x.type == STIVALE2_MMAP_USABLE || x.type == STIVALE2_MMAP_BOOTLOADER_RECLAIMABLE)
+		if(x.type == STIVALE2_MMAP_USABLE)
 			pushToQueue(x.base, x.length);
 
 	// Now we have some memory, hopefully
-	if(!first)
+	if(!top)
 		panic(Panic::PMM_INITIALIZE);
+}
+
+void PMM::finalizeInit(const MemoryMap& memmap) {
+	for(auto const& x : memmap)
+		if(x.type == STIVALE2_MMAP_BOOTLOADER_RECLAIMABLE)
+			pushToQueue(x.base, x.length);
 }
 
 uint64_t PMM::alloc() {
 	// Is there any memory left?
-	if(!first)
+	if(!top)
 		panic(Panic::OUT_OF_MEMORY);
 
 	// Grab the first region
-	auto* ret = first;
+	auto* ret = top;
 	// Anything left from this region?
 	if(ret->npages > 1) {
 		// Yes!
-		first = (FreePage*)((uint64_t)first + PAGE_SIZE);
-		first->npages = ret->npages - 1;
-		first->next = ret->next;
+		top = (FreePage*)((uint64_t)top + PAGE_SIZE);
+		top->npages = ret->npages - 1;
+		top->next = ret->next;
 	} else {
 		// No, use the next one
-		first = ret->next;
+		top = ret->next;
 	}
 
 	// That would be all
@@ -60,9 +58,7 @@ uint64_t PMM::alloc() {
 
 uint64_t PMM::calloc() {
 	auto ret = alloc();
-	// TODO: memset
-	for(size_t i=0; i<(PAGE_SIZE/sizeof(uint64_t)); ++i)
-		*(uint64_t*)(ret+i) = 0;
+	memset((void*)ret, 0, PAGE_SIZE);
 	return ret;
 }
 
@@ -71,7 +67,7 @@ void PMM::free(uint64_t addr) { pushToQueue(addr & ~0xFFF, PAGE_SIZE); }
 
 /*void PMM::_walk() {
 	printf("Free (addr, npages): ");
-	for(auto* it=first; it; it=it->next)
+	for(auto* it=top; it; it=it->next)
 		printf("(0x%x, 0x%x) ", it, it->npages);
 	printf("\n");
 }*/

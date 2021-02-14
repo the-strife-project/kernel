@@ -23,7 +23,7 @@ void initKernelPaging(MemoryMap mm) {
 	kpaging.setData((Paging::PML4E*)PMM::calloc());
 
 	// Map the framebuffer
-	kpaging.map(0xB8000, 0xB8000, 80*25*2, Paging::MapFlag::NX);
+	kpaging.map(0xFFFFFFFF800B8000, 0xB8000, 80*25*2, Paging::MapFlag::NX);
 
 	// Map the kernel and the modules
 	for(auto const& x : mm) {

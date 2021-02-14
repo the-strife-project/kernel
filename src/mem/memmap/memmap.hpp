@@ -14,8 +14,8 @@ public:
 	typedef const stivale2_mmap_entry* iterator;
 	inline iterator begin() const { return data; }
 	inline iterator end() const { return data+entries; }
-	inline bool empty() { return !data; }
-	inline uint64_t getn() { return entries; }
+	inline bool empty() const { return !data; }
+	inline uint64_t getn() const { return entries; }
 
 	void move(stivale2_mmap_entry*);
 };

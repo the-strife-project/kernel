@@ -1,6 +1,7 @@
 #include "output.hpp"
 
-#define VIDEO_BASE 0xB8000
+#define VIDEO_BASE 0xFFFFFFFF800B8000
+//#define VIDEO_BASE 0xB8000
 #define COLS 80
 #define DEFAULT_COLOR 0x0A
 
