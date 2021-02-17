@@ -2,9 +2,9 @@ BITS 64
 
 global actuallyResumeTask
 
-; Not user yet lmao
-%define USER_DATA 0x08
-%define USER_CODE 0x10
+%define USER_CPL 3
+%define USER_DATA (0x18 | USER_CPL)
+%define USER_CODE (0x20 | USER_CPL)
 
 ; rdi <- rsp
 ; rsi <- rip

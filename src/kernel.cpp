@@ -8,6 +8,7 @@
 #include <mem/PMM/PMM.hpp>
 #include <mem/paging/paging.hpp>
 #include <tasks/loader/loader.hpp>
+#include <tasks/task/TSS/TSS.hpp>
 
 __attribute__((section(".memmap"), used))
 stivale2_mmap_entry savedmemmap[PAGE_SIZE / sizeof(stivale2_mmap_entry)];
@@ -34,10 +35,11 @@ extern "C" void kmain(stivale2_struct* bootData) {
 	PMM::finalizeInit(memmap);
 	initAllocators();
 
-	PubList<int> asdf;
-	for(int i=0; i<1000; ++i)
-		asdf.push_back(i);
-	asdf.clear();
+	printf("Setting up TSS... ");
+	TSS tss = newTSS();
+	tss.setRSP0(VMM::Public::alloc() + PAGE_SIZE);
+	tss.load();
+	printf("[OK]\n");
 
 	printf("Loading ELF parser... "); Loader::startELFParser(); printf("[OK]\n");
 

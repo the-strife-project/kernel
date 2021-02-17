@@ -13,8 +13,24 @@ GDT::LameDescriptor GDT::CoolDescriptor::getLame() const {
 	return lame;
 }
 
+GDT::LameTSSDescriptor GDT::CoolTSSDescriptor::getLame() const {
+	LameTSSDescriptor lame;
+	lame.base_lo16 = (uint16_t)(base & 0xFFFF);
+	lame.base_mid8 = (uint8_t)((base >> 16) & 0xFF);
+	lame.base_hi8 = (uint8_t)((base >> 24) & 0xFF);
+	lame.base_rhi = (uint32_t)((base >> 32) & 0xFFFFFFFF);
+	return lame;
+}
+
 void GDT::addDescriptor(GDT::CoolDescriptor cool) {
 	gdt[ctr++] = cool.getLame();
+}
+
+void GDT::addTSS(GDT::CoolTSSDescriptor cool) {
+	// This is just awful
+	LameTSSDescriptor lame(cool.getLame());
+	gdt[ctr++] = *((GDT::LameDescriptor*)&lame);
+	gdt[ctr++] = *((GDT::LameDescriptor*)&lame + 1);
 }
 
 extern "C" void __loadGDT(uint64_t, uint64_t);
