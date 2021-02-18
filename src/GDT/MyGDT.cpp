@@ -8,36 +8,38 @@ void initGDT() {
 	gdt.setGDT(_gdt);
 
 	// Null descriptor
-	GDT::CoolDescriptor d0;
-	gdt.addDescriptor(d0);
+	GDT::CoolDescriptor nulldesc;
+	gdt.addDescriptor(nulldesc);
 
-	// Kernel data
-	GDT::CoolDescriptor d1;
-	d1.setPresent();
-	d1.setUser();
-	gdt.addDescriptor(d1);
+	// The order has to be this because of syscall
 
 	// Kernel code
-	GDT::CoolDescriptor d2;
-	d2.setPresent();
-	d2.setUser();
-	d2.setCode();
-	gdt.addDescriptor(d2);
+	GDT::CoolDescriptor kcode;
+	kcode.setPresent();
+	kcode.setUser();
+	kcode.setCode();
+	gdt.addDescriptor(kcode);
+
+	// Kernel data
+	GDT::CoolDescriptor kdata;
+	kdata.setPresent();
+	kdata.setUser();
+	gdt.addDescriptor(kdata);
 
 	// User data
-	GDT::CoolDescriptor d3;
-	d3.setPresent();
-	d3.setUser();
-	d3.setRing3();
-	gdt.addDescriptor(d3);
+	GDT::CoolDescriptor udata;
+	udata.setPresent();
+	udata.setUser();
+	udata.setRing3();
+	gdt.addDescriptor(udata);
 
 	// User code
-	GDT::CoolDescriptor d4;
-	d4.setPresent();
-	d4.setUser();
-	d4.setCode();
-	d4.setRing3();
-	gdt.addDescriptor(d4);
+	GDT::CoolDescriptor ucode;
+	ucode.setPresent();
+	ucode.setUser();
+	ucode.setCode();
+	ucode.setRing3();
+	gdt.addDescriptor(ucode);
 
 	gdt.load();
 }

@@ -1,5 +1,8 @@
 BITS 64
 
+%define KERNEL_CODE 0x08
+%define KERNEL_DATA 0x10
+
 gdtptr:
 	dw 0
 	dq 0
@@ -10,10 +13,10 @@ __loadGDT:
 	mov qword [rel gdtptr+2], rsi
 	lgdt [rel gdtptr]
 
-	push 0x08
+	push KERNEL_DATA
 	push rsp
 	pushf
-	push 0x10
+	push KERNEL_CODE
 
 	mov rax, finish
 	push rax
@@ -22,7 +25,7 @@ __loadGDT:
 finish:
 	pop rax
 
-	mov ax, 0x08
+	mov ax, KERNEL_DATA
 	mov ds, ax
 	mov es, ax
 	mov ss, ax
