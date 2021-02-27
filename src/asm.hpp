@@ -43,6 +43,10 @@ inline void invlpg(uint64_t page) {
 	asm volatile("invlpg (%0)" :: "r"(page));
 }
 
+inline void sysret() {
+	asm volatile("sysretq");
+}
+
 inline uint32_t* higherHalf_uint64(uint64_t* x) { return ((uint32_t*)x) + 1; }
 inline uint64_t rdmsr(uint32_t addr) {
 	uint64_t ret;

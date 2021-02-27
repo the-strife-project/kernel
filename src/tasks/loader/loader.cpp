@@ -2,13 +2,7 @@
 #include <mem/PMM/PMM.hpp>
 #include <IDT/MyIDT.hpp>
 
-#define MAX_PROG_PAGES 1048576
-#define MAX_HEAP_PAGES 16777216
-#define MAX_STACK_PAGES 2048
-
-#define PROG_ALIGNMENT PAGE_SIZE
-#define HEAP_ALIGNMENT PAGE_SIZE
-#define STACK_ALIGNMENT 16
+#include <tasks/constants.hpp>
 
 void doMappings(Paging paging, uint64_t base, const PrivList<Parser::Mapping>& mappings) {
 	for(auto const& x : mappings) {
@@ -57,19 +51,12 @@ Loader::LoaderInfo Loader::load(const PrivList<Parser::Mapping>& mappings) {
 	uint64_t base = aslr.get(MAX_PROG_PAGES, GROWS_UPWARD, PROG_ALIGNMENT);
 	doMappings(paging, base, mappings);
 
-	// Get a heap
+	// Get a heap (no need to allocate)
 	uint64_t heap = aslr.get(MAX_HEAP_PAGES, GROWS_UPWARD, HEAP_ALIGNMENT);
-	Paging::PageMapping heapmap(paging, heap);
-	heapmap.setUser();
-	heapmap.setNX();
-	heapmap.map4K(PMM::calloc());
 
 	// Get a stack
 	uint64_t stack = aslr.get(MAX_STACK_PAGES, GROWS_DOWNWARD, STACK_ALIGNMENT);
-	Paging::PageMapping stackmap(paging, stack & ~0xFFF);
-	stackmap.setUser();
-	stackmap.setNX();
-	stackmap.map4K(PMM::calloc());
+	paging.map(stack, PMM::calloc(), PAGE_SIZE, Paging::MapFlag::USER | Paging::MapFlag::NX);
 
 	return LoaderInfo(paging, move(aslr), base, heap, stack);
 }

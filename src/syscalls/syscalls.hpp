@@ -10,7 +10,17 @@
 #define STAR_SYSCALL_SELECTOR 32
 #define STAR_SYSRET_SELECTOR  48
 
-void syscall_handler();
+#include <stdarg.h>
+#include <common.hpp>
+
+struct Syscalls {
+	enum {
+		EXIT,
+		MORE_HEAP
+	};
+};
+
+void syscall_handler(size_t op, ...);
 void enableSyscalls();
 
 #endif

@@ -75,6 +75,8 @@ void Paging::map(uint64_t virt, uint64_t phys, uint64_t size, uint64_t flags) {
 		mapping.setRO();
 	if(flags & MapFlag::NX)
 		mapping.setNX();
+	if(flags & MapFlag::USER)
+		mapping.setUser();
 
 	if(size % PAGE_SIZE)
 		size += PAGE_SIZE - (size % PAGE_SIZE);

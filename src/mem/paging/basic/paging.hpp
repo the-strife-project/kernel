@@ -16,6 +16,7 @@ public:
 		static const uint64_t GLOBAL = 1 << 0;
 		static const uint64_t RO = 1 << 1;
 		static const uint64_t NX = 1 << 2;
+		static const uint64_t USER = 1 << 3;
 	};
 
 private:
