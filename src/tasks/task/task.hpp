@@ -3,6 +3,7 @@
 
 #include <klibc/klibc.hpp>
 #include "registers.hpp"
+#include <tasks/loader/loader.hpp>
 
 /*
 	Tasks will be in public dynamic memory, that is, always present,
@@ -14,17 +15,26 @@
 
 class Task {
 private:
+	// State
 	Paging paging;
 	GeneralRegisters regs;
 	uint64_t rip, rsp;
 	uint64_t rflags = BASIC_RFLAGS;
+	uint64_t heapBottom, stackTop;
+
+	// Properties
+	uint64_t prog, heap, stack;
 
 public:
-	inline Task() {}
-	inline Task(Paging paging, uint64_t entrypoint, uint64_t stack)
-		: paging(paging), rip(entrypoint), rsp(stack)
+	Task() = default;
+	inline Task(const Loader::LoaderInfo& load, uint64_t entry)
+		: paging(load.paging), rip(entry), rsp(load.stack),
+		  heapBottom(load.heap + PAGE_SIZE), stackTop(load.stack & ~0xFFF),
+		  prog(load.base), heap(load.heap), stack(load.stack)
 	{}
 
+	void moreHeap(size_t npages=1);
+	void moreStack();
 	void resume();
 };
 

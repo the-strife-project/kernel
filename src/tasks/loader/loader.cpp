@@ -2,13 +2,18 @@
 #include <mem/PMM/PMM.hpp>
 #include <IDT/MyIDT.hpp>
 
-#define BASE_LOAD 0x100000
-#define BASE_STACK 0xFFFFFF8000000000
+#define MAX_PROG_PAGES 1048576
+#define MAX_HEAP_PAGES 16777216
+#define MAX_STACK_PAGES 2048
 
-void doMappings(Paging paging, const PrivList<Parser::Mapping>& mappings) {
+#define PROG_ALIGNMENT PAGE_SIZE
+#define HEAP_ALIGNMENT PAGE_SIZE
+#define STACK_ALIGNMENT 16
+
+void doMappings(Paging paging, uint64_t base, const PrivList<Parser::Mapping>& mappings) {
 	for(auto const& x : mappings) {
 		// Each mapping requieres a PageMapping object
-		Paging::PageMapping map(paging, BASE_LOAD + x.dst);
+		Paging::PageMapping map(paging, base + x.dst);
 		map.setUser();
 		if(!(x.flags & PARSER_FLAGS_W))
 			map.setRO();
@@ -46,14 +51,25 @@ Loader::LoaderInfo Loader::load(const PrivList<Parser::Mapping>& mappings) {
 	// Add the kernel global entry (last PML4E), in case the TLB gets cleared
 	paging.getData()[PAGE_ENTRIES - 1] = kpaging.getData()[PAGE_ENTRIES - 1];
 
+	ASLR aslr;
+
 	// Do the mappings
-	doMappings(paging, mappings);
+	uint64_t base = aslr.get(MAX_PROG_PAGES, GROWS_UPWARD, PROG_ALIGNMENT);
+	doMappings(paging, base, mappings);
+
+	// Get a heap
+	uint64_t heap = aslr.get(MAX_HEAP_PAGES, GROWS_UPWARD, HEAP_ALIGNMENT);
+	Paging::PageMapping heapmap(paging, heap);
+	heapmap.setUser();
+	heapmap.setNX();
+	heapmap.map4K(PMM::calloc());
 
 	// Get a stack
-	Paging::PageMapping stackmap(paging, BASE_STACK - PAGE_SIZE);
+	uint64_t stack = aslr.get(MAX_STACK_PAGES, GROWS_DOWNWARD, STACK_ALIGNMENT);
+	Paging::PageMapping stackmap(paging, stack & ~0xFFF);
 	stackmap.setUser();
 	stackmap.setNX();
 	stackmap.map4K(PMM::calloc());
 
-	return LoaderInfo(paging, BASE_LOAD, BASE_STACK);
+	return LoaderInfo(paging, aslr, base, heap, stack);
 }

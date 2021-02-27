@@ -14,7 +14,8 @@ const char* const msgs[] = {
 	"Paging::getPTE() received an address that wasn't present",
 	"A bad size was given to construct an Allocator object",
 	"A bad size was given to alloc() or free()",
-	"A pure virtual function has been called inside the kernel"
+	"A pure virtual function has been called inside the kernel",
+	"Could not get an ASLR allocation"
 };
 
 void panic(size_t id, bool doNotHalt) {
