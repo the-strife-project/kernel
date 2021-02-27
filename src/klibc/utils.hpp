@@ -14,4 +14,6 @@ inline size_t log2(size_t x) {
 	return ret;
 }
 
+template<typename T> T&& move(T& x) { return static_cast<T&&>(x); }
+
 #endif

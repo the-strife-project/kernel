@@ -71,5 +71,5 @@ Loader::LoaderInfo Loader::load(const PrivList<Parser::Mapping>& mappings) {
 	stackmap.setNX();
 	stackmap.map4K(PMM::calloc());
 
-	return LoaderInfo(paging, aslr, base, heap, stack);
+	return LoaderInfo(paging, move(aslr), base, heap, stack);
 }

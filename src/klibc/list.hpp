@@ -70,7 +70,7 @@ public:
 	List(List&& other) {
 		first = other.first;
 		other.first = nullptr;
-		first = other.last;
+		last = other.last;
 		other.last = nullptr;
 		_size = other._size;
 		other._size = 0;
