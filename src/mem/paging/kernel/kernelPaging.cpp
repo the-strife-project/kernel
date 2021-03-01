@@ -36,5 +36,5 @@ void initKernelPaging(MemoryMap mm) {
 		}
 	}
 
-	kpaging.reload();
+	kpaging.load();
 }

@@ -30,7 +30,7 @@ public:
 	PTE* getPTE(uint64_t addr);
 	static void extendPDE(PDE*);
 	void map(uint64_t virt, uint64_t phys, uint64_t size, uint64_t flags=0);
-	inline void reload() { setCR3((uint64_t)data); }
+	inline void load() { setCR3((uint64_t)data); }
 	// TODO: destroy()
 
 	// Sign stuff (36 bits)

@@ -1,10 +1,12 @@
-PROJNAME := Kernel
-RESULT := kernel.elf
+export PROJNAME := Kernel
+export RESULT := kernel.elf
+export asm := yes
+export LINKER_FILE := linker.ld
+export nostdlib := true
+export nostdlibh := true
 
-OPTS := PROJNAME="$(PROJNAME)" RESULT="$(RESULT)" asm=yes LINKER_FILE=linker.ld
-
-all: kernel.elf
+all: $(RESULT)
 
 %: force
-	@$(MAKE) -f ../helper/Makefile $@ $(OPTS) --no-print-directory
+	@$(MAKE) -f ../helper/Makefile $@ --no-print-directory
 force: ;

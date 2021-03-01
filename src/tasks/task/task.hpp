@@ -19,6 +19,8 @@ private:
 	uint64_t prog, heap, stack;
 	uint64_t maxHeapBottom, maxStackTop;
 
+	void mapGeneralTask(Paging);
+
 public:
 	Task() = default;
 	inline Task(const Loader::LoaderInfo& load, uint64_t entry)
@@ -27,8 +29,9 @@ public:
 		  prog(load.base), heap(load.heap), stack(load.stack),
 		  maxHeapBottom(load.heap + MAX_HEAP_PAGES*PAGE_SIZE),
 		  maxStackTop(load.stack - MAX_STACK_PAGES*PAGE_SIZE)
-	{}
+	{ mapGeneralTask(load.paging); }
 
+	inline Paging getPaging() { return paging; }
 	void moreHeap(size_t npages);
 	void moreStack();
 	void resume();

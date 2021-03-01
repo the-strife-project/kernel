@@ -20,7 +20,6 @@ struct Syscalls {
 	};
 };
 
-void syscall_handler(size_t op, ...);
 void enableSyscalls();
 
 #endif

@@ -2,7 +2,7 @@
 #include <asm.hpp>
 #include <klibc/klibc.hpp>
 
-void syscall_handler(size_t op, ...) {
+extern "C" void syscall_handler(size_t op, ...) {
 	va_list args;
 	va_start(args, op);
 

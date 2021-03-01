@@ -60,20 +60,26 @@ public:
 
 	// -- Class stuff ---
 
-	List() {}
+	List() = default;
+	inline List(const List& other) { *this = other; }
+	inline List(List&& other) { *this = other; }
 
-	List(const List& other) {
+	List& operator=(const List& other) {
 		for(auto const& x : other)
 			push_back(x);
+		return *this;
 	}
 
-	List(List&& other) {
-		first = other.first;
-		other.first = nullptr;
-		last = other.last;
-		other.last = nullptr;
-		_size = other._size;
-		other._size = 0;
+	List& operator=(List&& other) {
+		if(this != &other) {
+			first = other.first;
+			other.first = nullptr;
+			last = other.last;
+			other.last = nullptr;
+			_size = other._size;
+			other._size = 0;
+		}
+		return *this;
 	}
 
 	inline ~List() { clear(); }

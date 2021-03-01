@@ -2,6 +2,11 @@
 
 extern "C" void actuallyResumeTask(uint64_t rsp, uint64_t rip, GeneralRegisters*, uint64_t rflags);
 
+extern Task* generalTask;
+void Task::mapGeneralTask(Paging p) {
+	p.map((uint64_t)generalTask, PMM::calloc(), PAGE_SIZE, Paging::MapFlag::NX);
+}
+
 void Task::moreHeap(size_t npages) {
 	if(npages == 0)
 		return;
@@ -21,6 +26,5 @@ void Task::moreHeap(size_t npages) {
 }
 
 void Task::resume() {
-	paging.reload();
 	actuallyResumeTask(rsp, rip, &regs, rflags);
 }

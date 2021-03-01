@@ -85,16 +85,20 @@ public:
 			panic(Panic::MLVECTOR_TOO_BIG);
 	};
 
-	inline MLvector(MLvector&& other) {
-		data = other.data;
-		other.data = nullptr;
+	inline MLvector(MLvector&& other) { *this = other; }
+	inline MLvector& operator=(MLvector&& other) {
+		if(this != &other) {
+			data = other.data;
+			other.data = nullptr;
+		}
+		return *this;
 	}
 
 	void destroy() {
 		if(data)
 			_destroy((uint64_t*)data, levels);
 	}
-	inline ~MLvector() { destroy(); }
+	//inline ~MLvector() { destroy(); }
 
 	inline size_t size() const { return _size; }
 

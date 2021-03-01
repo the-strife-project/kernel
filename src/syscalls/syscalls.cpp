@@ -3,12 +3,13 @@
 #include <klibc/klibc.hpp>
 #include <GDT/MyGDT.hpp>
 
+extern "C" void asm_syscall_handler();
 void enableSyscalls() {
 	uint64_t efer = rdmsr(MSR_EFER);
 	efer |= 1 << EFER_SYSCALL_ENABLE;
 	wrmsr(MSR_EFER, efer);
 
-	wrmsr(MSR_LSTAR, (uint64_t)syscall_handler);
+	wrmsr(MSR_LSTAR, (uint64_t)asm_syscall_handler);
 
 	uint64_t star = 0;
 	star |= (((uint64_t)SEGMENT_SELECTOR_UDATA - 0x08) | USER_PL) << STAR_SYSRET_SELECTOR;
