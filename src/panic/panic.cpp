@@ -15,7 +15,8 @@ const char* const msgs[] = {
 	"A bad size was given to construct an Allocator object",
 	"A bad size was given to alloc() or free()",
 	"A pure virtual function has been called inside the kernel",
-	"Could not get an ASLR allocation"
+	"Could not get an ASLR allocation",
+	"MLvector received a data type bigger than PAGE_SIZE"
 };
 
 void panic(size_t id, bool doNotHalt) {
