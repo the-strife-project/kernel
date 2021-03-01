@@ -21,3 +21,5 @@ void initIDT() {
 
 	idt.load();
 }
+
+// Changing an entry will require a spinlock

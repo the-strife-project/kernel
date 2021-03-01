@@ -3,7 +3,9 @@
 Task* generalTask;
 Scheduler sched;
 PubMLvector<PID> running;	// Which PID is running each CPU
-PubMLvector<Scheduler::SchedulerTask> tasks;
+static PubMLvector<Scheduler::SchedulerTask> tasks;
+
+static Spinlock schedLock, PIDLock;
 
 void initScheduler(size_t CPUs) {
 	generalTask = (Task*)(HIGHER_HALF + PMM::calloc());
@@ -16,23 +18,28 @@ void initScheduler(size_t CPUs) {
 }
 
 void Scheduler::addFront(PID pid) {
-	// Lock
+	schedLock.acquire();
 	rr.push_front(pid);
+	schedLock.release();
 }
 
 void Scheduler::add(PID pid) {
-	// Lock
+	schedLock.acquire();
 	rr.push(pid);
+	schedLock.release();
 }
 
 PID Scheduler::get() {
-	// Lock
-	return rr.pop();
+	schedLock.acquire();
+	auto ret = rr.pop();
+	schedLock.release();
+	return ret;
 }
 
 PID assignPID(const Scheduler::SchedulerTask& task) {
-	// Lock
+	PIDLock.acquire();
 	PID pid = tasks.next();
 	tasks[pid] = task;
+	PIDLock.release();
 	return pid;
 }

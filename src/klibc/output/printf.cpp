@@ -1,5 +1,6 @@
 #include "output.hpp"
 #include "../conversions/conversions.hpp"
+#include "../spinlock.hpp"
 
 void printHex(uint64_t n, size_t fixedSize=0) {
 	char buffer[17] = {0};
@@ -25,7 +26,10 @@ void dump(uint64_t addr, size_t sz) {
 	}
 }
 
+static Spinlock lock;
+
 void printf(const char* fmt, ...) {
+	lock.acquire();
 	va_list args;
 	va_start(args, fmt);
 
@@ -62,4 +66,5 @@ void printf(const char* fmt, ...) {
 			_writec(*fmt);
 		}
 	}
+	lock.release();
 }

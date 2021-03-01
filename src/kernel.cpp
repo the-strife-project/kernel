@@ -44,7 +44,6 @@ extern "C" void kmain(stivale2_struct* bootData) {
 
 	size_t CPUs = 1;
 	initScheduler(CPUs);
-
 	enableSyscalls();
 
 	printf("Loading ELF parser... "); Loader::startELFParser(); printf("[OK]\n");

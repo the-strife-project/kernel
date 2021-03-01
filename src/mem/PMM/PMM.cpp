@@ -34,7 +34,11 @@ void PMM::finalizeInit(const MemoryMap& memmap) {
 			pushToQueue(x.base, x.length);
 }
 
+
+static Spinlock lock;
+
 uint64_t PMM::alloc() {
+	lock.acquire();
 	// Is there any memory left?
 	if(!top)
 		panic(Panic::OUT_OF_MEMORY);
@@ -53,6 +57,7 @@ uint64_t PMM::alloc() {
 	}
 
 	// That would be all
+	lock.release();
 	return (uint64_t)ret;
 }
 
@@ -63,11 +68,8 @@ uint64_t PMM::calloc() {
 }
 
 // This is trivial
-void PMM::free(uint64_t addr) { pushToQueue(addr & ~0xFFF, PAGE_SIZE); }
-
-/*void PMM::_walk() {
-	printf("Free (addr, npages): ");
-	for(auto* it=top; it; it=it->next)
-		printf("(0x%x, 0x%x) ", it, it->npages);
-	printf("\n");
-}*/
+void PMM::free(uint64_t addr) {
+	lock.acquire();
+	pushToQueue(addr & ~0xFFF, PAGE_SIZE);
+	lock.release();
+}
