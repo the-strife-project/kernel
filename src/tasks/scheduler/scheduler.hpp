@@ -14,6 +14,8 @@
 
 	This way, at any point, there's only one Task mapped in public memory.
 	It is NOT a global page, but the pointer is always the same.
+
+	TODO: this might not be needed, check again when the kernel is done.
 */
 extern Task* generalTask;
 
@@ -28,6 +30,9 @@ public:
 			of the process.
 		*/
 		Paging paging;
+
+		// Physical (private) address of the task
+		Task* task;
 	};
 
 private:
@@ -44,5 +49,6 @@ extern Scheduler sched;
 extern PubMLvector<PID> running;
 void initScheduler(size_t CPUs);
 PID assignPID(const Scheduler::SchedulerTask&);
+Scheduler::SchedulerTask& getTask(PID);
 
 #endif

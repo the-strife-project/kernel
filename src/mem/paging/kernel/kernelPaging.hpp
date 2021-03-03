@@ -3,5 +3,5 @@
 
 #define HIGHER_HALF 0xFFFFFFFF80000000
 
-extern Paging kpaging;
+extern "C" Paging kpaging;
 void initKernelPaging(MemoryMap);

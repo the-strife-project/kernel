@@ -1,11 +1,17 @@
 %define KDATA 0x10
 %define UDATA 0x1b
 
+extern privStacks
+extern kpaging
+extern whoami
+
 global asm_syscall_handler
 extern syscall_handler
 asm_syscall_handler:
-	mov rax, rsp
-	push rax
+	; RPC here
+
+	; At this point, the syscall is not RPC.
+	; The page table will change to a private stack soon.
 
 	; Callee-saved are not saved.
 	push rcx
@@ -23,7 +29,44 @@ asm_syscall_handler:
 	mov fs, ax
 	mov gs, ax
 
+	; I'm gonna use this thank you very much
+	push rbx
+	push r12
+
+	; Save page table
+	mov r12, cr3
+
+	call whoami
+	shl eax, 3	; *8
+
+	; Get address of the private stack
+	lea rbx, qword [rel privStacks]
+	add rax, rbx
+
+	; Go into the kernel page table
+	mov rbx, qword [rel kpaging]
+	mov cr3, rbx
+
+	; We can now dereference the private stack
+	mov rbx, rsp
+	mov rsp, qword [rax]
+	push rbx
+
+	; Save page table (now for real)
+	push r12
+
 	call syscall_handler
+
+returnToAsm:
+	; So we're back, get:
+	pop rdi	; Page table
+	pop rsi	; Old stack
+
+	mov cr3, rdi
+	mov rsp, rsi
+
+	pop rbx
+	pop r12
 
 	mov ax, UDATA
 	mov ds, ax
@@ -40,5 +83,4 @@ asm_syscall_handler:
 	pop rdx
 	pop rcx
 
-	pop rsp
 	o64 sysret

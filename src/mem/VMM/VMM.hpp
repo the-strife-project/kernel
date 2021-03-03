@@ -15,11 +15,13 @@ typedef void (*free_t)(uint64_t);
 namespace VMM {
 	namespace Private {
 		uint64_t alloc();
+		uint64_t calloc();
 		void free(uint64_t);
 	}
 
 	namespace Public {
 		uint64_t alloc();
+		uint64_t calloc();
 		void free(uint64_t);
 	}
 };

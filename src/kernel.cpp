@@ -9,6 +9,7 @@
 #include <mem/paging/paging.hpp>
 #include <tasks/task/TSS/TSS.hpp>
 #include <syscalls/syscalls.hpp>
+#include <mem/stacks/stacks.hpp>
 #include <tasks/scheduler/scheduler.hpp>
 
 __attribute__((section(".memmap"), used))
@@ -31,18 +32,27 @@ extern "C" void kmain(stivale2_struct* bootData) {
 
 	printf("Setting GDT... "); initGDT(); printf("[OK]\n");
 	printf("Setting IDT... "); initIDT(); printf("[OK]\n");
-	printf("Initializing PMM... "); PMM::init(memmap); printf("[OK]\n");
-	printf("Paging memory... "); initKernelPaging(memmap); printf("[OK]\n");
-	PMM::finalizeInit(memmap);
+
+	printf("Doing a lot of memory stuff... ");
+	PMM::init(memmap);
+	initKernelPaging(memmap);
+	PMM::finalizeInit(memmap);	// Bootloader pages are now free to use.
 	initAllocators();
 
-	printf("Setting up TSS... ");
-	TSS tss = newTSS();
-	tss.setRSP0(VMM::Public::alloc() + PAGE_SIZE);
-	tss.load();
+	size_t CPUs = 1;
+
+	prepareStacks(CPUs);
 	printf("[OK]\n");
 
-	size_t CPUs = 1;
+	printf("Setting up TSS... ");
+	for(size_t i=0; i<CPUs; ++i) {
+		// This possibly isn't done like this in SMP. Just a stub
+		TSS tss = newTSS();
+		tss.setRSP0(pubStacks[i]);
+		tss.load();
+	}
+	printf("[OK]\n");
+
 	initScheduler(CPUs);
 	enableSyscalls();
 

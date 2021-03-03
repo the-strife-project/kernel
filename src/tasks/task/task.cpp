@@ -22,7 +22,7 @@ void Task::moreHeap(size_t npages) {
 	// Map
 	uint64_t flags = Paging::MapFlag::NX | Paging::MapFlag::USER;
 	paging.map(heapBottom, PMM::calloc(), sz, flags);
-	heapBottom += npages*PAGE_SIZE;
+	heapBottom += sz;
 }
 
 void Task::resume() {

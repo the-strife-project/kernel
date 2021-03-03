@@ -1,10 +1,16 @@
 #include "syscalls.hpp"
 #include <asm.hpp>
 #include <klibc/klibc.hpp>
+#include <tasks/scheduler/scheduler.hpp>
+#include <SMP/SMP.hpp>
+#include <mem/stacks/stacks.hpp>
 
-extern "C" void syscall_handler(size_t op, ...) {
-	va_list args;
-	va_start(args, op);
+extern "C" [[noreturn]] void returnToAsm(Paging);
+
+// Just add arguments as they needed. va_list doesn't work here.
+extern "C" uint64_t syscall_handler(size_t op, size_t arg1) {
+	uint64_t ret = 0;
+	PID pid = running[whoami()];
 
 	switch(op) {
 	case Syscalls::EXIT:
@@ -12,8 +18,7 @@ extern "C" void syscall_handler(size_t op, ...) {
 		hlt();
 		break;
 	case Syscalls::MORE_HEAP:
-		printf("More heap!");
-		hlt();
+		getTask(pid).task->moreHeap(arg1);
 		break;
 	default:
 		// TODO: kill
@@ -22,6 +27,5 @@ extern "C" void syscall_handler(size_t op, ...) {
 		break;
 	}
 
-	sysret();
-	hlt(); while(true);
+	return ret;
 }

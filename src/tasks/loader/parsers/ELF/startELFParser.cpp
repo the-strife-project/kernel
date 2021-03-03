@@ -15,12 +15,13 @@ void Loader::startELFParser() {
 
 	Scheduler::SchedulerTask schedTask;
 	schedTask.paging = task->getPaging();
+	schedTask.task = task;
 	schedTask.paging.map((uint64_t)generalTask, (uint64_t)task, PAGE_SIZE, Paging::MapFlag::NX);
 
 	PID pid = assignPID(schedTask);
 	ELF_PID = pid;
 
-	running[BSP] = ELF_PID;
+	running[whoami()] = ELF_PID;
 	schedTask.paging.load();
 	generalTask->resume();
 }

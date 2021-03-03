@@ -15,6 +15,9 @@ void initScheduler(size_t CPUs) {
 
 	while(CPUs--)
 		running[running.next()] = NULL_PID;
+
+	// Set null PID
+	tasks.next();
 }
 
 void Scheduler::addFront(PID pid) {
@@ -37,9 +40,17 @@ PID Scheduler::get() {
 }
 
 PID assignPID(const Scheduler::SchedulerTask& task) {
+	// TODO: recycle
 	PIDLock.acquire();
 	PID pid = tasks.next();
 	tasks[pid] = task;
 	PIDLock.release();
 	return pid;
+}
+
+Scheduler::SchedulerTask& getTask(PID pid) {
+	PIDLock.acquire();
+	auto& ret = tasks[pid];
+	PIDLock.release();
+	return ret;
 }

@@ -2,20 +2,27 @@
 #include <klibc/spinlock.hpp>
 
 uint64_t VMM::Private::alloc() { return PMM::alloc(); }
+uint64_t VMM::Private::calloc() { return PMM::calloc(); }
 void VMM::Private::free(uint64_t x) { return PMM::free(x); }
 
 static Spinlock lock = Spinlock();
+inline void atomicMap(uint64_t virt, uint64_t phys) {
+	lock.acquire();
+	kpaging.map(virt, phys, PAGE_SIZE, Paging::MapFlag::NX | Paging::MapFlag::GLOBAL);
+	lock.release();
+}
 
 uint64_t VMM::Public::alloc() {
-	// Alloc and map :^)
-	lock.acquire();
 	uint64_t phys = PMM::alloc();
 	uint64_t ret = HIGHER_HALF + phys;
-	Paging::PageMapping mapping(kpaging, ret);
-	mapping.setNX();
-	mapping.setGlobal();
-	mapping.map4K(phys);
-	lock.release();
+	atomicMap(ret, phys);
+	return ret;
+}
+
+uint64_t VMM::Public::calloc() {
+	uint64_t phys = PMM::calloc();
+	uint64_t ret = HIGHER_HALF + phys;
+	atomicMap(ret, phys);
 	return ret;
 }
 
