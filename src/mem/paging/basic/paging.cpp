@@ -94,3 +94,54 @@ void Paging::map(uint64_t virt, uint64_t phys, uint64_t size, uint64_t flags) {
 		virt += FOURKBS; phys += FOURKBS; size -= FOURKBS;
 	}
 }
+
+// Get flags of virtual address. ~0 if not mapped.
+uint64_t Paging::getFlags(uint64_t virt) {
+	uint64_t ret = 0;
+
+	uint64_t pml4_i, pdp_i, pd_i, pt_i;
+	getIndexes(virt, pml4_i, pdp_i, pd_i, pt_i);
+
+	PML4E* pml4e = data;
+	pml4e = &pml4e[pml4_i];
+	if(!pml4e->isPresent())
+		return ~0;
+
+	PDPE* pdpe = (PDPE*)extend(pml4e->getNext() << 12);
+	pdpe = &pdpe[pdp_i];
+	if(!pdpe->isPresent())
+		return ~0;
+
+	PDE* pde = (PDE*)extend(pdpe->getNext() << 12);
+	pde = &pde[pd_i];
+	if(!pde->isPresent()) {
+		return ~0;
+	} else if(pde->isHuge()) {
+		if(pde->isGlobal())
+			ret |= MapFlag::GLOBAL;
+		if(pde->isRO())
+			ret |= MapFlag::RO;
+		if(pde->isNX())
+			ret |= MapFlag::NX;
+		if(pde->isUser())
+			ret |= MapFlag::USER;
+
+		return ret;
+	}
+
+	PTE* pte = (PTE*)extend(pde->getNext() << 12);
+	pte = &pte[pt_i];
+	if(!pte->isPresent())
+		return ~0;
+
+	if(pte->isGlobal())
+		ret |= MapFlag::GLOBAL;
+	if(pte->isRO())
+		ret |= MapFlag::RO;
+	if(pte->isNX())
+		ret |= MapFlag::NX;
+	if(pte->isUser())
+		ret |= MapFlag::USER;
+
+	return ret;
+}

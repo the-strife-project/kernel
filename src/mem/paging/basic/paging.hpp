@@ -30,6 +30,7 @@ public:
 	PTE* getPTE(uint64_t addr);
 	static void extendPDE(PDE*);
 	void map(uint64_t virt, uint64_t phys, uint64_t size, uint64_t flags=0);
+	uint64_t getFlags(uint64_t virt);
 	inline void load() { setCR3((uint64_t)data); }
 	// TODO: destroy()
 

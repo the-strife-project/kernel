@@ -16,7 +16,8 @@
 struct Syscalls {
 	enum {
 		EXIT,
-		MORE_HEAP
+		MORE_HEAP,
+		EXPORT
 	};
 };
 

@@ -33,6 +33,13 @@ public:
 
 		// Physical (private) address of the task
 		Task* task;
+
+		// Exported procedures (page)
+		uint64_t* procs = nullptr;
+		uint64_t nprocs = 0;
+
+		// Stacks for concurrency
+		uint64_t* stacks = nullptr;
 	};
 
 private:

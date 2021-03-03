@@ -11,6 +11,7 @@ inline uint64_t rdrand() {
 }
 
 static uint64_t getCandidate() {
+	// TODO: Check
 	return rdrand();	// Stub
 }
 
@@ -32,7 +33,7 @@ uint64_t align(uint64_t x, uint64_t alignment) {
 }
 
 uint64_t ASLR::get(size_t max_pages, bool direction, uint64_t alignment, bool doNotPanic) {
-	if(max_pages && direction && alignment) {}
+	// TODO: Make this safer
 
 	for(uint64_t it=0; it<MAX_ITERATIONS; ++it) {
 		uint64_t candidate = getCandidate();

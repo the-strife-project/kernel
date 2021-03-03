@@ -10,6 +10,7 @@
 #include <syscalls/syscalls.hpp>
 #include <mem/stacks/stacks.hpp>
 #include <tasks/scheduler/scheduler.hpp>
+#include <CPU/SMP/SMP.hpp>
 
 __attribute__((section(".memmap"), used))
 stivale2_mmap_entry savedmemmap[PAGE_SIZE / sizeof(stivale2_mmap_entry)];
@@ -38,13 +39,13 @@ extern "C" void kmain(stivale2_struct* bootData) {
 	PMM::finalizeInit(memmap);	// Bootloader pages are now free to use.
 	initAllocators();
 
-	size_t CPUs = 1;
+	ncores = 1;
 
-	prepareStacks(CPUs);
+	prepareStacks(ncores);
 	printf("[OK]\n");
 
 	printf("Setting up TSS... ");
-	for(size_t i=0; i<CPUs; ++i) {
+	for(size_t i=0; i<ncores; ++i) {
 		// This possibly isn't done like this in SMP. Just a stub
 		TSS tss = newTSS();
 		tss.setRSP0(pubStacks[i]);
@@ -52,7 +53,7 @@ extern "C" void kmain(stivale2_struct* bootData) {
 	}
 	printf("[OK]\n");
 
-	initScheduler(CPUs);
+	initScheduler(ncores);
 	enableSyscalls();
 
 	printf("Loading ELF parser... "); Loader::startELFParser(); printf("[OK]\n");

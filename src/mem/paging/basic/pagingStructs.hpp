@@ -25,7 +25,7 @@ public:
 	inline void setPresent(bool v=true) { present = (uint64_t)v; }
 	inline bool isPresent() { return present; }
 	inline void setRO() { rw = 0; }
-	inline bool isRO() { return rw; }
+	inline bool isRO() { return !rw; }
 	inline void setUser() { allowUser = 1; }
 	inline bool isUser() { return allowUser; }
 	inline void setNext(uint64_t v) { next = v; }
@@ -66,14 +66,18 @@ public:
 		  accessed(0), dirty(0), pat(0), global(0), alloc0(0), phys(0), avl(0), alloc1(0), pke(0), nx(0)
 	{}
 
-	inline bool isPresent() { return present; }
 	inline void setPresent(bool v=true) { present = (uint64_t)v; }
+	inline bool isPresent() { return present; }
 	inline void setRO() { rw = 0; }
+	inline bool isRO() { return !rw; }
 	inline void setUser() { allowUser = 1; }
+	inline bool isUser() { return allowUser; }
 	inline void setGlobal() { global = 1; }
+	inline bool isGlobal() { return global; }
 	inline void setPhys(uint64_t v) { phys = v; }
 	inline uint64_t getPhys() { return phys; }
 	inline void setNX() { nx = 1; }
+	inline bool isNX() { return nx; }
 
 	// OS-dependent
 	inline void setUsedChunks(uint16_t x) {

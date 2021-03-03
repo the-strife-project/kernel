@@ -18,6 +18,7 @@ private:
 	// Properties
 	uint64_t prog, heap, stack;
 	uint64_t maxHeapBottom, maxStackTop;
+	ASLR aslr;
 
 	void mapGeneralTask(Paging);
 
@@ -28,12 +29,14 @@ public:
 		  heapBottom(load.heap + PAGE_SIZE), stackTop(load.stack & ~0xFFF),
 		  prog(load.base), heap(load.heap), stack(load.stack),
 		  maxHeapBottom(load.heap + MAX_HEAP_PAGES*PAGE_SIZE),
-		  maxStackTop(load.stack - MAX_STACK_PAGES*PAGE_SIZE)
+		  maxStackTop(load.stack - MAX_STACK_PAGES*PAGE_SIZE),
+		  aslr(load.aslr)
 	{ mapGeneralTask(load.paging); }
 
 	inline Paging getPaging() { return paging; }
 	void moreHeap(size_t npages);
 	void moreStack();
+	inline ASLR& getASLR() { return aslr; }
 	void resume();
 };
 
