@@ -3,7 +3,6 @@
 #include <boot/modules/modules.hpp>
 #include <GDT/MyGDT.hpp>
 #include <IDT/MyIDT.hpp>
-#include <drivers/PIC8259/PIC8259.hpp>
 #include <mem/memmap/memmap.hpp>
 #include <mem/PMM/PMM.hpp>
 #include <mem/paging/paging.hpp>
