@@ -6,7 +6,7 @@
 #include <mem/memmap/memmap.hpp>
 #include <mem/PMM/PMM.hpp>
 #include <mem/paging/paging.hpp>
-#include <tasks/task/TSS/TSS.hpp>
+#include <CPU/TSS/TSS.hpp>
 #include <syscalls/syscalls.hpp>
 #include <mem/stacks/stacks.hpp>
 #include <tasks/scheduler/scheduler.hpp>

@@ -1,7 +1,7 @@
 #include <boot/modules/modules.hpp>
 #include <tasks/loader/parsers/USU/USU.hpp>
 #include <tasks/scheduler/scheduler.hpp>
-#include <SMP/SMP.hpp>
+#include <CPU/SMP/SMP.hpp>
 
 size_t ELF_PID;
 

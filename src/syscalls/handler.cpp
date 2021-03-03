@@ -2,7 +2,7 @@
 #include <asm.hpp>
 #include <klibc/klibc.hpp>
 #include <tasks/scheduler/scheduler.hpp>
-#include <SMP/SMP.hpp>
+#include <CPU/SMP/SMP.hpp>
 #include <mem/stacks/stacks.hpp>
 
 extern "C" [[noreturn]] void returnToAsm(Paging);
