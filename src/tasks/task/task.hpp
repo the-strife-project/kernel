@@ -36,8 +36,10 @@ public:
 	inline Paging getPaging() { return paging; }
 	void moreHeap(size_t npages);
 	void moreStack();
+	void freeStack();
 	inline ASLR& getASLR() { return aslr; }
-	void resume();
+	void dispatchSaving();
+	void dispatch();
 };
 
 #endif

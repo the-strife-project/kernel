@@ -14,6 +14,8 @@ extern "C" uint64_t syscall_handler(size_t op, size_t arg1) {
 	PID pid = running[whoami()];
 	Scheduler::SchedulerTask& stask = getTask(pid);
 
+	bool goBack = true;
+
 	switch(op) {
 	case Syscalls::EXIT:
 		printf("Should kill");
@@ -25,12 +27,19 @@ extern "C" uint64_t syscall_handler(size_t op, size_t arg1) {
 	case Syscalls::EXPORT:
 		exportProcedure(stask, arg1);
 		break;
+	case Syscalls::HALT:
+		stask.task->freeStack();
+		goBack = false;
+		break;
 	default:
 		// TODO: kill
 		printf("Unknown syscall");
 		hlt();
 		break;
 	}
+
+	if(!goBack)
+		schedule();
 
 	return ret;
 }

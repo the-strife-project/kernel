@@ -15,10 +15,14 @@ static uint64_t getCandidate() {
 	return rdrand();	// Stub
 }
 
-inline bool overlaps(uint64_t begin, uint64_t end, uint64_t xbegin, uint64_t xend) {
+static inline bool overlaps(uint64_t begin, uint64_t end, uint64_t xbegin, uint64_t xend) {
 	bool ret = xbegin > end;
 	ret = ret || (xend < begin);
 	return !ret;
+}
+
+static inline bool contains(uint64_t begin, uint64_t end, uint64_t x) {
+	return overlaps(begin, end, x, x);
 }
 
 // Aligns without crossing a page boundary
@@ -58,4 +62,13 @@ uint64_t ASLR::get(size_t max_pages, bool direction, uint64_t alignment, bool do
 	if(!doNotPanic)
 		panic(Panic::COULD_NOT_GET_ASLR);
 	return 0;
+}
+
+void ASLR::free(uint64_t addr) {
+	for(auto& x : list) {
+		if(contains(x.begin, x.end, addr)) {
+			// TODO: It isn't worth thinking right now
+			x.begin = x.end = 0;
+		}
+	}
 }

@@ -58,4 +58,8 @@ void initScheduler(size_t CPUs);
 PID assignPID(const Scheduler::SchedulerTask&);
 Scheduler::SchedulerTask& getTask(PID);
 
+
+extern "C" uint64_t savedKernelState_rsp, savedKernelState_rip;
+[[noreturn]] void schedule();
+
 #endif

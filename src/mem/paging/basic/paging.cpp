@@ -46,6 +46,34 @@ Paging::PTE* Paging::getPTE(uint64_t addr) {
 	return pte;
 }
 
+uint64_t Paging::getPhys(uint64_t virt) {
+	uint64_t pml4_i, pdp_i, pd_i, pt_i;
+	getIndexes(virt, pml4_i, pdp_i, pd_i, pt_i);
+
+	PML4E* pml4e = data;
+	pml4e = &pml4e[pml4_i];
+	if(!pml4e->isPresent())
+		return 0;
+
+	PDPE* pdpe = (PDPE*)extend(pml4e->getNext() << 12);
+	pdpe = &pdpe[pdp_i];
+	if(!pdpe->isPresent())
+		return 0;
+
+	PDE* pde = (PDE*)extend(pdpe->getNext() << 12);
+	pde = &pde[pd_i];
+	if(!pde->isPresent())
+		return 0;
+	else
+		return pde->getNext() << 12;
+
+	PTE* pte = (PTE*)extend(pde->getNext() << 12);
+	pte = &pte[pt_i];
+	if(!pte->isPresent())
+		return 0;
+	return pte->getPhys() << 12;
+}
+
 // Extends a huge PDE into a regular one
 void Paging::extendPDE(PDE* pde) {
 	uint64_t phys = pde->getNext();
@@ -93,6 +121,33 @@ void Paging::map(uint64_t virt, uint64_t phys, uint64_t size, uint64_t flags) {
 		mapping.map4K(phys);
 		virt += FOURKBS; phys += FOURKBS; size -= FOURKBS;
 	}
+}
+
+void Paging::unmap(uint64_t virt) {
+	uint64_t pml4_i, pdp_i, pd_i, pt_i;
+	getIndexes(virt, pml4_i, pdp_i, pd_i, pt_i);
+
+	PML4E* pml4e = data;
+	pml4e = &pml4e[pml4_i];
+	if(!pml4e->isPresent())
+		return;
+
+	PDPE* pdpe = (PDPE*)extend(pml4e->getNext() << 12);
+	pdpe = &pdpe[pdp_i];
+	if(!pdpe->isPresent())
+		return;
+
+	PDE* pde = (PDE*)extend(pdpe->getNext() << 12);
+	pde = &pde[pd_i];
+	if(!pde->isPresent() || pde->isHuge()) {
+		pde->setPresent(false);
+		return;
+	}
+
+	PTE* pte = (PTE*)extend(pde->getNext() << 12);
+	pte = &pte[pt_i];
+	pte->setPresent(false);
+	return;
 }
 
 // Get flags of virtual address. ~0 if not mapped.

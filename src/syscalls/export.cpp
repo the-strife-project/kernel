@@ -19,9 +19,8 @@ void exportProcedure(Scheduler::SchedulerTask& stask, uint64_t addr) {
 		stask.stacks = (uint64_t*)VMM::Public::calloc();
 		for(size_t i=0; i<ncores; ++i) {
 			auto stack = stask.task->getASLR().get(1, GROWS_DOWNWARD, 16);
-			auto phys = PMM::calloc();
 			uint64_t flags = Paging::MapFlag::NX | Paging::MapFlag::USER;
-			stask.task->getPaging().map(stack & ~0xFFF, phys, PAGE_SIZE, flags);
+			stask.task->getPaging().map(stack & ~0xFFF, PMM::alloc(), PAGE_SIZE, flags);
 			stask.stacks[i] = stack;
 		}
 	}

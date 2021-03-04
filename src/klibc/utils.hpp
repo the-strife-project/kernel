@@ -1,5 +1,5 @@
-#ifndef HACKS_HPP
-#define HACKS_HPP
+#ifndef UTILS_HPP
+#define UTILS_HPP
 
 #include <common.hpp>
 

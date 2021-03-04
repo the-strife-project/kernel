@@ -1,6 +1,7 @@
 #include "task.hpp"
 
-extern "C" void actuallyResumeTask(uint64_t rsp, uint64_t rip, GeneralRegisters*, uint64_t rflags);
+extern "C" void asmDispatchSaving(uint64_t rsp, uint64_t rip, GeneralRegisters*, uint64_t rflags, Paging);
+extern "C" void asmDispatch(uint64_t rsp, uint64_t rip, GeneralRegisters*, uint64_t rflags, Paging);
 
 extern Task* generalTask;
 void Task::mapGeneralTask(Paging p) {
@@ -25,6 +26,27 @@ void Task::moreHeap(size_t npages) {
 	heapBottom += sz;
 }
 
-void Task::resume() {
-	actuallyResumeTask(rsp, rip, &regs, rflags);
+// TODO void Task::moreStack() {}
+
+void Task::freeStack() {
+	size_t npages = (stack - stackTop) / PAGE_SIZE;
+	++npages;	// Have to count for the initial one
+
+	auto current = stackTop & ~0xFFF;
+	while(npages--) {
+		auto phys = paging.getPhys(current);
+		paging.unmap(current);
+		PMM::free(phys);
+		current += PAGE_SIZE;
+	}
+
+	aslr.free(stack);
+}
+
+void Task::dispatchSaving() {
+	asmDispatchSaving(rsp, rip, &regs, rflags, paging);
+}
+
+void Task::dispatch() {
+	asmDispatch(rsp, rip, &regs, rflags, paging);
 }

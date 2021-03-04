@@ -22,6 +22,7 @@ void Loader::startELFParser() {
 	ELF_PID = pid;
 
 	running[whoami()] = ELF_PID;
-	schedTask.paging.load();
-	generalTask->resume();
+
+	schedTask.task->dispatchSaving();
+	return;
 }

@@ -1,16 +1,27 @@
 BITS 64
 
-global actuallyResumeTask
+global asmDispatchSaving
+global asmDispatch
+extern savedKernelState_rsp
+extern savedKernelState_rip
 
 %define USER_CPL 3
 %define USER_DATA (0x18 | USER_CPL)
 %define USER_CODE (0x20 | USER_CPL)
 
+justRet: ret
+
+asmDispatchSaving:
+	mov qword [rel savedKernelState_rsp], rsp
+	mov rax, justRet
+	mov qword [rel savedKernelState_rip], rax
+
 ; rdi <- rsp
 ; rsi <- rip
 ; rdx <- GeneralRegisters*
 ; rcx <- rflags
-actuallyResumeTask:
+; r8  <- Paging
+asmDispatch:
 	mov ax, USER_DATA
 	mov ds, ax
 	mov es, ax
@@ -33,7 +44,7 @@ actuallyResumeTask:
 	mov rsi, [r15 + 8*4]
 	mov rdi, [r15 + 8*5]
 	mov rbp, [r15 + 8*6]
-	mov r8, [r15 + 8*7]
+	push qword [r15 + 8*7]	; Saving this for later
 	mov r9, [r15 + 8*8]
 	mov r10, [r15 + 8*9]
 	mov r11, [r15 + 8*10]
@@ -41,5 +52,9 @@ actuallyResumeTask:
 	mov r13, [r15 + 8*12]
 	mov r14, [r15 + 8*13]
 	mov r15, [r15 + 8*14]
+
+	; Last thing is change the page table
+	mov cr3, r8
+	pop r8
 
 	iretq
