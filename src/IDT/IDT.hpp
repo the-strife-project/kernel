@@ -4,6 +4,7 @@
 #include <common.hpp>
 #include <GDT/MyGDT.hpp>
 #include <klibc/klibc.hpp>
+#include "enum.hpp"
 
 #define N_ENTRIES_IDT 256
 
@@ -18,7 +19,7 @@
 #define IDT_GATE_INTERRUPT 0b1110
 
 class IDT {
-private:
+public:
 	struct IDTR {
 		uint16_t size;
 		uint64_t offset;
@@ -34,11 +35,12 @@ private:
 		uint32_t zero = 0;
 	} __attribute__((packed));
 
+private:
 	LameDescriptor* idt;
 	IDTR idtr;
 
 public:
-	struct FakeDescriptor { uint8_t _[16]; };
+	struct FakeDescriptor { uint64_t _[2]; };
 
 	class CoolDescriptor {
 	private:
@@ -47,6 +49,7 @@ public:
 
 	public:
 		uint64_t offset;
+		size_t ist = 0;
 
 		inline void setRing3() { attributes |= 3 << IDT_ATTR_DPL; ring3 = true; }
 		inline void setPresent() { attributes |= 1 << IDT_ATTR_PRESENT; }

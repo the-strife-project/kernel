@@ -39,6 +39,12 @@ inline void setCR4(uint64_t v) {
 	asm volatile("mov %0, %%cr4" :: "a"(v));
 }
 
+inline uint64_t getCR2() {
+	uint64_t ret;
+	asm volatile("mov %%cr2, %0" : "=r"(ret));
+	return ret;
+}
+
 inline void invlpg(uint64_t page) {
 	asm volatile("invlpg (%0)" :: "r"(page));
 }

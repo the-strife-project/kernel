@@ -6,7 +6,7 @@ IDT::LameDescriptor IDT::CoolDescriptor::getLame() const {
 	ret.offset_lo16 = offset & 0xFFFF;
 	ret.offset_mid16 = (offset >> 16) & 0xFFFF;
 	ret.offset_hi32 = (offset >> 32) & 0xFFFFFFFF;
-	if(ring3) { /* TODO WHEN RING 3 */ }
+	ret.ist = ist;
 	ret.attributes = attributes;
 	return ret;
 }

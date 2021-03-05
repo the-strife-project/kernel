@@ -30,8 +30,10 @@ extern "C" void kmain(stivale2_struct* bootData) {
 	// Now, save the modules (next commit)
 	stivale2Modules::save(bootData);
 
-	printf("Setting GDT... "); initGDT(); printf("[OK]\n");
-	printf("Setting IDT... "); initIDT(); printf("[OK]\n");
+	printf("Setting descriptors... ");
+	initGDT();
+	initIDT();
+	printf("[OK]\n");
 
 	printf("Doing a lot of memory stuff... ");
 	PMM::init(memmap);
@@ -49,8 +51,11 @@ extern "C" void kmain(stivale2_struct* bootData) {
 		// This possibly isn't done like this in SMP. Just a stub
 		TSS tss = newTSS();
 		tss.setRSP0(pubStacks[i]);
+		tss.setIST(IST_PAGE_FAULT, VMM::Public::alloc());
+		tss.setIST(IST_DOUBLE_FAULT, VMM::Public::alloc());
 		tss.load();
 	}
+
 	printf("[OK]\n");
 
 	initScheduler(ncores);

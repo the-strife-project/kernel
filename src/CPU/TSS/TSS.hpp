@@ -5,6 +5,8 @@
 
 #define TSS_SIZE 104
 
+#include "ISTs.hpp"
+
 class TSS {
 private:
 	class _TSS {
@@ -19,6 +21,7 @@ private:
 
 	public:
 		inline void setRSP0(uint64_t rsp0) { RSPs[0] = rsp0; }
+		inline void setIST(size_t n, uint64_t rsp) { ISTs[n - 1] = rsp; }
 	} __attribute__((packed));
 
 	_TSS* tss;
@@ -32,6 +35,7 @@ public:
 		desc = newTSSsegment((uint64_t)tss);
 	}
 	inline void setRSP0(uint64_t rsp0) { tss->setRSP0(rsp0); }
+	inline void setIST(size_t n, uint64_t rsp) { tss->setIST(n, rsp); }
 	inline void load() { asm volatile("ltr %%ax" :: "a"(desc) : "cc"); }
 };
 
