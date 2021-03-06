@@ -2,6 +2,7 @@
 #include <tasks/loader/parsers/USU/USU.hpp>
 #include <tasks/scheduler/scheduler.hpp>
 #include <CPU/SMP/SMP.hpp>
+#include <tasks/PIDs/PIDs.hpp>
 
 size_t ELF_PID;
 

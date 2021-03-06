@@ -1,13 +1,18 @@
 %define KDATA 0x10
 %define UDATA 0x1b
+%define SYSCALL_RPC 4
 
 extern privStacks
 extern kpaging
 extern whoami
 
-global asm_syscall_handler
-extern syscall_handler
-asm_syscall_handler:
+global asmSyscallHandler
+extern rpcSwitcher
+extern syscallHandler
+asmSyscallHandler:
+	; RPC?
+	cmp rdi, SYSCALL_RPC
+	je rpcSwitcher
 	; RPC here
 
 	; At this point, the syscall is not RPC.
@@ -55,7 +60,7 @@ asm_syscall_handler:
 	; Save page table (now for real)
 	push r12
 
-	call syscall_handler
+	call syscallHandler
 
 returnToAsm:
 	; So we're back, get:

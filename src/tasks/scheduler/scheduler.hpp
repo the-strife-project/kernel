@@ -53,10 +53,8 @@ public:
 };
 
 extern Scheduler sched;
-extern PubMLvector<PID> running;
-void initScheduler(size_t CPUs);
-PID assignPID(const Scheduler::SchedulerTask&);
-Scheduler::SchedulerTask& getTask(PID);
+extern PID* running;
+void initScheduler();
 
 
 extern "C" uint64_t savedKernelState_rsp, savedKernelState_rip;

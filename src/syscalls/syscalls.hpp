@@ -18,7 +18,8 @@ struct Syscalls {
 		EXIT,
 		MORE_HEAP,
 		EXPORT,
-		HALT
+		HALT,
+		RPC
 	};
 };
 

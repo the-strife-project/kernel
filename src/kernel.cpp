@@ -42,6 +42,8 @@ extern "C" void kmain(stivale2_struct* bootData) {
 	initAllocators();
 
 	ncores = 1;
+	if(ncores > 512)
+		panic(Panic::TOO_MANY_CORES);
 
 	prepareStacks(ncores);
 	printf("[OK]\n");
@@ -58,7 +60,7 @@ extern "C" void kmain(stivale2_struct* bootData) {
 
 	printf("[OK]\n");
 
-	initScheduler(ncores);
+	initScheduler();
 	enableSyscalls();
 
 	printf("Loading ELF parser... "); Loader::startELFParser(); printf("[OK]\n");

@@ -4,12 +4,13 @@
 #include <tasks/scheduler/scheduler.hpp>
 #include <CPU/SMP/SMP.hpp>
 #include <mem/stacks/stacks.hpp>
+#include <tasks/PIDs/PIDs.hpp>
 
 extern "C" [[noreturn]] void returnToAsm(Paging);
 void exportProcedure(Scheduler::SchedulerTask&, uint64_t);
 
 // Just add arguments as they needed. va_list doesn't work here.
-extern "C" uint64_t syscall_handler(size_t op, size_t arg1) {
+extern "C" uint64_t syscallHandler(size_t op, size_t arg1) {
 	uint64_t ret = 0;
 	PID pid = running[whoami()];
 	Scheduler::SchedulerTask& stask = getTask(pid);
