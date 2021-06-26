@@ -25,7 +25,7 @@ void initKernelPaging(MemoryMap mm) {
 	// Map the framebuffer
 	kpaging.map(0xFFFFFFFF800B8000, 0xB8000, 80*25*2, Paging::MapFlag::NX);
 
-	// Map the kernel and the modules
+	// Map everything
 	for(auto const& x : mm) {
 		if(x.type == STIVALE2_MMAP_USABLE || x.type == STIVALE2_MMAP_BOOTLOADER_RECLAIMABLE) {
 			kpaging.map(x.base, x.base, x.length, Paging::MapFlag::NX);

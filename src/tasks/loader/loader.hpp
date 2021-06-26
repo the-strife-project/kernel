@@ -17,7 +17,6 @@ namespace Loader {
 		{}
 	};
 
-	void startELFParser();
 	LoaderInfo load(const PrivList<Parser::Mapping>& mappings);
 };
 

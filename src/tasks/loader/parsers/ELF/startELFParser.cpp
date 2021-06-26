@@ -6,10 +6,10 @@
 
 size_t ELF_PID;
 
-void Loader::startELFParser() {
+void startELFParser() {
 	USU usu(stivale2Modules::elf_beg, stivale2Modules::elf_end);
 	usu.parse();
-	LoaderInfo load = Loader::load(usu.mappings);
+	Loader::LoaderInfo load = Loader::load(usu.mappings);
 
 	Task* task = (Task*)PMM::calloc();
 	*task = Task(load, load.base + usu.entrypoint);

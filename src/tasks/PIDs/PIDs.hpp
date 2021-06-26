@@ -3,6 +3,8 @@
 
 #include <tasks/scheduler/scheduler.hpp>
 
+extern "C" size_t givenPIDs;
+
 Scheduler::SchedulerTask& getTask(PID pid);
 PID assignPID(const Scheduler::SchedulerTask&);
 

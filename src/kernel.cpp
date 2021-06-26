@@ -11,6 +11,7 @@
 #include <mem/stacks/stacks.hpp>
 #include <tasks/scheduler/scheduler.hpp>
 #include <CPU/SMP/SMP.hpp>
+#include <tasks/loader/parsers/ELF/ELF.hpp>
 
 __attribute__((section(".memmap"), used))
 stivale2_mmap_entry savedmemmap[PAGE_SIZE / sizeof(stivale2_mmap_entry)];
@@ -63,7 +64,10 @@ extern "C" void kmain(stivale2_struct* bootData) {
 	initScheduler();
 	enableSyscalls();
 
-	printf("Loading ELF parser... "); Loader::startELFParser(); printf("[OK]\n");
+	printf("Loading ELF parser... "); startELFParser(); printf("[OK]\n");
+
+	ELF test(0, 0);
+	test.parse();
 
 	printf("\nThat's all for now folks.");
 
