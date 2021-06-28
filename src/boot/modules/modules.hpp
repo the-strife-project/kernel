@@ -4,7 +4,7 @@
 #include <boot/bootdata.hpp>
 
 namespace stivale2Modules {
-	extern uint64_t elf_beg, elf_end;
+	extern uint64_t loader_beg, loader_end;
 
 	void save(stivale2_struct*);
 }

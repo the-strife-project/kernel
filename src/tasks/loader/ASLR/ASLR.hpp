@@ -24,6 +24,7 @@ private:
 
 public:
 	uint64_t get(size_t max_pages, bool direction, uint64_t alignment, bool doNotPanic=false);
+	void set(uint64_t addr, size_t max_pages);
 	void free(uint64_t addr);
 };
 

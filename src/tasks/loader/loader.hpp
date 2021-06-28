@@ -1,7 +1,6 @@
 #ifndef LOADER_HPP
 #define LOADER_HPP
 
-#include "parsers/parser.hpp"
 #include <mem/paging/paging.hpp>
 #include "ASLR/ASLR.hpp"
 
@@ -17,8 +16,7 @@ namespace Loader {
 		{}
 	};
 
-	void startELFParser();
-	LoaderInfo load(const PrivList<Parser::Mapping>& mappings);
+	void bootstrapLoader();
 };
 
 #endif

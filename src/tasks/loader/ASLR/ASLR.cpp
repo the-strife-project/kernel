@@ -64,6 +64,10 @@ uint64_t ASLR::get(size_t max_pages, bool direction, uint64_t alignment, bool do
 	return 0;
 }
 
+void ASLR::set(uint64_t addr, size_t max_pages) {
+	list.push_back(Node(addr, addr + max_pages*PAGE_SIZE));
+}
+
 void ASLR::free(uint64_t addr) {
 	for(auto& x : list) {
 		if(contains(x.begin, x.end, addr)) {

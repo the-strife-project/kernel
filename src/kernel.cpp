@@ -63,7 +63,7 @@ extern "C" void kmain(stivale2_struct* bootData) {
 	initScheduler();
 	enableSyscalls();
 
-	printf("Loading ELF parser... "); Loader::startELFParser(); printf("[OK]\n");
+	printf("Bootstrapping the loader... "); Loader::bootstrapLoader(); printf("[OK]\n");
 
 	printf("\nThat's all for now folks.");
 
