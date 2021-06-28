@@ -77,10 +77,8 @@ void Loader::bootstrapLoader() {
 	aslr.set(LOADER_STACK, MAX_STACK_PAGES);
 	aslr.set(LOADER_HEAP, MAX_HEAP_PAGES);
 
-	// LoaderInfo object (TEMPORAL TODO)
-	LoaderInfo loaderInfo(paging, aslr, LOADER_BASE, LOADER_HEAP, LOADER_STACK);
-
 	// Task
+	LoaderInfo loaderInfo(paging, aslr, LOADER_BASE, LOADER_HEAP, LOADER_STACK);
 	Task* task = (Task*)PMM::calloc();
 	*task = Task(loaderInfo, LOADER_BASE + entrypoint);
 
