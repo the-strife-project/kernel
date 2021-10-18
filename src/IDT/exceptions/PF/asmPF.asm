@@ -1,7 +1,7 @@
 extern catchPF
 global asmPF
 asmPF:
-	pop rsi
+	pop rdi
 	call catchPF
 	; That might return!
 	hlt

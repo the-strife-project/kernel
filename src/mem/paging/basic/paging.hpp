@@ -34,6 +34,7 @@ public:
 	void unmap(uint64_t virt);
 	uint64_t getFlags(uint64_t virt);
 	inline void load() { setCR3((uint64_t)data); }
+	void dump();
 	// TODO: destroy()
 
 	// Sign stuff (36 bits)

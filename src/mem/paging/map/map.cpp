@@ -74,6 +74,7 @@ void Paging::PageMapping::nextPTE() {
 
 	pte = (PTE*)(extend(pde->getNext() << 12));
 	pte = &pte[pt_i++];
+	*pte = PTE();
 }
 
 void Paging::PageMapping::map4K(uint64_t phys) {

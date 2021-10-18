@@ -19,7 +19,7 @@ const char* const msgs[] = {
 	"MLvector received a data type bigger than PAGE_SIZE",
 	"Unexpected interrupt",
 	"Double fault, cannot recover",
-	"Unknown page fault",
+	"Could not manage page fault",
 	"Too many cores"
 };
 

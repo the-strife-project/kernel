@@ -69,7 +69,7 @@ void Loader::bootstrapLoader() {
 
 	// Map stack (no need to map heap, it is done on demand)
 	auto stackFlags = Paging::MapFlag::USER | Paging::MapFlag::NX;
-	paging.map(LOADER_STACK, PMM::calloc(), PAGE_SIZE, stackFlags);
+	paging.map(LOADER_STACK - PAGE_SIZE, PMM::calloc(), PAGE_SIZE, stackFlags);
 
 	// ASLR object
 	ASLR aslr;
