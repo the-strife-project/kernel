@@ -27,7 +27,7 @@ extern "C" void kmain(stivale2_struct* bootData) {
 	// Move the memory map somewhere safe
 	memmap.move(savedmemmap);
 
-	// Now, save the modules (next commit)
+	// Now, save the modules
 	stivale2Modules::save(bootData);
 
 	printf("Setting descriptors... ");
@@ -55,6 +55,7 @@ extern "C" void kmain(stivale2_struct* bootData) {
 		tss.setRSP0(pubStacks[i]);
 		tss.setIST(IST_PAGE_FAULT, VMM::Public::alloc());
 		tss.setIST(IST_DOUBLE_FAULT, VMM::Public::alloc());
+		tss.setIST(IST_GENERAL_PROTECTION_FAULT, VMM::Public::alloc());
 		tss.load();
 	}
 
@@ -63,7 +64,9 @@ extern "C" void kmain(stivale2_struct* bootData) {
 	initScheduler();
 	enableSyscalls();
 
-	printf("Bootstrapping the loader... "); Loader::bootstrapLoader(); printf("[OK]\n");
+	printf("Bootstrapping the loader... ");
+	Loader::bootstrapLoader();
+	printf("[OK]\n");
 
 	printf("\nThat's all for now folks.");
 

@@ -18,15 +18,22 @@ asmSyscallHandler:
 	; At this point, the syscall is not RPC.
 	; The page table will change to a private stack soon.
 
-	; Callee-saved are not saved.
+	; Just save everything.
+	; Saving only callee-saved would leak stuff from the kernel.
+	push rbx
 	push rcx
 	push rdx
 	push rsi
 	push rdi
+	push rbp
 	push r8
 	push r9
 	push r10
 	push r11
+	push r12
+	push r13
+	push r14
+	push r15
 
 	mov ax, KDATA
 	mov ds, ax
@@ -34,7 +41,7 @@ asmSyscallHandler:
 	mov fs, ax
 	mov gs, ax
 
-	; I'm gonna use this thank you very much
+	; I'm gonna use these thank you very much
 	push rbx
 	push r12
 
@@ -63,7 +70,8 @@ asmSyscallHandler:
 	call syscallHandler
 
 returnToAsm:
-	; So we're back, get:
+	; So we're back. rax is set to returned value.
+	; Get:
 	pop rdi	; Page table
 	pop rsi	; Old stack
 
@@ -73,19 +81,27 @@ returnToAsm:
 	pop rbx
 	pop r12
 
+	push rax
 	mov ax, UDATA
 	mov ds, ax
 	mov es, ax
 	mov fs, ax
 	mov gs, ax
+	pop rax
 
+	pop r15
+	pop r14
+	pop r13
+	pop r12
 	pop r11
 	pop r10
 	pop r9
 	pop r8
+	pop rbp
 	pop rdi
 	pop rsi
 	pop rdx
 	pop rcx
+	pop rbx
 
 	o64 sysret

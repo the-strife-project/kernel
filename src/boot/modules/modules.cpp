@@ -7,19 +7,31 @@
 
 uint64_t stivale2Modules::loader_beg = 0;
 uint64_t stivale2Modules::loader_end = 0;
+uint64_t stivale2Modules::stdlib_beg = 0;
+uint64_t stivale2Modules::stdlib_end = 0;
 
-#define MODULE_ID_LOADER 0
+enum {
+	MODULE_ID_LOADER,
+	MODULE_ID_STDLIB
+};
 
 void stivale2Modules::save(stivale2_struct* bootData) {
 	auto* modules = (stivale2_struct_tag_modules*)stivale2_get_tag(bootData, STIVALE2_STRUCT_TAG_MODULES_ID);
 
-	stivale2_module* current = modules->modules;
-	uint64_t count = modules->module_count;
-	while(count--) {
-		switch(current->string[0] - '0') {
+	stivale2_module* arr = modules->modules;
+	size_t count = modules->module_count;
+	for(size_t i=0; i<count; ++i) {
+		size_t begin = arr[i].begin + HIGHER_HALF;
+		size_t end = arr[i].end + HIGHER_HALF;
+
+		switch(arr[i].string[0] - '0') {
 		case MODULE_ID_LOADER:
-			loader_beg = current->begin + HIGHER_HALF;
-			loader_end = current->end + HIGHER_HALF;
+			loader_beg = begin;
+			loader_end = end;
+			break;
+		case MODULE_ID_STDLIB:
+			stdlib_beg = begin;
+			stdlib_end = end;
 			break;
 		}
 	}

@@ -8,9 +8,9 @@ void Task::mapGeneralTask(Paging p) {
 	p.map((uint64_t)generalTask, PMM::calloc(), PAGE_SIZE, Paging::MapFlag::NX);
 }
 
-void Task::moreHeap(size_t npages) {
+uint64_t Task::moreHeap(size_t npages) {
 	if(npages == 0)
-		return;
+		return heapBottom;
 
 	size_t sz = npages * PAGE_SIZE;
 
@@ -23,7 +23,10 @@ void Task::moreHeap(size_t npages) {
 	// Map
 	uint64_t flags = Paging::MapFlag::NX | Paging::MapFlag::USER;
 	paging.map(heapBottom, PMM::calloc(), sz, flags);
+
+	uint64_t ret = heapBottom;
 	heapBottom += sz;
+	return ret;
 }
 
 // TODO void Task::moreStack() {}

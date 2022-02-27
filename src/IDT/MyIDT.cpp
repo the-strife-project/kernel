@@ -34,6 +34,12 @@ void initIDT() {
 	pf.ist = IST_PAGE_FAULT;
 	idt.set(IDTException::PAGE_FAULT, pf);
 
+	IDT::CoolDescriptor gpf;
+	gpf.setPresent();
+	gpf.offset = (uint64_t)&asmGPF;
+	gpf.ist = IST_GENERAL_PROTECTION_FAULT;
+	idt.set(IDTException::GENERAL_PROTECTION_FAULT, gpf);
+
 	idt.load();
 }
 

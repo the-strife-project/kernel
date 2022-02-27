@@ -20,7 +20,8 @@ const char* const msgs[] = {
 	"Unexpected interrupt",
 	"Double fault, cannot recover",
 	"Could not manage page fault",
-	"Too many cores"
+	"Too many cores",
+	"General Protection Fault"
 };
 
 void panic(size_t id, bool doNotHalt) {

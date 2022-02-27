@@ -17,6 +17,46 @@
 
 PID LOADER_PID;
 
+void howManyPages(size_t size, size_t& npages, size_t& lastpagesz) {
+	npages = size / PAGE_SIZE;
+	lastpagesz = size % PAGE_SIZE;
+	if(lastpagesz)
+		++npages;
+	else
+		lastpagesz = PAGE_SIZE;
+}
+
+void _mapInLoader(Paging paging, uint64_t begin, size_t npages, size_t lastpagesz, uint64_t where) {
+	Paging::PageMapping map(paging, where);
+	map.setUser();
+
+	// Copy all pages but the last one
+	while(--npages) {
+		uint64_t page = PMM::alloc();	// No need to calloc() here.
+		memcpy((void*)page, (void*)begin, PAGE_SIZE);
+		map.map4K(page);
+		begin += PAGE_SIZE;
+	}
+
+	// Last page
+	uint64_t page = PMM::calloc();
+	memcpy((void*)page, (void*)begin, lastpagesz);
+	map.map4K(page);
+}
+
+uint64_t mapInLoader(Paging paging, uint64_t begin, size_t size, ASLR& aslr, uint64_t where=0) {
+	size_t npages, lastpagesz;
+	howManyPages(size, npages, lastpagesz);
+
+	if(!where)
+		where = aslr.get(npages, GROWS_DOWNWARD, PAGE_SIZE);
+	else
+		aslr.set(where, npages);
+
+	_mapInLoader(paging, begin, npages, lastpagesz, where);
+	return where;
+}
+
 void Loader::bootstrapLoader() {
 	uint64_t rawbegin = stivale2Modules::loader_beg;
 	uint64_t rawend = stivale2Modules::loader_end;
@@ -36,51 +76,37 @@ void Loader::bootstrapLoader() {
 	uint64_t size = rawend - begin;
 
 
-	// --- Paging object ---
+	// Paging object
 	Paging paging;
 	paging.setData((Paging::PML4E*)PMM::calloc());
-	// Add the kernel global entry (last PML4E), in case the TLB gets cleared
+	// Add the kernel global entry (last PML4E), in case the TLB gets flushed
 	paging.getData()[PAGE_ENTRIES - 1] = kpaging.getData()[PAGE_ENTRIES - 1];
 
+	// ASLR object
+	ASLR aslr;
 
-	// --- Mapping ---
-	Paging::PageMapping map(paging, LOADER_BASE);
-	map.setUser();
-	size_t npages = size / PAGE_SIZE;
-	size_t lastpagesz = size % PAGE_SIZE;
-	if(lastpagesz)
-		++npages;
-	else
-		lastpagesz = PAGE_SIZE;
-
-	// --- Copy executable pages ---
-	// Copy all pages but the last one
-	uint64_t orig = rawbegin + sizeof(Header);
-	while(--npages) {
-		uint64_t page = PMM::alloc();	// No need to calloc() here.
-		memcpy((void*)page, (void*)orig, PAGE_SIZE);
-		map.map4K(page);
-		orig += PAGE_SIZE;
-	}
-	// Last page
-	uint64_t page = PMM::calloc();
-	memcpy((void*)page, (void*)orig, lastpagesz);
-	map.map4K(page);
+	// Map program
+	mapInLoader(paging, begin, size, aslr, LOADER_BASE);
 
 	// Map stack (no need to map heap, it is done on demand)
 	auto stackFlags = Paging::MapFlag::USER | Paging::MapFlag::NX;
 	paging.map(LOADER_STACK - PAGE_SIZE, PMM::calloc(), PAGE_SIZE, stackFlags);
-
-	// ASLR object
-	ASLR aslr;
-	aslr.set(LOADER_BASE, npages);
 	aslr.set(LOADER_STACK, MAX_STACK_PAGES);
 	aslr.set(LOADER_HEAP, MAX_HEAP_PAGES);
+
+	// Mount the stdlib, first thing the loader has to parse
+	begin = stivale2Modules::stdlib_beg;
+	size = stivale2Modules::stdlib_end - begin;
+	uint64_t stdlib = mapInLoader(paging, begin, size, aslr);
 
 	// Task
 	LoaderInfo loaderInfo(paging, aslr, LOADER_BASE, LOADER_HEAP, LOADER_STACK);
 	Task* task = (Task*)PMM::calloc();
 	*task = Task(loaderInfo, LOADER_BASE + entrypoint);
+
+	// Parameters
+	task->getRegs().rdi = stdlib;
+	task->getRegs().rsi = size;
 
 	Scheduler::SchedulerTask schedTask;
 	schedTask.paging = paging;

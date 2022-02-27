@@ -23,7 +23,7 @@ extern "C" uint64_t syscallHandler(size_t op, size_t arg1) {
 		hlt();
 		break;
 	case Syscalls::MORE_HEAP:
-		stask.task->moreHeap(arg1);
+		ret = stask.task->moreHeap(arg1);
 		break;
 	case Syscalls::EXPORT:
 		exportProcedure(stask, arg1);

@@ -26,7 +26,7 @@ public:
 	Task() = default;
 	inline Task(const Loader::LoaderInfo& load, uint64_t entry)
 		: paging(load.paging), rip(entry), rsp(load.stack),
-		  heapBottom(load.heap + PAGE_SIZE), stackTop(load.stack & ~0xFFF),
+		  heapBottom(load.heap), stackTop(load.stack & ~0xFFF),
 		  prog(load.base), heap(load.heap), stack(load.stack),
 		  maxHeapBottom(load.heap + MAX_HEAP_PAGES*PAGE_SIZE),
 		  maxStackTop(load.stack - MAX_STACK_PAGES*PAGE_SIZE),
@@ -34,12 +34,13 @@ public:
 	{ mapGeneralTask(load.paging); }
 
 	inline Paging getPaging() { return paging; }
-	void moreHeap(size_t npages);
+	uint64_t moreHeap(size_t npages);
 	void moreStack();
 	void freeStack();
 	inline ASLR& getASLR() { return aslr; }
 	void dispatchSaving();
 	void dispatch();
+	inline GeneralRegisters& getRegs() { return regs; }
 };
 
 #endif

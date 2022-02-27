@@ -3,5 +3,6 @@
 
 #define IST_PAGE_FAULT 1
 #define IST_DOUBLE_FAULT 2
+#define IST_GENERAL_PROTECTION_FAULT 3
 
 #endif
