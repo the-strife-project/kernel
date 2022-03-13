@@ -5,7 +5,7 @@ static uint64_t _gdt[32];	// Just a random number, enough to fit all TSSs
 static GDT gdt;
 
 void initGDT() {
-	gdt.setGDT(_gdt);
+	gdt.setGDT((GDT::LameDescriptor*)_gdt); // TODO: strict aliasing violation
 
 	// Null descriptor
 	GDT::CoolDescriptor nulldesc;

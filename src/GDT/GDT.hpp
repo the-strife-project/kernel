@@ -22,7 +22,7 @@
 */
 
 class GDT {
-private:
+public:
 	struct LameDescriptor {
 		uint16_t limit_lo16;
 		uint16_t base_lo16;
@@ -41,6 +41,7 @@ private:
 		uint32_t zero = 0;
 	} __attribute__((packed));
 
+private:
 	LameDescriptor* gdt;
 	size_t ctr = 0;
 
@@ -74,7 +75,7 @@ public:
 		LameTSSDescriptor getLame() const;
 	};
 
-	inline void setGDT(uint64_t* x) { gdt = (LameDescriptor*)x; }
+	inline void setGDT(LameDescriptor* x) { gdt = x; }
 	void addDescriptor(CoolDescriptor);
 	void addTSS(CoolTSSDescriptor);
 	void load();

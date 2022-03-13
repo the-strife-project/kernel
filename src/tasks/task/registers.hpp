@@ -49,4 +49,13 @@ struct RFLAGS {
 
 #define BASIC_RFLAGS ((1 << RFLAGS::MBO) | (1 << RFLAGS::IF))
 
+// Saved state from a process on syscall (in the stack, go read asmhandler)
+struct SavedState {
+	uint64_t rflags = BASIC_RFLAGS;
+	GeneralRegisters regs;
+} __attribute__((packed));
+
+// One SavedState pointer per CPU
+extern "C" SavedState* savedState[PAGE_SIZE / sizeof(SavedState*)];
+
 #endif

@@ -21,8 +21,8 @@ void initAllocators() {
 	for(size_t i=0; i<N_ALLOCATORS; ++i) {
 		Allocator pub(16 << i, VMM::Public::alloc, VMM::Public::free);
 		Allocator priv(16 << i, VMM::Private::alloc, VMM::Private::free);
-		*((Allocator*)(&pubAllocators[i])) = pub;
-		*((Allocator*)(&privAllocators[i])) = priv;
+		pubAllocators[i] = pub;
+		privAllocators[i] = priv;
 	}
 }
 

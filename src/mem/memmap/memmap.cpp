@@ -3,6 +3,7 @@
 #include <klibc/klibc.hpp>
 
 MemoryMap::MemoryMap(stivale2_struct* bootData) {
+	// TODO strict aliasing violation?
 	auto* tag = (stivale2_struct_tag_memmap*)stivale2_get_tag(bootData, STIVALE2_STRUCT_TAG_MEMMAP_ID);
 
 	if(!tag)

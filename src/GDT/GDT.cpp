@@ -27,7 +27,7 @@ void GDT::addDescriptor(GDT::CoolDescriptor cool) {
 }
 
 void GDT::addTSS(GDT::CoolTSSDescriptor cool) {
-	// This is just awful
+	// TODO strict aliasing violation
 	LameTSSDescriptor lame(cool.getLame());
 	gdt[ctr++] = *((GDT::LameDescriptor*)&lame);
 	gdt[ctr++] = *((GDT::LameDescriptor*)&lame + 1);

@@ -18,7 +18,7 @@ void Paging::dump() {
 
 void bigDump(BigPaging* big, size_t base, size_t ctr) {
 	for(size_t i=0; i<PAGE_ENTRIES; ++i) {
-		BigPaging* cur = (BigPaging*)&(big[i]);
+		BigPaging* cur = &big[i];
 		if(!cur->isPresent()) continue;
 
 		size_t mult = PAGE_SIZE;
@@ -38,16 +38,19 @@ void bigDump(BigPaging* big, size_t base, size_t ctr) {
 
 		printf("\n");
 
+		// TODO strict aliasing violation?
 		BigPaging* next = (BigPaging*)Paging::extend(cur->getNext() << 12);
 		if(ctr)
 			bigDump(next, begin, ctr-1);
 		else
 			ptDump((Paging::PDE*)next, base);
+		// ↑ TODO strict aliasing violation
 	}
 }
 
 void ptDump(Paging::PDE* pde, size_t base) {
 	for(size_t i=0; i<PAGE_ENTRIES; ++i) {
+		// TODO strict aliasing violation
 		Paging::PTE* pte = (Paging::PTE*)&(pde[i]);
 		if(!pte->isPresent()) continue;
 

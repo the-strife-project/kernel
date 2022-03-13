@@ -105,8 +105,8 @@ void Loader::bootstrapLoader() {
 	*task = Task(loaderInfo, LOADER_BASE + entrypoint);
 
 	// Parameters
-	task->getRegs().rdi = stdlib;
-	task->getRegs().rsi = size;
+	task->getState().regs.rdi = stdlib;
+	task->getState().regs.rsi = size;
 
 	Scheduler::SchedulerTask schedTask;
 	schedTask.paging = paging;
@@ -117,8 +117,6 @@ void Loader::bootstrapLoader() {
 
 	// Run!
 	running[whoami()] = LOADER_PID;
-	bochs();
 	schedTask.task->dispatchSaving();
-	printf("Back from loader!");
-	while(true);
+	bochs();
 }

@@ -17,6 +17,10 @@ namespace Loader {
 	};
 
 	void bootstrapLoader();
+	void imBack(size_t err, uint64_t entry);
+
+	extern size_t last_err;
+	extern size_t last_entry;
 };
 
 #endif

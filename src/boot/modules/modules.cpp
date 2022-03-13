@@ -16,6 +16,7 @@ enum {
 };
 
 void stivale2Modules::save(stivale2_struct* bootData) {
+	// TODO strict aliasing violation?
 	auto* modules = (stivale2_struct_tag_modules*)stivale2_get_tag(bootData, STIVALE2_STRUCT_TAG_MODULES_ID);
 
 	stivale2_module* arr = modules->modules;

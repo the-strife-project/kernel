@@ -12,16 +12,7 @@
 
 #include <stdarg.h>
 #include <common.hpp>
-
-struct Syscalls {
-	enum {
-		EXIT,
-		MORE_HEAP,
-		EXPORT,
-		HALT,
-		RPC
-	};
-};
+#include <syscalls> // Header from stdlib, has "std::Syscalls" enum
 
 void enableSyscalls();
 

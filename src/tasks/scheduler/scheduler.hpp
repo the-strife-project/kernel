@@ -57,7 +57,8 @@ extern PID* running;
 void initScheduler();
 
 
-extern "C" uint64_t savedKernelState_rsp, savedKernelState_rip;
+extern "C" uint64_t savedKernelState_rsp;
+extern "C" uint64_t savedKernelState[N_CALLEE_SAVED];
 [[noreturn]] void schedule();
 
 #endif

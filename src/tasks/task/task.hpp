@@ -6,13 +6,14 @@
 #include <tasks/loader/loader.hpp>
 #include <tasks/constants.hpp>
 
+void pmemcpy(void* dst, Paging remote, void* orig, size_t n);
+
 class Task {
 private:
 	// State
 	Paging paging;
-	GeneralRegisters regs;
+	SavedState state; // regs + rflags
 	uint64_t rip, rsp;
-	uint64_t rflags = BASIC_RFLAGS;
 	uint64_t heapBottom, stackTop;
 
 	// Properties
@@ -40,7 +41,12 @@ public:
 	inline ASLR& getASLR() { return aslr; }
 	void dispatchSaving();
 	void dispatch();
-	inline GeneralRegisters& getRegs() { return regs; }
+	inline SavedState& getState() { return state; }
+	inline void putState(SavedState* ss) {
+		pmemcpy(&state, paging, ss, sizeof(SavedState));
+	}
 };
+
+extern "C" void asmRestoreKernel();
 
 #endif

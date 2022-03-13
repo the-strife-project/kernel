@@ -5,6 +5,8 @@
 
 #define PAGE_ENTRIES 512
 
+// TODO possibly many strict aliasing violations
+
 Paging::PageMapping::PageMapping(Paging paging, uint64_t virt)
 	: data(paging.data), virt(virt)
 {

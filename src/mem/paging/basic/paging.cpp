@@ -13,6 +13,8 @@ void Paging::getIndexes(uint64_t addr, uint64_t& pml4_i, uint64_t& pdp_i, uint64
 	pd_i = getPDi(addr); pt_i = getPTi(addr);
 }
 
+// TODO maybe many strict aliasing violations
+
 Paging::PTE* Paging::getPTE(uint64_t addr) {
 	uint64_t pml4_i, pdp_i, pd_i, pt_i;
 	getIndexes(addr, pml4_i, pdp_i, pd_i, pt_i);
@@ -64,8 +66,6 @@ uint64_t Paging::getPhys(uint64_t virt) {
 	pde = &pde[pd_i];
 	if(!pde->isPresent())
 		return 0;
-	else
-		return pde->getNext() << 12;
 
 	PTE* pte = (PTE*)extend(pde->getNext() << 12);
 	pte = &pte[pt_i];

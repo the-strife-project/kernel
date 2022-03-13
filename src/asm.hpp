@@ -3,6 +3,8 @@
 
 #include <common.hpp>
 
+#define N_CALLEE_SAVED 6
+
 inline void bochs() { asm volatile("xchgw %bx, %bx"); }
 
 inline uint64_t rflags_read() {
@@ -53,6 +55,7 @@ inline void sysret() {
 	asm volatile("sysretq");
 }
 
+// TODO possible strict aliasing violation
 inline uint32_t* higherHalf_uint64(uint64_t* x) { return ((uint32_t*)x) + 1; }
 inline uint64_t rdmsr(uint32_t addr) {
 	uint64_t ret;

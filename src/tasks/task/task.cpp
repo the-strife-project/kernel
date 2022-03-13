@@ -47,9 +47,9 @@ void Task::freeStack() {
 }
 
 void Task::dispatchSaving() {
-	asmDispatchSaving(rsp, rip, &regs, rflags, paging);
+	asmDispatchSaving(rsp, rip, &(state.regs), state.rflags, paging);
 }
 
 void Task::dispatch() {
-	asmDispatch(rsp, rip, &regs, rflags, paging);
+	asmDispatch(rsp, rip, &(state.regs), state.rflags, paging);
 }

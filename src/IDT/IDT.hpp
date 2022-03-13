@@ -57,6 +57,7 @@ public:
 		LameDescriptor getLame() const;
 	};
 
+	// TODO strict aliasing violation
 	inline void setIDT(FakeDescriptor* x) { idt = (LameDescriptor*)x; }
 	inline void set(uint8_t n, const CoolDescriptor& cool) { idt[n] = cool.getLame(); }
 	void load();

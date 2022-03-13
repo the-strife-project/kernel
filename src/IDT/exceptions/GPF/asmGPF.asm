@@ -3,10 +3,6 @@ global asmGPF
 
 asmGPF:
     pop rdi
-    xchg bx, bx
-    nop
-    nop
-    nop
-    nop
+    pop rsi
     call catchGPF
     hlt
