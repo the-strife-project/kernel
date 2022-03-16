@@ -9,8 +9,16 @@
 //extern "C" [[noreturn]] void returnToAsm(Paging); // <- fix
 void exportProcedure(Scheduler::SchedulerTask&, uint64_t);
 
+void onlyLoader(PID pid) {
+	if(pid != Loader::LOADER_PID) {
+		printf("Should kill here");
+		hlt();
+	}
+}
+
 // Just add arguments as they needed. va_list doesn't work here.
-extern "C" uint64_t syscallHandler(size_t op, size_t arg1, size_t arg2) {
+extern "C" uint64_t syscallHandler(size_t op, size_t arg1, size_t arg2,
+								   size_t arg3) {
 	uint64_t ret = 0;
 	PID pid = running[whoami()];
 	Scheduler::SchedulerTask& stask = getTask(pid);
@@ -19,21 +27,36 @@ extern "C" uint64_t syscallHandler(size_t op, size_t arg1, size_t arg2) {
 
 	switch(op) {
 	case std::Syscalls::EXIT:
-		printf("Should kill");
+		printf("Exit value: 0x%x\n", arg1);
 		hlt();
 		break;
 	case std::Syscalls::MORE_HEAP:
 		ret = stask.task->moreHeap(arg1);
 		break;
+	case std::Syscalls::MMAP:
+		ret = stask.task->mmap(arg1, arg2);
+		break;
+
+	// --- LOADER ONLY ---
 	case std::Syscalls::BACK_FROM_LOADER:
-		Loader::imBack(arg1, arg2);
+		onlyLoader(pid);
+		Loader::imBack(arg1, arg2, arg3);
 		// Never returns
 		hlt();
 		break;
 	case std::Syscalls::MAKE_PROCESS:
-		printf("Make process");
-		hlt();
+		onlyLoader(pid);
+		ret = Loader::makeProcess();
 		break;
+	case std::Syscalls::ASLR_GET:
+		onlyLoader(pid);
+		ret = getTask(arg1).task->getASLR().getFromID(arg2, arg3);
+		break;
+	case std::Syscalls::MAP_IN:
+		onlyLoader(pid);
+		ret = Loader::mapIn(arg1, arg2, arg3);
+		break;
+
 	/*case std::Syscalls::EXPORT:
 		exportProcedure(stask, arg1);
 		break;

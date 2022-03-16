@@ -3,9 +3,16 @@
 
 #include <boot/bootdata.hpp>
 
-namespace stivale2Modules {
-	extern uint64_t loader_beg, loader_end;
-	extern uint64_t stdlib_beg, stdlib_end;
+namespace BootModules {
+	extern uint64_t begins[];
+	extern uint64_t sizes[];
+
+	enum {
+		MODULE_ID_LOADER,
+		MODULE_ID_STDLIB,
+		MODULE_ID_TERM,
+		NMODULES
+	};
 
 	void save(stivale2_struct*);
 }

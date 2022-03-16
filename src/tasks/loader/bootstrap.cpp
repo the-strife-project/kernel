@@ -9,13 +9,13 @@
 
 #define SUS_MAGIC 0x5355537F
 // ↓ 1MB ↓
-#define LOADER_BASE (1 << 20)
+#define LOADER_BASE (1ull << 20)
 // ↓ 1GB ↓
-#define LOADER_HEAP (1 << 30)
+#define LOADER_HEAP (1ull << 30)
 // ↓ 64 GB ↓
 #define LOADER_STACK (64 * (1ull << 30))
 
-PID LOADER_PID;
+PID Loader::LOADER_PID;
 
 void howManyPages(size_t size, size_t& npages, size_t& lastpagesz) {
 	npages = size / PAGE_SIZE;
@@ -26,7 +26,7 @@ void howManyPages(size_t size, size_t& npages, size_t& lastpagesz) {
 		lastpagesz = PAGE_SIZE;
 }
 
-void _mapInLoader(Paging paging, uint64_t begin, size_t npages, size_t lastpagesz, uint64_t where) {
+static void _mapInLoader(Paging paging, uint64_t begin, size_t npages, size_t lastpagesz, uint64_t where) {
 	Paging::PageMapping map(paging, where);
 	map.setUser();
 
@@ -44,22 +44,19 @@ void _mapInLoader(Paging paging, uint64_t begin, size_t npages, size_t lastpages
 	map.map4K(page);
 }
 
-uint64_t mapInLoader(Paging paging, uint64_t begin, size_t size, ASLR& aslr, uint64_t where=0) {
+static uint64_t mapInLoader(Paging paging, uint64_t begin, size_t size, ASLR& aslr, uint64_t where) {
 	size_t npages, lastpagesz;
 	howManyPages(size, npages, lastpagesz);
-
-	if(!where)
-		where = aslr.get(npages, GROWS_DOWNWARD, PAGE_SIZE);
-	else
-		aslr.set(where, npages);
-
+	aslr.set(where, npages);
 	_mapInLoader(paging, begin, npages, lastpagesz, where);
 	return where;
 }
 
 void Loader::bootstrapLoader() {
-	uint64_t rawbegin = stivale2Modules::loader_beg;
-	uint64_t rawend = stivale2Modules::loader_end;
+	uint64_t rawbegin = BootModules::begins[BootModules::MODULE_ID_LOADER];
+	uint64_t rawsize = BootModules::sizes[BootModules::MODULE_ID_LOADER];
+	if(!rawbegin)
+		panic(Panic::NO_LOADER);
 
 	// Parse SUS executable
 	struct Header {
@@ -73,7 +70,7 @@ void Loader::bootstrapLoader() {
 
 	uint64_t entrypoint = header->entrypoint;
 	uint64_t begin = rawbegin + sizeof(Header);
-	uint64_t size = rawend - begin;
+	uint64_t size = rawsize - sizeof(Header);
 
 
 	// Paging object
@@ -95,9 +92,18 @@ void Loader::bootstrapLoader() {
 	aslr.set(LOADER_HEAP, MAX_HEAP_PAGES);
 
 	// Mount the stdlib, first thing the loader has to parse
-	begin = stivale2Modules::stdlib_beg;
-	size = stivale2Modules::stdlib_end - begin;
-	uint64_t stdlib = mapInLoader(paging, begin, size, aslr);
+	begin = BootModules::begins[BootModules::MODULE_ID_STDLIB];
+	size = BootModules::sizes[BootModules::MODULE_ID_STDLIB];
+	if(!begin)
+		panic(Panic::NO_STDLIB);
+	if(size > MAX_ELF_SIZE)
+		panic(Panic::BOOTSTRAP_ELF_TOO_BIG);
+	aslr.set(ELF_BASE, MAX_ELF_SIZE / PAGE_SIZE);
+
+	size_t npages, lastpagesz;
+	howManyPages(size, npages, lastpagesz);
+
+	_mapInLoader(paging, begin, npages, lastpagesz, ELF_BASE);
 
 	// Task
 	LoaderInfo loaderInfo(paging, aslr, LOADER_BASE, LOADER_HEAP, LOADER_STACK);
@@ -105,7 +111,7 @@ void Loader::bootstrapLoader() {
 	*task = Task(loaderInfo, LOADER_BASE + entrypoint);
 
 	// Parameters
-	task->getState().regs.rdi = stdlib;
+	task->getState().regs.rdi = ELF_BASE;
 	task->getState().regs.rsi = size;
 
 	Scheduler::SchedulerTask schedTask;
@@ -113,10 +119,15 @@ void Loader::bootstrapLoader() {
 	schedTask.task = task;
 	// General task (https://bit.ly/3xXdHUT)
 
-	LOADER_PID = assignPID(schedTask);
+	Loader::LOADER_PID = assignPID(schedTask);
 
 	// Run!
-	running[whoami()] = LOADER_PID;
+	running[whoami()] = Loader::LOADER_PID;
 	schedTask.task->dispatchSaving();
-	bochs();
+
+	// How did it go?
+	if(Loader::last_err)
+		panic(Panic::BAD_STDLIB);
+
+	Loader::freeELF();
 }

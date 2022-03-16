@@ -17,10 +17,23 @@ namespace Loader {
 	};
 
 	void bootstrapLoader();
-	void imBack(size_t err, uint64_t entry);
+	void imBack(PID pid, size_t err, uint64_t entry);
 
+	extern size_t last_pid;
 	extern size_t last_err;
 	extern size_t last_entry;
+
+	// Place where ELFs are loaded in the loader
+	const uint64_t ELF_BASE = 128 * (1ull << 30);
+	// Max ELF size
+	const uint64_t MAX_ELF_SIZE = 1ull << 30;
+
+	extern PID LOADER_PID;
+	void freeELF();
+	bool mapELF(uint64_t elf, size_t sz, bool doNotPanic=false);
+
+	PID makeProcess();
+	bool mapIn(PID pid, uint64_t local, uint64_t remote);
 };
 
 #endif

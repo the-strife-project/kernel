@@ -40,7 +40,7 @@ asmSyscallHandler:
     push rcx
     push rbx
     push rax ; No need to keep it since it will contain return value, but for completion
-    pushfq
+    pushfq ; TODO: not really, flags are @ r11
 
     mov ax, KDATA
     mov ds, ax

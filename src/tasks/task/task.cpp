@@ -1,4 +1,5 @@
 #include "task.hpp"
+#include <CPU/SMP/SMP.hpp>
 
 extern "C" void asmDispatchSaving(uint64_t rsp, uint64_t rip, GeneralRegisters*, uint64_t rflags, Paging);
 extern "C" void asmDispatch(uint64_t rsp, uint64_t rip, GeneralRegisters*, uint64_t rflags, Paging);
@@ -52,4 +53,14 @@ void Task::dispatchSaving() {
 
 void Task::dispatch() {
 	asmDispatch(rsp, rip, &(state.regs), state.rflags, paging);
+}
+
+void Task::saveStateSyscall() {
+	// Three things: SavedState (regs + rflags), rip, rsp
+	pmemcpy(&state, paging, savedState[whoami()], sizeof(SavedState));
+	rip = getState().regs.rcx; // On syscall, rcx=rip
+	// The stack before syscall is as follows (go read asmhandler.asm)
+	uint64_t newrsp = (uint64_t)savedState[whoami()];
+	newrsp += sizeof(SavedState);
+	rsp = newrsp;
 }

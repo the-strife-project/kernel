@@ -21,7 +21,12 @@ const char* const msgs[] = {
 	"Double fault, cannot recover",
 	"Could not manage page fault",
 	"Too many cores",
-	"General Protection Fault"
+	"General Protection Fault",
+	"No stdlib",
+	"Error parsing stdlib",
+	"Bootstrap ELF not found",
+	"Bootstrap ELF is too big (>1GB)",
+	"Error parsing bootstrap ELF"
 };
 
 void panic(size_t id, bool doNotHalt) {

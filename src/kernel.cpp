@@ -11,6 +11,8 @@
 #include <mem/stacks/stacks.hpp>
 #include <tasks/scheduler/scheduler.hpp>
 #include <CPU/SMP/SMP.hpp>
+#include <bootstrap/bootstrap.hpp>
+#include <tasks/PIDs/PIDs.hpp>
 
 __attribute__((section(".memmap"), used))
 stivale2_mmap_entry savedmemmap[PAGE_SIZE / sizeof(stivale2_mmap_entry)];
@@ -28,7 +30,7 @@ extern "C" void kmain(stivale2_struct* bootData) {
 	memmap.move(savedmemmap);
 
 	// Now, save the modules
-	stivale2Modules::save(bootData);
+	BootModules::save(bootData);
 
 	printf("Setting descriptors... ");
 	initGDT();
@@ -58,7 +60,6 @@ extern "C" void kmain(stivale2_struct* bootData) {
 		tss.setIST(IST_GENERAL_PROTECTION_FAULT, VMM::Public::alloc());
 		tss.load();
 	}
-
 	printf("[OK]\n");
 
 	initScheduler();
@@ -68,7 +69,13 @@ extern "C" void kmain(stivale2_struct* bootData) {
 	Loader::bootstrapLoader();
 	printf("[OK]\n");
 
-	printf("\nThat's all for now folks.");
+	// Now it's time to set up the userspace
+	printf("\n - Bootstrapping userspace - \n");
+	Bootstrap::term();
 
+	running[whoami()] = 2;
+	getTask(2).task->dispatch();
+
+	printf("\nThat's all for now folks!\n");
 	hlt(); while(true);
 }

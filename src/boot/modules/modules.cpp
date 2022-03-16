@@ -5,17 +5,10 @@
 #include <panic/panic.hpp>
 #include <mem/paging/paging.hpp>
 
-uint64_t stivale2Modules::loader_beg = 0;
-uint64_t stivale2Modules::loader_end = 0;
-uint64_t stivale2Modules::stdlib_beg = 0;
-uint64_t stivale2Modules::stdlib_end = 0;
+uint64_t BootModules::begins[BootModules::NMODULES];
+uint64_t BootModules::sizes[BootModules::NMODULES];
 
-enum {
-	MODULE_ID_LOADER,
-	MODULE_ID_STDLIB
-};
-
-void stivale2Modules::save(stivale2_struct* bootData) {
+void BootModules::save(stivale2_struct* bootData) {
 	// TODO strict aliasing violation?
 	auto* modules = (stivale2_struct_tag_modules*)stivale2_get_tag(bootData, STIVALE2_STRUCT_TAG_MODULES_ID);
 
@@ -24,18 +17,12 @@ void stivale2Modules::save(stivale2_struct* bootData) {
 	for(size_t i=0; i<count; ++i) {
 		size_t begin = arr[i].begin + HIGHER_HALF;
 		size_t end = arr[i].end + HIGHER_HALF;
+		size_t sz = end - begin;
 
-		switch(arr[i].string[0] - '0') {
-		case MODULE_ID_LOADER:
-			loader_beg = begin;
-			loader_end = end;
-			break;
-		case MODULE_ID_STDLIB:
-			stdlib_beg = begin;
-			stdlib_end = end;
-			break;
+		size_t code = arr[i].string[0] - '0'; // ugly atoi()
+		if(code <= NMODULES) {
+			begins[code] = begin;
+			sizes[code] = sz;
 		}
 	}
-
-	if(!loader_beg) panic(Panic::NO_LOADER);
 }

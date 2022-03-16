@@ -42,9 +42,11 @@ public:
 	void dispatchSaving();
 	void dispatch();
 	inline SavedState& getState() { return state; }
-	inline void putState(SavedState* ss) {
-		pmemcpy(&state, paging, ss, sizeof(SavedState));
-	}
+	void saveStateSyscall();
+
+	inline void jump(uint64_t addr) { rip = addr; }
+
+	uint64_t mmap(size_t npages, size_t prot);
 };
 
 extern "C" void asmRestoreKernel();
