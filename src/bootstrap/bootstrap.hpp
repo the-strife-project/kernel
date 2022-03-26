@@ -13,7 +13,8 @@
 #include <tasks/task/task.hpp>
 
 namespace Bootstrap {
-	void term();
+	PID run(const char* name, size_t moduleID);
+	void bootstrap();
 };
 
 #endif

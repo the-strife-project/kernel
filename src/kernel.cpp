@@ -71,8 +71,9 @@ extern "C" void kmain(stivale2_struct* bootData) {
 
 	// Now it's time to set up the userspace
 	printf("\n - Bootstrapping userspace - \n");
-	Bootstrap::term();
+	Bootstrap::bootstrap();
 
+	// Temporal: run term
 	running[whoami()] = 2;
 	getTask(2).task->dispatch();
 
