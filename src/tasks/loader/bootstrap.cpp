@@ -126,8 +126,11 @@ void Loader::bootstrapLoader() {
 	schedTask.task->dispatchSaving();
 
 	// How did it go?
-	if(Loader::last_err)
-		panic(Panic::BAD_STDLIB);
+	if(Loader::last_err) {
+		panic(Panic::BAD_STDLIB, DO_NOT_PANIC);
+		printf("Loader error: 0x%x\n", Loader::last_err);
+		hlt();
+	}
 
 	Loader::freeELF();
 }

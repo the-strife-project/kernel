@@ -111,11 +111,12 @@ void Paging::map(uint64_t virt, uint64_t phys, uint64_t size, uint64_t flags) {
 
 	while(size) {
 		// Can we map 2M?
-		if(size >= TWOMEGS && getPTi(virt) == 0) {
+		// (This is scary and I don't want to use it)
+		/*if(size >= TWOMEGS && getPTi(virt) == 0) {
 			mapping.map2M(phys);
 			virt += TWOMEGS; phys += TWOMEGS; size -= TWOMEGS;
 			continue;
-		}
+		}*/
 
 		// Just map 4K
 		mapping.map4K(phys);

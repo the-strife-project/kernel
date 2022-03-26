@@ -26,6 +26,7 @@ extern "C" uint64_t syscallHandler(size_t op, size_t arg1, size_t arg2,
 	bool goBack = true;
 
 	switch(op) {
+	// --- GENERIC ---
 	case std::Syscalls::EXIT:
 		printf("Exit value: 0x%x\n", arg1);
 		hlt();
@@ -57,6 +58,7 @@ extern "C" uint64_t syscallHandler(size_t op, size_t arg1, size_t arg2,
 		ret = Loader::mapIn(arg1, arg2, arg3);
 		break;
 
+	// --- IPC ---
 	/*case std::Syscalls::EXPORT:
 		exportProcedure(stask, arg1);
 		break;

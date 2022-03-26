@@ -40,6 +40,12 @@ void initIDT() {
 	gpf.ist = IST_GENERAL_PROTECTION_FAULT;
 	idt.set(IDTException::GENERAL_PROTECTION_FAULT, gpf);
 
+	IDT::CoolDescriptor ud;
+	ud.setPresent();
+	ud.offset = (uint64_t)&asmUD;
+	ud.ist = IST_GENERAL_PROTECTION_FAULT; // Recycling time
+	idt.set(IDTException::INVALID_OPCODE, ud);
+
 	idt.load();
 }
 

@@ -13,17 +13,20 @@ uint64_t Task::moreHeap(size_t npages) {
 	if(npages == 0)
 		return heapBottom;
 
+	// TODO: check this doesn't overflow
 	size_t sz = npages * PAGE_SIZE;
 
 	// Reached the limit?
-	if((heapBottom + sz) >= maxHeapBottom) {
+	// TODO: check that this doesn't overflow
+	if((heapBottom + (npages*PAGE_SIZE)) >= maxHeapBottom) {
 		// TODO: kill
 		printf("Heap limit reached!"); hlt();
 	}
 
 	// Map
 	uint64_t flags = Paging::MapFlag::NX | Paging::MapFlag::USER;
-	paging.map(heapBottom, PMM::calloc(), sz, flags);
+	for(size_t i=0; i<npages; ++i)
+		paging.map(heapBottom+i*PAGE_SIZE, PMM::calloc(), PAGE_SIZE, flags);
 
 	uint64_t ret = heapBottom;
 	heapBottom += sz;

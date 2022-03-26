@@ -6,6 +6,9 @@
 #define PAGE_SIZE 4096
 #define PAGE_ENTRIES 512
 
+// Important point: Paging does shallow copy. You will see a lot of
+//   "Paging paging" arguments and such. It's fine. You can understand
+//   the object as an overcomplicated PML4E*, it's the only member.
 class Paging {
 public:
 	#include "pagingStructs.hpp"
