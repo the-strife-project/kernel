@@ -4,10 +4,10 @@
 extern "C" void asmDispatchSaving(uint64_t rsp, uint64_t rip, GeneralRegisters*, uint64_t rflags, Paging);
 extern "C" void asmDispatch(uint64_t rsp, uint64_t rip, GeneralRegisters*, uint64_t rflags, Paging);
 
-extern Task* generalTask;
+/*extern Task* generalTask;
 void Task::mapGeneralTask(Paging p) {
 	p.map((uint64_t)generalTask, PMM::calloc(), PAGE_SIZE, Paging::MapFlag::NX);
-}
+}*/
 
 uint64_t Task::moreHeap(size_t npages) {
 	if(npages == 0)

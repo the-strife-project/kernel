@@ -1,15 +1,20 @@
 BITS 64
 
-; All arguments are caller saved :)
 global memcpy
+global memset
+global memmove
+
+; All arguments are caller saved :)
 memcpy:
+memmove:
 	mov rcx, rdx
+    cld
 	rep movsb
 	ret
 
-global memset
 memset:
 	mov rax, rsi
 	mov rcx, rdx
+    cld
 	rep stosb
 	ret

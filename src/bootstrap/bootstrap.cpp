@@ -1,6 +1,7 @@
 #include "bootstrap.hpp"
 #include <boot/modules/modules.hpp>
 #include <tasks/PIDs/PIDs.hpp>
+#include <CPU/SMP/SMP.hpp>
 
 void Bootstrap::bootstrap() {
 	// --- TERM ---
@@ -20,6 +21,9 @@ void Bootstrap::bootstrap() {
 	term->getState().regs.rdi = fb;
 	term->getState().regs.rsi = row;
 	term->getState().regs.rdx = col;
+
+	running[whoami()] = termPID;
+	term->dispatchSaving();
 
 	//resetKernelTerm(); // TODO uncomment this soon
 }

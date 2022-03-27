@@ -21,7 +21,7 @@ private:
 	uint64_t maxHeapBottom, maxStackTop;
 	ASLR aslr;
 
-	void mapGeneralTask(Paging);
+	//void mapGeneralTask(Paging);
 
 public:
 	Task() = default;
@@ -32,7 +32,7 @@ public:
 		  maxHeapBottom(load.heap + MAX_HEAP_PAGES*PAGE_SIZE),
 		  maxStackTop(load.stack - MAX_STACK_PAGES*PAGE_SIZE),
 		  aslr(load.aslr)
-	{ mapGeneralTask(load.paging); }
+	{ /*mapGeneralTask(load.paging);*/ }
 
 	inline Paging getPaging() { return paging; }
 	uint64_t moreHeap(size_t npages);

@@ -73,10 +73,6 @@ extern "C" void kmain(stivale2_struct* bootData) {
 	printf("\n - Bootstrapping userspace - \n");
 	Bootstrap::bootstrap();
 
-	// Temporal: run term
-	running[whoami()] = 2;
-	getTask(2).task->dispatch();
-
 	printf("\nThat's all for now folks!\n");
-	hlt(); while(true);
+	//schedule();
 }

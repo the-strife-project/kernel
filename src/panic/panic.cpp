@@ -26,11 +26,18 @@ const char* const msgs[] = {
 	"Error parsing stdlib",
 	"Bootstrap ELF not found",
 	"Bootstrap ELF is too big (>1GB)",
-	"Error parsing bootstrap ELF"
+	"Error parsing bootstrap ELF",
+	"Dispatcher returned"
 };
 
 void panic(size_t id, bool doNotHalt) {
 	setColor(0x4F);
 	printf("PANIC!\n\n%s", msgs[id]);
 	if(!doNotHalt) { hlt(); while(true); }
+}
+
+[[noreturn]] void hardPanic(size_t id) {
+	panic(id);
+	hlt();
+	while(true);
 }

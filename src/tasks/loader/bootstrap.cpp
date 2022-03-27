@@ -115,7 +115,6 @@ void Loader::bootstrapLoader() {
 	task->getState().regs.rsi = size;
 
 	Scheduler::SchedulerTask schedTask;
-	schedTask.paging = paging;
 	schedTask.task = task;
 	// General task (https://bit.ly/3xXdHUT)
 

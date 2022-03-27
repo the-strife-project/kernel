@@ -29,10 +29,12 @@ struct Panic {
 		BAD_STDLIB,
 		NO_BOOTSTRAP,
 		BOOTSTRAP_ELF_TOO_BIG,
-		BAD_BOOTSTRAP
+		BAD_BOOTSTRAP,
+		DISPATCHER_RETURNED
 	};
 };
 
 void panic(size_t id, bool doNotHalt=false);
+[[noreturn]] void hardPanic(size_t id); // Just doNotHalt=false
 
 #endif

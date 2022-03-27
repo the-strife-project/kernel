@@ -37,7 +37,6 @@ PID Loader::makeProcess() {
 
 	// Create scheduler task
 	Scheduler::SchedulerTask schedTask;
-	schedTask.paging = paging;
 	schedTask.task = task;
 	PID pid = assignPID(schedTask); // SchedTask is public
 
