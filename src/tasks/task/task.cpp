@@ -36,14 +36,19 @@ uint64_t Task::moreHeap(size_t npages) {
 // TODO void Task::moreStack() {}
 
 void Task::freeStack() {
-	size_t npages = (stack - stackTop) / PAGE_SIZE;
-	++npages;	// Have to count for the initial one
+	size_t npages = stackTop & ~0xFFF;
+	npages -= stack & ~0xFFF;
+	npages /= PAGE_SIZE;
+	++npages;
 
 	auto current = stackTop & ~0xFFF;
 	while(npages--) {
 		auto phys = paging.getPhys(current);
 		paging.unmap(current);
-		PMM::free(phys);
+		// Might be some issues with offsets: stackTop might be in a non-allocated
+		//   page, which is perfectly valid. That's why there's a check below
+		if(phys)
+			PMM::free(phys);
 		current += PAGE_SIZE;
 	}
 

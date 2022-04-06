@@ -5,9 +5,7 @@
 #include <CPU/SMP/SMP.hpp>
 #include <mem/stacks/stacks.hpp>
 #include <tasks/PIDs/PIDs.hpp>
-
-//extern "C" [[noreturn]] void returnToAsm(Paging); // <- fix
-void exportProcedure(Scheduler::SchedulerTask&, uint64_t);
+#include <IPC/IPC.hpp>
 
 void onlyLoader(PID pid) {
 	if(pid != Loader::LOADER_PID) {
@@ -59,13 +57,16 @@ extern "C" uint64_t syscallHandler(size_t op, size_t arg1, size_t arg2,
 		break;
 
 	// --- IPC ---
-	/*case std::Syscalls::EXPORT:
-		exportProcedure(stask, arg1);
+	case std::Syscalls::PUBLISH:
+		ret = IPC::publish(pid, arg1);
+		break;
+	case std::Syscalls::RESOLVE:
+		ret = IPC::resolve(arg1);
 		break;
 	case std::Syscalls::HALT:
 		stask.task->freeStack();
 		goBack = false;
-		break;*/
+		break;
 	default:
 		// TODO: kill
 		printf("Unknown syscall");

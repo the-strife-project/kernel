@@ -1,6 +1,7 @@
 #include "bootstrap.hpp"
 #include <boot/modules/modules.hpp>
 #include <tasks/PIDs/PIDs.hpp>
+#include <CPU/SMP/SMP.hpp>
 
 // Common function for all critical processes
 
@@ -19,6 +20,8 @@ PID Bootstrap::run(const char* name, size_t moduleID) {
 
 	Task* loader = getTask(Loader::LOADER_PID).task;
 	loader->getState().regs.rax = sz;
+
+	running[whoami()] = Loader::LOADER_PID;
 	loader->dispatchSaving();
 
 	// Loader has finished its business
@@ -29,6 +32,8 @@ PID Bootstrap::run(const char* name, size_t moduleID) {
 		hlt();
 		while(true);
 	}
+
+	Loader::freeELF();
 
 	Task* task = getTask(Loader::last_pid).task;
 	task->jump(Loader::last_entry); // Set RIP

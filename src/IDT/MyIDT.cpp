@@ -43,8 +43,14 @@ void initIDT() {
 	IDT::CoolDescriptor ud;
 	ud.setPresent();
 	ud.offset = (uint64_t)&asmUD;
-	ud.ist = IST_GENERAL_PROTECTION_FAULT; // Recycling time
+	ud.ist = IST_GENERAL_PROTECTION_FAULT; // TODO
 	idt.set(IDTException::INVALID_OPCODE, ud);
+
+	IDT::CoolDescriptor de;
+	de.setPresent();
+	de.offset = (uint64_t)&asmDE;
+	de.ist = IST_GENERAL_PROTECTION_FAULT; // TODO
+	idt.set(IDTException::DIVISION_BY_ZERO, de);
 
 	idt.load();
 }

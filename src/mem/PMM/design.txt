@@ -1,11 +1,11 @@
 This physical memory manager sets up free regions as a queue.
 A free region has the number of pages it contains and a pointer to the next free region (FreePage).
-It can only allocate and free full pages (PAGE_SIZE bytes), and does not guarantee that consecutive allocations give consecutive pages. For this, a free list allocator has been implemented.
+It can only allocate and free full pages (PAGE_SIZE bytes), and does not guarantee that consecutive allocations will give consecutive pages. For this, a free list allocator has been implemented.
 
-When an alloc() ocurrs, the first free region is modified so that, in case it has still free pages on it, reduces its size. Either way, the pointer to the first free region is updated.
+When an alloc() ocurrs, the first free region is modified so that, in case it has still free pages on it, reduces its size. The pointer to the first free region is updated.
 
-When a dealloc() happens, the last region points to the new one, and the global pointer is updated.
+When a free() takes place, the last region points to the new one, and the global pointer is updated.
 
-This way, there's no need to do a queue of all the pages at intialization, so it's orders of magnitude faster to set up, and both alloc() and dealloc() are O(1).
+This way, there's no need to do a queue of all the pages at intialization, so it's orders of magnitude faster to set up, and both alloc() and free() are O(1).
 
 This all is possible because stivale2 guarantees that both "usable" and "bootloader reclaimable" entries are PAGE_SIZE aligned for both base and length (https://github.com/stivale/stivale/blob/master/STIVALE2.md).

@@ -6,7 +6,7 @@
 #include <tasks/loader/loader.hpp>
 #include <tasks/constants.hpp>
 
-void pmemcpy(void* dst, Paging remote, void* orig, size_t n);
+bool pmemcpy(void* dst, Paging remote, void* orig, size_t n);
 
 class Task {
 private:

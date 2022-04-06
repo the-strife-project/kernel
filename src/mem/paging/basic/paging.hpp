@@ -25,6 +25,8 @@ public:
 private:
 	PML4E* data;
 
+	// TODO: Make page table RO until necessary for safety
+
 public:
 	inline void setData(PML4E* x) { data = x; }
 	inline PML4E* getData() { return data; }

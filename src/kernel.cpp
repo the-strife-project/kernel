@@ -13,6 +13,7 @@
 #include <CPU/SMP/SMP.hpp>
 #include <bootstrap/bootstrap.hpp>
 #include <tasks/PIDs/PIDs.hpp>
+#include <IPC/IPC.hpp>
 
 __attribute__((section(".memmap"), used))
 stivale2_mmap_entry savedmemmap[PAGE_SIZE / sizeof(stivale2_mmap_entry)];
@@ -64,6 +65,7 @@ extern "C" void kmain(stivale2_struct* bootData) {
 
 	initScheduler();
 	enableSyscalls();
+	IPC::initPSNS();
 
 	printf("Bootstrapping the loader... ");
 	Loader::bootstrapLoader();

@@ -9,6 +9,7 @@ struct PFErr {
 
 extern "C" void catchPF(uint32_t err) {
 	// Some checks would go here
+	// Remember that PF in ring 0 is not necessarily bad
 
 	panic(Panic::UNKNOWN_PAGE_FAULT, true);
 	printf("\nAt: 0x%x\n", getCR2());

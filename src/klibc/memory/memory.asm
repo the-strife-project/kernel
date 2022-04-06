@@ -10,6 +10,7 @@ memmove:
 	mov rcx, rdx
     cld
 	rep movsb
+    mov rax, rdi
 	ret
 
 memset:
@@ -17,4 +18,5 @@ memset:
 	mov rcx, rdx
     cld
 	rep stosb
+    mov rax, rdi
 	ret

@@ -31,6 +31,7 @@ bool Loader::mapIn(PID pid, uint64_t local, uint64_t remote) {
 
 	rp.map(remote, phys, PAGE_SIZE, flags);
 	lp.unmap(local);
+	getTask(LOADER_PID).task->getASLR().free(local);
 
 	return true;
 }

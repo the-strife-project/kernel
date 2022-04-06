@@ -26,7 +26,10 @@ void Bootstrap::bootstrap() {
 	term->dispatchSaving();
 
 	//resetKernelTerm(); // TODO uncomment this soon
+
+	// --- PCI ---
+	PID pciPID = run("PCI", BootModules::MODULE_ID_PCI);
+	Task* pci = getTask(pciPID).task;
+	running[whoami()] = pciPID;
+	pci->dispatchSaving();
 }
-
-
-

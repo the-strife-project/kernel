@@ -2,8 +2,7 @@
 
 #include <klibc/klibc.hpp>
 
-// Last GB of virtual memory for PIDs
-static Scheduler::SchedulerTask** tasks = (Scheduler::SchedulerTask**)(0 - (1 << 30));
+static Scheduler::SchedulerTask** tasks = (Scheduler::SchedulerTask**)GLOBAL_PIDS_REGION;
 
 static size_t givenPIDs = 0;
 static Spinlock lock;
