@@ -87,4 +87,6 @@ extern "C" uint64_t savedKernelState[N_CALLEE_SAVED];
 
 [[noreturn]] void schedule();
 
+Scheduler::SchedulerTask& getMyCurrent();
+
 #endif

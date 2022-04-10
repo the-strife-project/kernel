@@ -1,5 +1,6 @@
 #include "scheduler.hpp"
 #include <tasks/PIDs/PIDs.hpp>
+#include <CPU/SMP/SMP.hpp>
 
 //Task* generalTask;
 Scheduler sched;
@@ -12,4 +13,8 @@ void initScheduler() {
 
 	// Reserve null PID
 	assignPID(Scheduler::SchedulerTask());
+}
+
+Scheduler::SchedulerTask& getMyCurrent() {
+	return getTask(running[whoami()]);
 }

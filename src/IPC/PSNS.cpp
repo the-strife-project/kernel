@@ -1,6 +1,7 @@
 #include "IPC.hpp"
 #include <tasks/PIDs/PIDs.hpp>
 #include <klibc/ht64/ht64.hpp>
+#include <kkill>
 
 static HT64 psns;
 static Spinlock lock;
@@ -14,11 +15,8 @@ void IPC::initPSNS() {
 bool IPC::publish(PID pid, uint64_t name) {
 	// TODO Did this process publish already?
 
-	if(!name) {
-		// TODO Should kill
-		printf("Should kill\n");
-		hlt();
-	}
+	if(!name)
+		getMyCurrent().task->kill(std::kkill::BAD_STRING);
 
 	lock.acquire();
 	if(psns.has(name)) {

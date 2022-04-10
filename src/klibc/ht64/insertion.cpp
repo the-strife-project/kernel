@@ -1,5 +1,6 @@
 #include "ht64.hpp"
 #include <panic/bruh.hpp>
+#include <algorithm>
 
 // Public insertion routine
 void HT64::add(uint64_t key, uint64_t val) {
@@ -37,6 +38,7 @@ void HT64::more() {
 
 	auto prevBuckets = buckets;
 	buckets += BUCKETS_PER_PAGE;
+	filledBuckets = 0;
 
 	// Make the switch
 	state = !state;
@@ -58,48 +60,29 @@ void HT64::more() {
 
 // Private insertion routine
 void HT64::insert(const BucketNode& bn) {
+	// This method can't fail, so...
+	++filledBuckets;
+
 	auto h = hash(bn.key);
 	auto origh = h;
 
-	// Is the optimal bucket free?
-	if(!data[h].key) {
-		// Yes!
-		data[h] = bn;
-		return;
-	}
-
 	// Nope. Here we go
 	BucketNode cbn = bn;
-	++h;
-	++cbn.psl;
-	while(true) {
+	bool first = true;
+	while(first || h != origh) {
 		if(!data[h].key) {
 			// Free!
 			data[h] = cbn;
 			return;
 		}
 
-		// Used. Compare PSLs
-		if(cbn.psl > data[h].psl) {
-			// Swap!
-			BucketNode aux = data[h];
-			data[h] = cbn;
-			cbn = aux;
-		}
+		if(first) first = false;
 
-		// Two passes:
-		//   First, from h to the end
-		//   Then, from the beginning to h
-		if(h == origh) {
-			// Second pass complete
-			break;
-		} else if(h == buckets) {
-			// First pass complete, start the second
+		if(cbn.psl > data[h].psl)
+			std::swap(cbn, data[h]);
+
+		if(++h == buckets)
 			h = 0;
-		} else {
-			// Go ahead
-			++h;
-		}
 
 		++cbn.psl;
 	}

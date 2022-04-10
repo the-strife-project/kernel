@@ -18,10 +18,8 @@ uint64_t Task::moreHeap(size_t npages) {
 
 	// Reached the limit?
 	// TODO: check that this doesn't overflow
-	if((heapBottom + (npages*PAGE_SIZE)) >= maxHeapBottom) {
-		// TODO: kill
-		printf("Heap limit reached!"); hlt();
-	}
+	if((heapBottom + (npages*PAGE_SIZE)) >= maxHeapBottom)
+		return 0;
 
 	// Map
 	uint64_t flags = Paging::MapFlag::NX | Paging::MapFlag::USER;

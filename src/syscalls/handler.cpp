@@ -6,12 +6,12 @@
 #include <mem/stacks/stacks.hpp>
 #include <tasks/PIDs/PIDs.hpp>
 #include <IPC/IPC.hpp>
+#include <kkill>
+#include <panic/bruh.hpp>
 
-void onlyLoader(PID pid) {
-	if(pid != Loader::LOADER_PID) {
-		printf("Should kill here");
-		hlt();
-	}
+inline static void onlyLoader(PID pid) {
+	if(pid != Loader::LOADER_PID)
+		getMyCurrent().task->kill(std::kkill::LOADER_SYSCALL);
 }
 
 // Just add arguments as they needed. va_list doesn't work here.
@@ -19,6 +19,10 @@ extern "C" uint64_t syscallHandler(size_t op, size_t arg1, size_t arg2,
 								   size_t arg3) {
 	uint64_t ret = 0;
 	PID pid = running[whoami()];
+
+	if(!pid)
+		bruh(Bruh::SYSCALL_FROM_PID_0);
+
 	Scheduler::SchedulerTask& stask = getTask(pid);
 
 	bool goBack = true;
@@ -68,10 +72,7 @@ extern "C" uint64_t syscallHandler(size_t op, size_t arg1, size_t arg2,
 		goBack = false;
 		break;
 	default:
-		// TODO: kill
-		printf("Unknown syscall");
-		hlt();
-		break;
+		getMyCurrent().task->kill(std::kkill::UNKNOWN_SYSCALL);
 	}
 
 	if(!goBack)

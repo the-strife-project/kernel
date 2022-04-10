@@ -10,7 +10,8 @@ struct Bruh {
 	enum {
 		HT64_NULL_KEY,
 		HT64_NO_SPACE,
-		HT64_FULL_ON_LOOKUP
+		HT64_FULL_ON_LOOKUP,
+		SYSCALL_FROM_PID_0
 	};
 };
 

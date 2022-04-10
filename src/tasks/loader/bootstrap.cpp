@@ -8,8 +8,12 @@
 #include <CPU/SMP/SMP.hpp>
 
 #define SUS_MAGIC 0x5355537F
-// ↓ 1MB ↓
-#define LOADER_BASE (1ull << 20)
+// I wanted loaders's base to be 1MB, but setting it statically in the ELF
+//   (and therefore in the SUS) is way more comfortable. I've had some issues
+//   with this, so I do it this way. As the SUS is a flat binary, 1MB would
+//   make the file >1MB, which increases a lot the size of the ISO. For this
+//   very reason, I set it to 4KB, which should be fine.
+#define LOADER_BASE 0
 // ↓ 1GB ↓
 #define LOADER_HEAP (1ull << 30)
 // ↓ 64 GB ↓

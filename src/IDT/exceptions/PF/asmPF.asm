@@ -1,7 +1,8 @@
 extern catchPF
 global asmPF
 asmPF:
-	pop rdi
-	call catchPF
-	; That might return!
-	hlt
+    pop rdi
+    mov rsi, rsp ; iret struct
+    call catchPF
+    ; That might return!
+    hlt

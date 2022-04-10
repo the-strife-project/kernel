@@ -7,12 +7,9 @@ const HT64::BucketNode* HT64::lookup(uint64_t key) const {
 	auto h = hash(key);
 	auto origh = h;
 
-	if(data[h].key == key)
-		return &data[h];
-	++h;
-
-	uint64_t psl = 0;
-	while(true) {
+	bool first = true;
+	size_t psl = 0;
+	while(first || h != origh) {
 		if(data[h].key == key)
 			return &data[h];
 
@@ -20,18 +17,14 @@ const HT64::BucketNode* HT64::lookup(uint64_t key) const {
 		if(!data[h].key || data[h].psl > psl)
 			return nullptr;
 
+		if(first) first = false;
+
 		// Two passes, same as insert()
-		if(h == origh) {
-			// Second pass complete
-			// This would imply that the hash table is full, which is impossible
-			bruh(Bruh::HT64_FULL_ON_LOOKUP);
-		} else if(h == buckets) {
-			// First pass complete, start the second
+		if(++h == buckets)
 			h = 0;
-		} else {
-			++h;
-		}
 
 		++psl;
 	}
+
+	bruh(Bruh::HT64_FULL_ON_LOOKUP);
 }

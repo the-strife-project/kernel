@@ -45,6 +45,7 @@ public:
 	void saveStateSyscall();
 
 	inline void jump(uint64_t addr) { rip = addr; }
+	[[noreturn]] void kill(size_t reason);
 
 	uint64_t mmap(size_t npages, size_t prot);
 };
