@@ -4,7 +4,9 @@
 void Loader::freeELF() {
 	// Go through the ELF pages in the loader process, unmapping and freeing
 	uint64_t page = ELF_BASE;
-	Paging paging = getTask(LOADER_PID).task->getPaging();
+	// Pretty sure, when this is called, that lock is already acquired
+	// Otherwise it will immediately produce a BRUH, so no biggie
+	Paging paging = getTask(LOADER_PID).get()->paging;
 
 	while(true) {
 		uint64_t phys = paging.getPhys(page);
@@ -60,7 +62,9 @@ bool Loader::mapELF(uint64_t elf, size_t sz, bool doNotPanic) {
 			panic(Panic::BOOTSTRAP_ELF_TOO_BIG);
 	}
 
-	Paging paging = getTask(Loader::LOADER_PID).task->getPaging();
+	// This comes from lock already acquired
+	auto pp = getTask(Loader::LOADER_PID);
+	Paging paging = pp.get()->paging;
 	copyELF(paging, elf, sz);
 	return true;
 }

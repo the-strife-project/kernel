@@ -4,7 +4,15 @@
 
 void MLFQ::add(PID pid) {
 	// Time to do some feedback
-	Scheduler::SchedulerTask& st = getTask(pid);
+	auto pp = getTask(pid);
+	pp.acquire();
+	if(pp.isNull()) {
+		// Whoops
+		pp.release();
+		return;
+	}
+
+	Scheduler::SchedulerTask& st = *(pp.get());
 
 	size_t prio = st.lastPrio;
 	if(st.ioBurst) {
@@ -20,6 +28,7 @@ void MLFQ::add(PID pid) {
 	// TODO: What about aging?
 
 	st.lastPrio = prio;
+	pp.release();
 	rr[prio].push(pid); // This is mutex'd
 	++approxSize;
 }

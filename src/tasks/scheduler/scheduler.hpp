@@ -4,6 +4,7 @@
 #include <tasks/task/task.hpp>
 #include "alg/MLFQ.hpp"
 #include <klibc/memory/memory.hpp>
+#include <CPU/SMP/SMP.hpp>
 
 #define NULL_PID 0
 
@@ -14,18 +15,19 @@
 	that contains the Task object for the given process.
 
 	This way, at any point, there's only one Task mapped in public memory.
-	It is NOT a global page, but the pointer is always the same.
-
-	TODO: this might not be needed, check again when the kernel is done.
+	Note that it is NOT a global page, but the pointer is always the same.
 */
-//extern Task* generalTask;
+extern "C" Task* generalTask;
 
 class Scheduler {
 public:
 	struct SchedulerTask {
+		// Used by RPC outside of paging (no access to task)
+		Paging paging;
+
 		PID parent = 0;
 
-		// Physical (private) address of the task
+		// Physical (kernel private) address of the task
 		Task* task = nullptr;
 
 		// Exported procedures (page)
@@ -42,13 +44,13 @@ public:
 
 private:
 	// Sandwich MLFQ
-	static const size_t N_SRT = 3;
+	static const size_t N_VSRT = 3;
 	static const size_t N_REGULAR = 10;
 	static const size_t N_BACKGROUND = 3;
 
 	// All of these structures are well protected by locks
-	// Soft real time threads
-	RoundRobin srt[N_SRT];
+	// Very soft real time (no deadlines, just max priority)
+	RoundRobin vsrt[N_VSRT];
 	// Regular threads
 	MLFQ regular = MLFQ(N_REGULAR);
 	// Background
@@ -57,15 +59,15 @@ private:
 public:
 	// TODO: try to assign the same CPU to a SRT process. This has nothing
 	//   to do with this scheduler, more with the currently non-existing multicore one.
-	inline void addSRT(PID pid, size_t prio) { srt[prio].push(pid); }
+	inline void addVSRT(PID pid, size_t prio) { vsrt[prio].push(pid); }
 	inline void add(PID pid) { regular.add(pid); }
 	inline void addBackground(PID pid, size_t prio) { background[prio].push(pid); }
 
 	inline PID get() {
 		PID ret;
 		// First, check SRT threads
-		for(size_t i=0; i<N_SRT; ++i)
-			if((ret = srt[i].pop()))
+		for(size_t i=0; i<N_VSRT; ++i)
+			if((ret = vsrt[i].pop()))
 				return ret;
 		// Then, regular ones
 		if((ret = regular.pop()))
@@ -79,14 +81,14 @@ public:
 };
 
 extern Scheduler sched;
-extern PID* running; // Which PID is running on each CPU
+extern "C" PID* running; // Which PID is running on each CPU
+inline void thisCoreIsNowRunning(PID pid) { running[whoami()] = pid; }
+inline PID whatIsThisCoreRunning() { return running[whoami()]; }
 void initScheduler();
 
 extern "C" uint64_t savedKernelState_rsp;
 extern "C" uint64_t savedKernelState[N_CALLEE_SAVED];
 
 [[noreturn]] void schedule();
-
-Scheduler::SchedulerTask& getMyCurrent();
 
 #endif

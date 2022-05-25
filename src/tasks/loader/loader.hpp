@@ -19,7 +19,7 @@ namespace Loader {
 	void bootstrapLoader();
 	void imBack(PID pid, size_t err, uint64_t entry);
 
-	extern size_t last_pid;
+	extern PID last_pid;
 	extern size_t last_err;
 	extern size_t last_entry;
 

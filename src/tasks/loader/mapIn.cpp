@@ -11,8 +11,16 @@ bool Loader::mapIn(PID pid, uint64_t local, uint64_t remote) {
 	remote &= ~0b111;
 
 	// Get phys from loader
-	Paging lp = getTask(LOADER_PID).task->getPaging();
-	Paging rp = getTask(pid).task->getPaging();
+	auto ppl = getTask(LOADER_PID); // Acquired already
+	Task* ltask = ppl.get()->task;
+	Paging lp = ppl.get()->paging;
+
+	auto ppr = getTask(pid);
+	ppr.acquire();
+	if(ppr.isNull())
+		return false;
+	Paging rp = ppr.get()->paging;
+
 	uint64_t phys = lp.getPhys(local);
 
 	// Just make sure it's not zero
@@ -30,8 +38,10 @@ bool Loader::mapIn(PID pid, uint64_t local, uint64_t remote) {
 	flags |= Paging::MapFlag::USER;
 
 	rp.map(remote, phys, PAGE_SIZE, flags);
+	ppr.release();
+
 	lp.unmap(local);
-	getTask(LOADER_PID).task->getASLR().free(local);
+	ltask->getASLR().free(local);
 
 	return true;
 }

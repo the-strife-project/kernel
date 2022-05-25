@@ -1,13 +1,19 @@
 #include "task.hpp"
 #include <CPU/SMP/SMP.hpp>
+#include <panic/bruh.hpp>
 
 extern "C" void asmDispatchSaving(uint64_t rsp, uint64_t rip, GeneralRegisters*, uint64_t rflags, Paging);
 extern "C" void asmDispatch(uint64_t rsp, uint64_t rip, GeneralRegisters*, uint64_t rflags, Paging);
 
-/*extern Task* generalTask;
-void Task::mapGeneralTask(Paging p) {
-	p.map((uint64_t)generalTask, PMM::calloc(), PAGE_SIZE, Paging::MapFlag::NX);
-}*/
+extern "C" Task* generalTask;
+void Task::mapGeneralTask(Paging p, uint64_t whereami) {
+	// Task is always on its own page, so that makes this easy
+	if(generalTask) {
+		// Set, so map it
+		printf("Mapping generalTask to 0x%x\n", whereami);
+		p.map((uint64_t)generalTask, whereami, PAGE_SIZE, Paging::MapFlag::NX);
+	}
+}
 
 uint64_t Task::moreHeap(size_t npages) {
 	if(npages == 0)

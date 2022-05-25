@@ -4,7 +4,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
-typedef size_t PID;
+typedef unsigned short PID;
+#define NULL_PID 0
 
 // These are verbose values for "doNotPanic" parameters
 #define DO_NOT_PANIC true

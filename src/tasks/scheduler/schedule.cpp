@@ -19,10 +19,19 @@ uint64_t savedKernelState[N_CALLEE_SAVED]; // callee-saved only
 		while(true);
 	}
 
-	// Got it
-	running[whoami()] = pid;
+	auto pp = getTask(pid);
+	pp.acquire();
+	if(pp.isNull()) {
+		// Just take it out and go for another
+		schedule();
+	}
 
-	getTask(pid).task->dispatch();
+	// Got it
+	thisCoreIsNowRunning(pid);
+	Task* task = pp.get()->task;
+	pp.release();
+
+	task->dispatch();
 	// Never returns
 
 	hardPanic(Panic::DISPATCHER_RETURNED);

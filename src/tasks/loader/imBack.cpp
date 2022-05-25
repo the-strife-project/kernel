@@ -12,10 +12,9 @@ void Loader::imBack(PID pid, size_t err, uint64_t entry) {
 	last_err = err;
 	last_entry = entry;
 
-	// Save state to task
-	Task* task = getTask(running[whoami()]).task;
-	task->saveStateSyscall();
+	// This is a syscall, so lock is acquired
+	Task* task = getTask(Loader::LOADER_PID).get()->task;
 
-	// Resume saved state from kernel
-	asmRestoreKernel();
+	// Save state to task
+	task->saveStateSyscall();
 }

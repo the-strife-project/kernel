@@ -15,6 +15,17 @@ PID Loader::makeProcess() {
 	// Gotta have some ASLR
 	ASLR aslr;
 
+	// generalTask
+	if(!generalTask) {
+		// Time to fix it
+		uint64_t val = aslr.get(1, GROWS_DOWNWARD, PAGE_SIZE, DO_PANIC);
+		generalTask = (Task*)val;
+	} else {
+		// Already set, just mark it in ASLR
+		uint64_t val = (uint64_t)generalTask;
+		aslr.set(val, 1);
+	}
+
 	// Fix a base now. MAX_ELF_SIZE (1GB) shouldn't cause a problem
 	uint64_t base = aslr.get(MAX_ELF_SIZE / PAGE_SIZE, GROWS_DOWNWARD, PAGE_SIZE, DO_PANIC);
 	aslr.setID(ASLR_BASE_ID, base);
@@ -31,13 +42,15 @@ PID Loader::makeProcess() {
 	// Create task
 	LoaderInfo info(paging, aslr, base, heap, stack);
 	Task* task = (Task*)PMM::calloc(); // Task is private
-	*task = Task(info, 0); // Second parameter, entry point, is unknown this soon
+	uint64_t entrypoint = 0; // Unknown this soon
+	*task = Task(info, entrypoint, (uint64_t)task);
 
 	// TODO: Parameters?
 
 	// Create scheduler task
 	Scheduler::SchedulerTask schedTask;
 	schedTask.task = task;
+	schedTask.paging = paging;
 	PID pid = assignPID(schedTask); // SchedTask is public
 
 	// That's it. It wasn't so hard, was it?

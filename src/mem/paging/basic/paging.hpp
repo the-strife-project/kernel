@@ -23,7 +23,7 @@ public:
 	};
 
 private:
-	PML4E* data;
+	PML4E* data = nullptr;
 
 	// TODO: Make page table RO until necessary for safety
 

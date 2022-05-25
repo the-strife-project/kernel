@@ -1,12 +1,15 @@
 #include "bootstrap.hpp"
 #include <boot/modules/modules.hpp>
 #include <tasks/PIDs/PIDs.hpp>
-#include <CPU/SMP/SMP.hpp>
+//#include <CPU/SMP/SMP.hpp>
+#include <panic/bruh.hpp>
 
 void Bootstrap::bootstrap() {
 	// --- TERM ---
 	PID termPID = run("term", BootModules::MODULE_ID_TERM);
-	Task* term = getTask(termPID).task;
+	auto pp = getTask(termPID);
+	pp.acquire();
+	Task* term = pp.get()->task;
 
 	// Map framebuffer
 	size_t fbsize = FB_ROWS * FB_COLS * 2;
@@ -22,14 +25,18 @@ void Bootstrap::bootstrap() {
 	term->getState().regs.rsi = row;
 	term->getState().regs.rdx = col;
 
-	running[whoami()] = termPID;
+	thisCoreIsNowRunning(termPID);
+	pp.release();
 	term->dispatchSaving();
 
 	//resetKernelTerm(); // TODO uncomment this soon
 
 	// --- PCI ---
 	PID pciPID = run("PCI", BootModules::MODULE_ID_PCI);
-	Task* pci = getTask(pciPID).task;
-	running[whoami()] = pciPID;
+	pp = getTask(pciPID);
+	pp.acquire();
+	Task* pci = pp.get()->task;
+	thisCoreIsNowRunning(pciPID);
+	pp.release();
 	pci->dispatchSaving();
 }

@@ -15,8 +15,11 @@ void IPC::initPSNS() {
 bool IPC::publish(PID pid, uint64_t name) {
 	// TODO Did this process publish already?
 
-	if(!name)
-		getMyCurrent().task->kill(std::kkill::BAD_STRING);
+	if(!name) {
+		// Since this is a syscall, lock has been acquired
+		auto pp = getTask(whatIsThisCoreRunning());
+		pp.get()->task->kill(std::kkill::BAD_STRING);
+	}
 
 	lock.acquire();
 	if(psns.has(name)) {

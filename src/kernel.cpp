@@ -45,13 +45,12 @@ extern "C" void kmain(stivale2_struct* bootData) {
 	initAllocators();
 
 	ncores = 1;
-	if(ncores > 512)
+	if(ncores > MAX_CORES)
 		panic(Panic::TOO_MANY_CORES);
 
 	prepareStacks(ncores);
 	printf("[OK]\n");
 
-	printf("Setting up TSS... ");
 	for(size_t i=0; i<ncores; ++i) {
 		// This possibly isn't done like this in SMP. Just a stub
 		TSS tss = newTSS();
@@ -61,7 +60,6 @@ extern "C" void kmain(stivale2_struct* bootData) {
 		tss.setIST(IST_GENERAL_PROTECTION_FAULT, VMM::Public::alloc());
 		tss.load();
 	}
-	printf("[OK]\n");
 
 	initScheduler();
 	enableSyscalls();
@@ -74,6 +72,8 @@ extern "C" void kmain(stivale2_struct* bootData) {
 	// Now it's time to set up the userspace
 	printf("\n - Bootstrapping userspace - \n");
 	Bootstrap::bootstrap();
+
+	// Bootstrapping is done. Time to fire up the rest of the cores.
 
 	printf("\nThat's all for now folks!\n");
 	//schedule();

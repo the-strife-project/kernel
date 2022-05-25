@@ -2,19 +2,19 @@
 #include <tasks/PIDs/PIDs.hpp>
 #include <CPU/SMP/SMP.hpp>
 
-//Task* generalTask;
+Task* generalTask;
 Scheduler sched;
 PID* running;	// Which PID is running each CPU
 
 void initScheduler() {
-	//generalTask = (Task*)(HIGHER_HALF + PMM::calloc());
+	// generalTask starts as nullptr
+	// It will be set in makeProcess.cpp when building "term"
+	generalTask = nullptr;
+
 	sched = Scheduler();
-	running = (PID*)VMM::Private::calloc();
+	// This must be public memory, it's changed in RPC
+	running = (PID*)VMM::Public::calloc();
 
 	// Reserve null PID
 	assignPID(Scheduler::SchedulerTask());
-}
-
-Scheduler::SchedulerTask& getMyCurrent() {
-	return getTask(running[whoami()]);
 }

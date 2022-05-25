@@ -8,6 +8,9 @@ namespace IPC {
 	void initPSNS();
 	bool publish(PID pid, uint64_t name);
 	PID resolve(uint64_t name);
+
+	// Extra
+	uint64_t rpcMoreStacks(PID remote);
 };
 
 #endif

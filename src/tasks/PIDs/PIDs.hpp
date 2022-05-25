@@ -3,7 +3,7 @@
 
 #include <tasks/scheduler/scheduler.hpp>
 
-Scheduler::SchedulerTask& getTask(PID pid);
+ProtPtr<Scheduler::SchedulerTask> getTask(PID pid);
 PID assignPID(const Scheduler::SchedulerTask&);
 
 #endif

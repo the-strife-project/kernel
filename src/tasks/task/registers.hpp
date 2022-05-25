@@ -51,6 +51,7 @@ struct RFLAGS {
 
 // Saved state from a process on syscall (in the stack, go read asmhandler)
 struct SavedState {
+	uint64_t segment = 0;
 	uint64_t rflags = BASIC_RFLAGS;
 	GeneralRegisters regs;
 } __attribute__((packed));

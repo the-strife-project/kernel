@@ -2,6 +2,8 @@
 #include <panic/panic.hpp>
 #include <tasks/scheduler/scheduler.hpp>
 #include <kkill>
+#include <tasks/PIDs/PIDs.hpp>
+#include "../exceptions.hpp"
 
 struct PFErr {
 	enum {
@@ -9,8 +11,21 @@ struct PFErr {
 	};
 };
 
-#include <CPU/SMP/SMP.hpp>
-extern "C" void catchPF(size_t err, uint64_t iretqs) {
+extern "C" void catchPF(size_t err, uint64_t iretqs, size_t rax) {
+	// First check: caused by user, at lower half, in kernel-only
+	if(err & (1 << PFErr::U)) { // Caused by user
+		if(!(getCR2() >> 63)) { // Lower half
+			if(err & (1 << PFErr::P)) { // Page protection
+				if(!(getCR2() & 0xFFF)) { // Fault at page beginning
+					// That's rpcReturn!
+					asm volatile("mov %%rbp, %%rdi\n"
+								 "mov %%cr2, %%rsp\n"
+								 "jmp rpcReturn"
+								 :: "d" (rax));
+				}
+			}
+		}
+	}
 	// Some checks would go here
 	// Remember that PF in ring 0 is not necessarily bad
 
@@ -42,8 +57,12 @@ extern "C" void catchPF(size_t err, uint64_t iretqs) {
 	// Time to return to the kernel
 	kpaging.load();
 
-	if(err & (1 << PFErr::U))
-		getMyCurrent().task->kill(std::kkill::SEGFAULT);
+	// TODO This check would need to be at the top of the function.
+	if(err & (1 << PFErr::U)) {
+		// PF from userspace. No biggie.
+		// Assume segfault by now.
+		exceptionKill(std::kkill::SEGFAULT);
+	}
 
 	hlt();
 }

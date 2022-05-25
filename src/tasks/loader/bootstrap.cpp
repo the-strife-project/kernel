@@ -14,6 +14,7 @@
 //   make the file >1MB, which increases a lot the size of the ISO. For this
 //   very reason, I set it to 4KB, which should be fine.
 #define LOADER_BASE 0
+#define LOADER_SKIP 0x1000
 // ↓ 1GB ↓
 #define LOADER_HEAP (1ull << 30)
 // ↓ 64 GB ↓
@@ -73,8 +74,8 @@ void Loader::bootstrapLoader() {
 		panic(Panic::LOADER_NOT_SUS);
 
 	uint64_t entrypoint = header->entrypoint;
-	uint64_t begin = rawbegin + sizeof(Header);
-	uint64_t size = rawsize - sizeof(Header);
+	uint64_t begin = rawbegin + sizeof(Header) + LOADER_SKIP;
+	uint64_t size = rawsize - (sizeof(Header) + LOADER_SKIP);
 
 
 	// Paging object
@@ -87,7 +88,7 @@ void Loader::bootstrapLoader() {
 	ASLR aslr;
 
 	// Map program
-	mapInLoader(paging, begin, size, aslr, LOADER_BASE);
+	mapInLoader(paging, begin, size, aslr, LOADER_SKIP);
 
 	// Map stack (no need to map heap, it is done on demand)
 	auto stackFlags = Paging::MapFlag::USER | Paging::MapFlag::NX;
@@ -106,13 +107,12 @@ void Loader::bootstrapLoader() {
 
 	size_t npages, lastpagesz;
 	howManyPages(size, npages, lastpagesz);
-
 	_mapInLoader(paging, begin, npages, lastpagesz, ELF_BASE);
 
 	// Task
 	LoaderInfo loaderInfo(paging, aslr, LOADER_BASE, LOADER_HEAP, LOADER_STACK);
 	Task* task = (Task*)PMM::calloc();
-	*task = Task(loaderInfo, LOADER_BASE + entrypoint);
+	*task = Task(loaderInfo, LOADER_BASE + entrypoint, (uint64_t)task);
 
 	// Parameters
 	task->getState().regs.rdi = ELF_BASE;
@@ -120,13 +120,16 @@ void Loader::bootstrapLoader() {
 
 	Scheduler::SchedulerTask schedTask;
 	schedTask.task = task;
-	// General task (https://bit.ly/3xXdHUT)
+	schedTask.paging = paging;
 
 	Loader::LOADER_PID = assignPID(schedTask);
 
 	// Run!
-	running[whoami()] = Loader::LOADER_PID;
+	thisCoreIsNowRunning(Loader::LOADER_PID);
 	schedTask.task->dispatchSaving();
+
+	auto pp = getTask(Loader::LOADER_PID);
+	pp.acquire();
 
 	// How did it go?
 	if(Loader::last_err) {
@@ -136,4 +139,5 @@ void Loader::bootstrapLoader() {
 	}
 
 	Loader::freeELF();
+	pp.release();
 }

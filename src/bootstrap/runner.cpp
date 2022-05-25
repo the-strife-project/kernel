@@ -16,13 +16,17 @@ PID Bootstrap::run(const char* name, size_t moduleID) {
 		while(true);
 	}
 
+	auto pp = getTask(Loader::LOADER_PID);
+	pp.acquire();
 	Loader::mapELF(beg, sz);
 
-	Task* loader = getTask(Loader::LOADER_PID).task;
+	Task* loader = pp.get()->task;
 	loader->getState().regs.rax = sz;
 
-	running[whoami()] = Loader::LOADER_PID;
+	thisCoreIsNowRunning(Loader::LOADER_PID);
+	pp.release();
 	loader->dispatchSaving();
+	pp.acquire();
 
 	// Loader has finished its business
 	if(Loader::last_err) {
@@ -34,9 +38,14 @@ PID Bootstrap::run(const char* name, size_t moduleID) {
 	}
 
 	Loader::freeELF();
+	PID ret = Loader::last_pid;
+	thisCoreIsNowRunning(NULL_PID);
+	pp.release();
 
-	Task* task = getTask(Loader::last_pid).task;
-	task->jump(Loader::last_entry); // Set RIP
+	pp = getTask(ret);
+	pp.acquire();
+	pp.get()->task->jump(Loader::last_entry); // Set RIP
+	pp.release();
 
-	return Loader::last_pid;
+	return ret;
 }

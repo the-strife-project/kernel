@@ -10,6 +10,25 @@ bool pmemcpy(void* dst, Paging remote, void* orig, size_t n);
 
 class Task {
 private:
+	// Used by RPC (asm), so it's important to keep this first
+	uint64_t rpcEntry = 0;
+	uint64_t rpcFlags = BASIC_RFLAGS; // RFLAGS when entering RPC handler
+
+	/*
+		Stacks are needed for different CPUs that can RPC simultaneously.
+		Option A: one stack per CPU. Direct access, no checks, thread-safe.
+			This has an issue: if process gets interrupted and it's later resumed
+			by another CPU, the stack is lost.
+		Option B: stack pool. When an RPC happens, handler checks if any is free,
+			in which case takes it. Otherwise, allocates a new one.
+		I'm pretty sure B is the way to go.
+		An item in rpcStacks might be:
+			0: this stack in the pool exists and it's in use
+			1: from here on, there are no free stacks
+			any other: available stack
+	*/
+	uint64_t rpcStacks[257] = {1}; // 256 + last one is always 1
+
 	// State
 	Paging paging;
 	SavedState state; // regs + rflags
@@ -21,19 +40,20 @@ private:
 	uint64_t maxHeapBottom, maxStackTop;
 	ASLR aslr;
 
-	//void mapGeneralTask(Paging);
+	void mapGeneralTask(Paging, uint64_t whereami);
 
 public:
 	Task() = default;
-	inline Task(const Loader::LoaderInfo& load, uint64_t entry)
+	inline Task(const Loader::LoaderInfo& load, uint64_t entry, uint64_t whereami)
 		: paging(load.paging), rip(entry), rsp(load.stack),
 		  heapBottom(load.heap), stackTop(load.stack & ~0xFFF),
 		  prog(load.base), heap(load.heap), stack(load.stack),
 		  maxHeapBottom(load.heap + MAX_HEAP_PAGES*PAGE_SIZE),
 		  maxStackTop(load.stack - MAX_STACK_PAGES*PAGE_SIZE),
 		  aslr(load.aslr)
-	{ /*mapGeneralTask(load.paging);*/ }
+	{ mapGeneralTask(load.paging, whereami); }
 
+	inline uint64_t* getRPCStacks() { return rpcStacks; }
 	inline Paging getPaging() { return paging; }
 	uint64_t moreHeap(size_t npages);
 	void moreStack();
@@ -43,6 +63,7 @@ public:
 	void dispatch();
 	inline SavedState& getState() { return state; }
 	void saveStateSyscall();
+	inline void setRPCentry(uint64_t x) { rpcEntry = x; }
 
 	inline void jump(uint64_t addr) { rip = addr; }
 	[[noreturn]] void kill(size_t reason);

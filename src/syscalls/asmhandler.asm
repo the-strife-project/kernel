@@ -1,6 +1,6 @@
 %define KDATA 0x10
 %define UDATA 0x1b
-%define SYSCALL_RPC 4
+%define SYSCALL_RPC 10
 
 extern privStacks
 extern kpaging
@@ -13,13 +13,13 @@ savedState times 4096 db 0
 global asmSyscallHandler
 extern rpcSwitcher
 extern syscallHandler
+
 asmSyscallHandler:
     ; Welcome to the syscall routine. This function is executed on each "syscall".
 
     ; RPC?
-    ;cmp rdi, SYSCALL_RPC
-    ;je rpcSwitcher
-    ; RPC here
+    cmp rdi, SYSCALL_RPC
+    je rpcSwitcher
 
     ; At this point, the syscall is not RPC.
     ; The page table will change to a private stack soon.
@@ -41,6 +41,10 @@ asmSyscallHandler:
     push rbx
     push rax ; No need to keep it since it will contain return value, but for completion
     pushfq ; TODO: not really, flags are @ r11
+
+    ; Save segment to return later (most of the time it's UDATA)
+    mov ax, ds
+    push rax
 
     mov ax, KDATA
     mov ds, ax
@@ -94,13 +98,12 @@ returnToAsm:
     mov cr3, rdi
     mov rsp, rsi
 
-    push rax
-    mov ax, UDATA
-    mov ds, ax
-    mov es, ax
-    mov fs, ax
-    mov gs, ax
-    pop rax
+    ; Restore segments
+    pop rbx
+    mov ds, bx
+    mov es, bx
+    mov fs, bx
+    mov gs, bx
 
     popfq
     pop rbx ; This is rax, but the value needs to be discarded
@@ -119,4 +122,11 @@ returnToAsm:
     pop r14
     pop r15
 
+    ; Kernel syscall?
+    cmp rdi, 0x0C
+    jz .ret
+
+    ; Usual case, syscall from userspace
     o64 sysret
+
+  .ret: ret
