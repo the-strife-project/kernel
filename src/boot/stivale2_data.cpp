@@ -3,9 +3,14 @@
 __attribute__((section(".stack"), used))
 uint8_t stack[4096];
 
+stivale2_tag rsdp_tag {
+	.identifier = STIVALE2_STRUCT_TAG_RSDP_ID,
+	.next = (uint64_t)nullptr
+};
+
 stivale2_tag memmap_tag = {
 	.identifier = STIVALE2_STRUCT_TAG_MEMMAP_ID,
-	.next = (uint64_t)nullptr
+	.next = (uint64_t)&rsdp_tag
 };
 
 __attribute__((section(".stivale2hdr"), used))

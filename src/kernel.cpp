@@ -14,6 +14,7 @@
 #include <bootstrap/bootstrap.hpp>
 #include <tasks/PIDs/PIDs.hpp>
 #include <IPC/IPC.hpp>
+#include <drivers/ACPI/ACPI.hpp>
 
 __attribute__((section(".memmap"), used))
 stivale2_mmap_entry savedmemmap[PAGE_SIZE / sizeof(stivale2_mmap_entry)];
@@ -38,9 +39,16 @@ extern "C" void kmain(stivale2_struct* bootData) {
 	initIDT();
 	printf("[OK]\n");
 
-	printf("Doing a lot of memory stuff... ");
+	printf("First memory initialization... ");
 	PMM::init(memmap);
 	initKernelPaging(memmap);
+	printf("[OK]\n");
+
+	printf("Parsing ACPI... ");
+	ACPI::parse(bootData);
+	printf("[OK]\n");
+
+	printf("Finishing memory... ");
 	PMM::finalizeInit(memmap);	// Bootloader pages are now free to use.
 	initAllocators();
 

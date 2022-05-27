@@ -58,7 +58,7 @@ extern asmSyscallHandler
     ; Got it :)
 %endmacro
 
-; Release rpcStacksLock
+; Release a lock
 ; rax <- ptr to uint64_t to release
 %macro releaseTheLock 0
     btr qword [rax], 0
@@ -171,8 +171,6 @@ rpcSwitcher:
     mov rax, cr3
     mov cr3, rbx ; Return to previous page table
     ; Stack is now working
-
-    ; Release server temporally
 
     mov r11, rsi ; Instead of pushing
     mov rdi, SYS_RPC_MORE_STACKS

@@ -27,7 +27,9 @@ const char* const msgs[] = {
 	"Bootstrap ELF not found",
 	"Bootstrap ELF is too big (>1GB)",
 	"Error parsing bootstrap ELF",
-	"Dispatcher returned"
+	"Dispatcher returned",
+	"ACPI RSDP has a bad signature",
+	"ACPI RSDP has a bad checksum"
 };
 
 void panic(size_t id, bool doNotHalt) {
