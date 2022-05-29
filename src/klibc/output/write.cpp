@@ -1,25 +1,64 @@
 #include "output.hpp"
+#include <klibc/memory/memory.hpp>
 
-size_t row = 0;
-size_t col = 0;
+// This driver starts on its own, with boot cursor (row and column).
+// When term is running, it syncs the cursor with it.
+
+size_t bootRow = 0;
+size_t bootCol = 0;
 char color = DEFAULT_COLOR;
 
-inline void goAhead(size_t n=1) {
-	col += n;
-	row += col / FB_COLS;
-	col %= FB_COLS;
+size_t* row = &bootRow;
+size_t* col = &bootCol;
+
+static uint64_t* kcursor = nullptr;
+
+void nowSyncWithTerm(size_t* kcursor_) {
+	kcursor = kcursor_;
+	kcursor[0] = bootRow;
+	kcursor[1] = bootCol;
+	row = &kcursor[0];
+	col = &kcursor[1];
 }
 
-inline char* getVideo() {
-	return ((char*)VIDEO_BASE) + (FB_COLS*row + col)*2;
+// This driver is a copy-paste from term's w/o the comments. Go read that one.
+
+inline static char* getChar(size_t r, size_t c) {
+	return ((char*)VIDEO_BASE) + (FB_COLS * r + c)*2;
 }
 
-// This will never implement scroll. Shouldn't be used that often.
+inline static char* getVideo() { return getChar(*row, *col); }
+
+inline static void clearRow(size_t r) {
+	char* buffer = getChar(r, 0);
+	for(size_t i=0; i<FB_COLS; ++i) {
+		*buffer++ = ' ';
+		*buffer++ = color;
+	}
+}
+
+inline static void scroll() {
+	void* from = (void*)(VIDEO_BASE + FB_BYTES_PER_ROW);
+	memmove((void*)VIDEO_BASE, from, (FB_ROWS-1)*FB_BYTES_PER_ROW);
+	--*row;
+	clearRow(FB_ROWS-1);
+}
+
+inline static void goAhead() {
+	++*col;
+	if(*col >= FB_COLS) {
+		++*row;
+		*col = 0;
+		if(*row >= FB_ROWS)
+			scroll();
+	}
+}
 
 void _writec(char c) {
 	if(c == '\n') {
-		++row;
-		col = 0;
+		++*row;
+		*col = 0;
+		if(*row >= FB_ROWS) scroll();
 		return;
 	}
 
@@ -31,12 +70,3 @@ void _writec(char c) {
 
 void setColor(uint8_t c) { color = c; }
 void resetColor() { color = DEFAULT_COLOR; }
-
-void getRC(size_t& r, size_t& c) {
-	r = row;
-	c = col;
-}
-
-void resetKernelTerm() {
-	row = col = 0;
-}

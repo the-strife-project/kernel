@@ -18,18 +18,20 @@ void Bootstrap::bootstrap() {
 	uint64_t flags = Paging::MapFlag::USER | Paging::MapFlag::NX;
 	term->getPaging().map(fb, PHYS_VIDEO_BASE, fbsize, flags);
 
-	// Send current cursor position
-	size_t row, col;
-	getRC(row, col);
+	// Map cursor sync for kernel
+	uint64_t kcursor = VMM::Private::calloc();
+	uint64_t pkcursor = term->getASLR().get(1, GROWS_UPWARD, PAGE_SIZE);
+	term->getPaging().map(pkcursor, kcursor, 4096, flags);
+	nowSyncWithTerm((uint64_t*)kcursor);
+
+	// Send framebuffer address and cursor sync
 	term->getState().regs.rdi = fb;
-	term->getState().regs.rsi = row;
-	term->getState().regs.rdx = col;
+	term->getState().regs.rsi = pkcursor;
 
 	thisCoreIsNowRunning(termPID);
 	pp.release();
 	term->dispatchSaving();
-
-	//resetKernelTerm(); // TODO uncomment this soon
+	printf("[OK]\n");
 
 	// --- PCI ---
 	PID pciPID = run("PCI", BootModules::MODULE_ID_PCI);
@@ -39,4 +41,5 @@ void Bootstrap::bootstrap() {
 	thisCoreIsNowRunning(pciPID);
 	pp.release();
 	pci->dispatchSaving();
+	printf("[OK]\n");
 }
