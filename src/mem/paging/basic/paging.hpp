@@ -34,7 +34,6 @@ public:
 
 	PTE* getPTE(uint64_t addr);
 	uint64_t getPhys(uint64_t virt);
-	static void extendPDE(PDE*);
 	void map(uint64_t virt, uint64_t phys, uint64_t size, uint64_t flags=0);
 	void unmap(uint64_t virt);
 	uint64_t getFlags(uint64_t virt);

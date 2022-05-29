@@ -58,10 +58,6 @@ void Paging::PageMapping::nextPDE(bool huge) {
 
 		if(!huge)
 			pde->setNext(clear(PMM::calloc() >> 12));
-	} else if(pde->isHuge() && !huge) {
-		extendPDE(pde);
-	} else if(!pde->isHuge() && huge) {
-		panic(Panic::PAGE_RETRACTION);
 	}
 
 	if(user) pde->setUser();

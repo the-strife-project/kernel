@@ -10,7 +10,6 @@ void Task::mapGeneralTask(Paging p, uint64_t whereami) {
 	// Task is always on its own page, so that makes this easy
 	if(generalTask) {
 		// Set, so map it
-		printf("Mapping generalTask to 0x%x\n", whereami);
 		p.map((uint64_t)generalTask, whereami, PAGE_SIZE, Paging::MapFlag::NX);
 	}
 }

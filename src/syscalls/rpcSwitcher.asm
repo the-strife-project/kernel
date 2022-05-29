@@ -72,36 +72,33 @@ rpcSwitcher:
     ; Critical: most of the time, RPC doesn't go through kernel's page table,
     ;   which gives only one context switch.
 
-    ; Does any register need to be saved? Surely those regarding the syscall
-    ;   so it's possible to return.
-    push rcx ; Free to use since this point in the routine
-    push r11 ; Free to use as well
-    ; In order to speed things up, server is expected to save callee-saved registers (duh).
-    ; In jotaOS, client trusts the server (even though not the other way around).
-    ; Server can perfectly crash client if it really wants to, so no need to save
-    ;   callee-saved.
-
-    ; What about caller-saved? Only those that are not used by the syscall.
-    ; Caller-saved are: rax, rcx, rdx, rsi, rdi, and r8...r11 (and some more regarding FPU).
-    ; rcx and r11 are already saved. rax, rdi, and rsi, destroyed on RPC specifically.
-    ; So that only leaves rdx, r8, r9, r10, which, coincidentally, are the arguments
-    ; As an RPC might come with 0, 1, 2, 3, or 4 arguments, all must be pushed
+    ; Save all registers. I didn't do this in the beginning, and let the
+    ;   server painfully crash the client if it wanted to. However, some
+    ;   callee-saved registers aren't being saved in regular non-malicious C++
+    ;   and I don't want to deal with that. Save everything.
+    push rbx
+    push rcx
     push rdx
+    push rdi
+    push rsi
     push r8
     push r9
     push r10
-    push rbx ; Exception, I will be using it in this routine
-    push rbp ; This one too
-    mov rbp, rax ; Backup, server PID
-    push r15 ; And this one, which will always be client PID
-    ; These two are caller-saved and will cause problems in C++
-    push rdi
-    push rsi
+    push r11
+    push r12
+    push r13
+    push r14
+    push r15
+    push rbp
+
+    ; rbp contains server PID now
+    mov rbp, rax
 
     ; Who is client?
     mov rbx, [rel running]
     call whoami
     mov r15, qword [rbx + rax*8]
+    ; Client PID will always be in r15 now
 
     ; Server PID alright?
     test rbp, rbp
@@ -230,7 +227,7 @@ rpcSwitcher:
     mov r11, qword [r11 + Off_rpcFlags] ; Ready for sysret
 
     ; rdi = client
-    mov rdi, rbp
+    mov rdi, r15
     ; Saving both PIDs like a boss
     push rbp
     push r15
@@ -330,19 +327,22 @@ rpcReturn:
     mov rax, rdx
 
     ; Pop everything from client stack
-    pop rsi
-    pop rdi
-    pop r15
     pop rbp
-    pop rbx
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop r11
     pop r10
     pop r9
     pop r8
+    pop rsi
+    pop rdi
     pop rdx
+    pop rcx
+    pop rbx
 
     ; And get back
-    pop r11
-    pop rcx
     o64 sysret
 
 badRPCReturn:

@@ -8,7 +8,8 @@ const char* const msgs[] = {
 	"Syscall from PID 0",
 	"getTask() on empty SchedulerTask*",
 	"On bootstrap, acquisition got null",
-	"Protected pointer get() or isNull() while not acquired"
+	"Protected pointer get() or isNull() while not acquired",
+	"smAllow reached an impossible flow"
 };
 
 [[noreturn]] void bruh(size_t id) {

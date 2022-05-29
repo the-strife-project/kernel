@@ -44,7 +44,7 @@ extern "C" void kmain(stivale2_struct* bootData) {
 	initKernelPaging(memmap);
 	printf("[OK]\n");
 
-	printf("Parsing ACPI... ");
+	printf("Parsing ACPI tables... ");
 	ACPI::parse(bootData);
 	printf("[OK]\n");
 
@@ -84,5 +84,6 @@ extern "C" void kmain(stivale2_struct* bootData) {
 	// Bootstrapping is done. Time to fire up the rest of the cores.
 
 	printf("\nThat's all for now folks!\n");
+	hlt();
 	//schedule();
 }

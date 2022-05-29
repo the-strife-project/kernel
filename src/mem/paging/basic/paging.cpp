@@ -36,8 +36,6 @@ Paging::PTE* Paging::getPTE(uint64_t addr) {
 
 	if(!pde->isPresent())
 		panic(Panic::GET_PTE_NO_PAGE);
-	else if(pde->isHuge())
-		extendPDE(pde);
 
 	PTE* pte = (PTE*)extend(pde->getNext() << 12);
 	pte = &pte[pt_i];
@@ -74,26 +72,8 @@ uint64_t Paging::getPhys(uint64_t virt) {
 	return pte->getPhys() << 12;
 }
 
-// Extends a huge PDE into a regular one
-void Paging::extendPDE(PDE* pde) {
-	uint64_t phys = pde->getNext();
-	PTE* pageTable = (PTE*)PMM::calloc();
-	pde->setNext(((uint64_t)pageTable) >> 12);
-
-	for(size_t i=0; i<PAGE_ENTRIES; ++i) {
-		pageTable->setPhys(phys);
-		if(pde->isGlobal()) pageTable->setGlobal();
-		if(pde->isUser()) pageTable->setUser();
-		if(pde->isRO()) pageTable->setRO();
-		if(pde->isNX()) pageTable->setNX();
-		++pageTable; ++phys;
-	}
-}
-
 // Wrapper around PageMapping
-#define TWOMEGS 2 << 20
 #define FOURKBS 4 << 10
-
 void Paging::map(uint64_t virt, uint64_t phys, uint64_t size, uint64_t flags) {
 	PageMapping mapping(*this, virt);
 
@@ -110,15 +90,6 @@ void Paging::map(uint64_t virt, uint64_t phys, uint64_t size, uint64_t flags) {
 		size += PAGE_SIZE - (size % PAGE_SIZE);
 
 	while(size) {
-		// Can we map 2M?
-		// (This is scary and I don't want to use it)
-		/*if(size >= TWOMEGS && getPTi(virt) == 0) {
-			mapping.map2M(phys);
-			virt += TWOMEGS; phys += TWOMEGS; size -= TWOMEGS;
-			continue;
-		}*/
-
-		// Just map 4K
 		mapping.map4K(phys);
 		virt += FOURKBS; phys += FOURKBS; size -= FOURKBS;
 	}

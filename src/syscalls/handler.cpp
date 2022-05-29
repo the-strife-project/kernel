@@ -44,7 +44,7 @@ extern "C" uint64_t syscallHandler(size_t op, size_t arg1, size_t arg2,
 	auto pp = getTask(pid);
 	pp.acquire(); // No one does anything with PID
 	if(pp.isNull()) {
-		// damn
+		// damn, got killed
 		pp.release();
 		schedule();
 	}
@@ -109,6 +109,21 @@ extern "C" uint64_t syscallHandler(size_t op, size_t arg1, size_t arg2,
 		onlyKernel(stask);
 		ret = IPC::rpcMoreStacks(arg1);
 		break;
+
+	// --- SHARED MEMORY ---
+	case std::Syscalls::SM_MAKE:
+		ret = IPC::smMake(stask.task);
+		break;
+	case std::Syscalls::SM_ALLOW:
+		ret = IPC::smAllow(stask.task, arg1, arg2);
+		break;
+	case std::Syscalls::SM_REQUEST:
+		ret = IPC::smRequest(stask.task, pid, arg1, arg2);
+		break;
+	case std::Syscalls::SM_MAP:
+		ret = IPC::smMap(stask.task, arg1);
+		break;
+
 	default:
 		stask.task->kill(std::kkill::UNKNOWN_SYSCALL);
 		goBack = false;

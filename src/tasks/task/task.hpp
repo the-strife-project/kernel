@@ -9,6 +9,15 @@
 bool pmemcpy(void* dst, Paging remote, void* orig, size_t n);
 
 class Task {
+public:
+	struct SharedSegment {
+		std::SMID smid = 0;
+		uint64_t kptr = 0;
+		uint64_t tptr = 0;
+		std::PID allowed = 0;
+	} __attribute__((packed));
+	static const size_t NUM_SHARED_SEGMENTS = PAGE_SIZE / sizeof(SharedSegment);
+
 private:
 	// Used by RPC (asm), so it's important to keep this first
 	uint64_t rpcEntry = 0;
@@ -40,6 +49,8 @@ private:
 	uint64_t maxHeapBottom, maxStackTop;
 	ASLR aslr;
 
+	SharedSegment* shared = nullptr;
+
 	void mapGeneralTask(Paging, uint64_t whereami);
 
 public:
@@ -69,6 +80,9 @@ public:
 	[[noreturn]] void kill(size_t reason);
 
 	uint64_t mmap(size_t npages, size_t prot);
+
+	SharedSegment* getShared() { return shared; }
+	void setShared(SharedSegment* ptr) { shared = ptr; }
 };
 
 extern "C" void asmRestoreKernel();

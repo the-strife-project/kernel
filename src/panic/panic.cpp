@@ -8,7 +8,6 @@ const char* const msgs[] = {
 	"No memory to initialize the PMM",
 	"Out of physical memory",
 	"Too many regions in the memory map",
-	"Tried to retract an extended PDE",
 	"The program loader wasn't loaded as a stivale2 module",
 	"The loaded loader.sus file is not an SUS file",
 	"Paging::getPTE() received an address that wasn't present",
@@ -29,7 +28,8 @@ const char* const msgs[] = {
 	"Error parsing bootstrap ELF",
 	"Dispatcher returned",
 	"ACPI RSDP has a bad signature",
-	"ACPI RSDP has a bad checksum"
+	"ACPI RSDP has a bad checksum",
+	"I live in a constant state of stress and pain",
 };
 
 void panic(size_t id, bool doNotHalt) {

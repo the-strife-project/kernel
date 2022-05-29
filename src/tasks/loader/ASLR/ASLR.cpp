@@ -1,19 +1,9 @@
 #include "ASLR.hpp"
+#include <klibc/random/random.hpp>
 
 #define MIN_ADDRESS 0x0000000000100000
 #define MAX_ADDRESS 0x00007FFFFFFFFFFF
 #define MAX_ITERATIONS 100
-
-inline uint64_t rdrand() {
-	uint64_t ret;
-	asm volatile("rdrand %%rax" : "=a"(ret));
-	return ret;
-}
-
-static uint64_t getCandidate() {
-	// TODO: Check
-	return rdrand();	// Stub
-}
 
 static inline bool overlaps(uint64_t begin, uint64_t end, uint64_t xbegin, uint64_t xend) {
 	bool ret = xbegin > end;
@@ -40,7 +30,7 @@ uint64_t ASLR::get(size_t max_pages, bool direction, uint64_t alignment, bool do
 	// TODO: Make this safer
 
 	for(uint64_t it=0; it<MAX_ITERATIONS; ++it) {
-		uint64_t candidate = getCandidate();
+		uint64_t candidate = getRandom64();
 		candidate %= MAX_ADDRESS - MIN_ADDRESS;
 		candidate += MIN_ADDRESS;
 
