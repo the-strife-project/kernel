@@ -108,9 +108,9 @@ rpcSwitcher:
 
     ; Welcome to the fat critical section
     ; Lock both PIDs: client and server
-    lea rax, qword [TASKS + r15*8]
+    lea rax, [TASKS + r15*8]
     acquireTheLock
-    lea rax, qword [TASKS + rbp*8]
+    lea rax, [TASKS + rbp*8]
     acquireTheLock
 
     ; Client has to be running. Otherwise, it would have not reached this.
@@ -142,7 +142,7 @@ rpcSwitcher:
     xor ecx, ecx
   .findStack:
     ; In use?
-    lea r11, qword [rax + Off_rpcStacks]
+    lea r11, [rax + Off_rpcStacks]
     mov r11, qword [r11 + rcx*8]
     test r11, r11
     jz .tryNextStack
@@ -153,7 +153,7 @@ rpcSwitcher:
     ; Got it!
     inc r11 ; Valid stack again
     ; Mark as used
-    lea rax, qword [rax + Off_rpcStacks]
+    lea rax, [rax + Off_rpcStacks]
     mov qword [rax + rcx*8], 0
     jmp .gotStack
   .needMoreStacks:
@@ -243,9 +243,9 @@ rpcSwitcher:
     push r10
 
     ; Release them locks
-    lea rax, qword [TASKS + r15*8]
+    lea rax, [TASKS + r15*8]
     releaseTheLock
-    lea rax, qword [TASKS + rbp*8]
+    lea rax, [TASKS + rbp*8]
     releaseTheLock
 
     ; There we go!
@@ -294,7 +294,7 @@ rpcReturn:
     xor ecx, ecx
   .looking:
     ; In use?
-    lea r11, qword [rax + Off_rpcStacks]
+    lea r11, [rax + Off_rpcStacks]
     mov r11, qword [r11 + rcx*8]
     test r11, r11
     jz .gotIt
@@ -309,7 +309,7 @@ rpcReturn:
   .absolutelyImpossible: hlt
   .gotIt:
     ; Got the index @ rcx
-    lea r11, qword [rax + Off_rpcStacks]
+    lea r11, [rax + Off_rpcStacks]
     mov qword [r11 + rcx*8], rbx
 
     ; Stack has been freed. Go back to client.
@@ -318,9 +318,9 @@ rpcReturn:
     mov cr3, rcx
 
     ; Nothing else to do. Let's go back.
-    lea rax, qword [TASKS + r15*8]
+    lea rax, [TASKS + r15*8]
     releaseTheLock
-    lea rax, qword [TASKS + rbp*8]
+    lea rax, [TASKS + rbp*8]
     releaseTheLock
 
     ; Return value, set @ rdx by PF.cpp
@@ -352,9 +352,9 @@ badRPCReturn:
 ; If something bad happened, this returns to kernel page table and stack,
 ;   much like asmSyscallHandler, except takes no care in keeping state resumable
 badPID:
-    lea rax, qword [TASKS + r15*8]
+    lea rax, [TASKS + r15*8]
     releaseTheLock
-    lea rax, qword [TASKS + rbp*8]
+    lea rax, [TASKS + rbp*8]
     releaseTheLock
     ; fall-through
 badPIDnorelease:

@@ -13,7 +13,7 @@ extern savedKernelState
 ; These two save/restore callee-saved
 asmRestoreKernel:
     mov rsp, qword [rel savedKernelState_rsp]
-    lea rax, qword [rel savedKernelState]
+    lea rax, [rel savedKernelState]
     mov rbp, qword [rax+8*0]
     mov rbx, qword [rax+8*1]
     mov r12, qword [rax+8*2]
@@ -23,7 +23,7 @@ asmRestoreKernel:
     ret
 asmDispatchSaving:
     mov qword [rel savedKernelState_rsp], rsp
-    lea rax, qword [rel savedKernelState]
+    lea rax, [rel savedKernelState]
     mov qword [rax+8*0], rbp
     mov qword [rax+8*1], rbx
     mov qword [rax+8*2], r12
