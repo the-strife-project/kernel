@@ -13,7 +13,11 @@
 #include <stdarg.h>
 #include <common.hpp>
 #include <syscalls> // Header from stdlib, has "std::Syscalls" enum
+#include <tasks/task/task.hpp>
 
 void enableSyscalls();
+
+// Specifics
+size_t getIO(std::PID pid, Task* task);
 
 #endif

@@ -40,7 +40,7 @@ asmSyscallHandler:
     push rcx
     push rbx
     push rax ; No need to keep it since it will contain return value, but for completion
-    pushfq ; TODO: not really, flags are @ r11
+    push r11 ; Flags (again, yes)
 
     ; Save segment to return later (most of the time it's UDATA)
     mov ax, ds
@@ -105,7 +105,7 @@ returnToAsm:
     mov fs, bx
     mov gs, bx
 
-    popfq
+    add rsp, 8 ; Flags, ignoring (they're @ r11)
     pop rbx ; This is rax, but the value needs to be discarded
     pop rbx
     pop rcx

@@ -124,6 +124,12 @@ extern "C" uint64_t syscallHandler(size_t op, size_t arg1, size_t arg2,
 		ret = IPC::smMap(stask.task, arg1);
 		break;
 
+	// --- OTHER STUFF ---
+	case std::Syscalls::GET_IO:
+		// A check would go here (running as system?)
+		ret = getIO(pid, stask.task);
+		break;
+
 	default:
 		stask.task->kill(std::kkill::UNKNOWN_SYSCALL);
 		goBack = false;
