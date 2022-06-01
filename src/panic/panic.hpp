@@ -33,6 +33,9 @@ struct Panic {
 		RSDP_BAD_SIGNATURE,
 		RSDP_BAD_CHECKSUM,
 		HELP_ME, // Just needed to get that out
+		NO_APIC,
+		APIC_ADDRESS_IN_USE,
+		APIC_WEIRD_ADDRESS,
 	};
 };
 

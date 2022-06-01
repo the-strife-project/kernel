@@ -57,12 +57,14 @@ inline void sysret() {
 
 // TODO possible strict aliasing violation
 inline uint32_t* higherHalf_uint64(uint64_t* x) { return ((uint32_t*)x) + 1; }
-inline uint64_t rdmsr(uint32_t addr) {
+
+typedef uint32_t MSR;
+inline uint64_t rdmsr(MSR addr) {
 	uint64_t ret;
 	asm volatile("rdmsr" : "=d"(*higherHalf_uint64(&ret)), "=a"(ret) : "c"(addr));
 	return ret;
 }
-inline void wrmsr(uint32_t addr, uint64_t contents) {
+inline void wrmsr(MSR addr, uint64_t contents) {
 	asm volatile("wrmsr" :: "c"(addr), "d"(*higherHalf_uint64(&contents)), "a"(contents));
 }
 

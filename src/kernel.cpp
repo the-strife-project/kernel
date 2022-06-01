@@ -15,6 +15,7 @@
 #include <tasks/PIDs/PIDs.hpp>
 #include <IPC/IPC.hpp>
 #include <drivers/ACPI/ACPI.hpp>
+#include <drivers/APIC/APIC.hpp>
 
 __attribute__((section(".memmap"), used))
 stivale2_mmap_entry savedmemmap[PAGE_SIZE / sizeof(stivale2_mmap_entry)];
@@ -46,6 +47,10 @@ extern "C" void kmain(stivale2_struct* bootData) {
 
 	printf("Parsing ACPI tables... ");
 	ACPI::parse(bootData);
+	printf("[OK]\n");
+
+	printf("Initializing APIC... ");
+	APIC::init();
 	printf("[OK]\n");
 
 	printf("Finishing memory... ");

@@ -30,6 +30,9 @@ const char* const msgs[] = {
 	"ACPI RSDP has a bad signature",
 	"ACPI RSDP has a bad checksum",
 	"I live in a constant state of stress and pain",
+	"No APIC detected",
+	"Turns out APIC address was already in use",
+	"APIC address is weird",
 };
 
 void panic(size_t id, bool doNotHalt) {
