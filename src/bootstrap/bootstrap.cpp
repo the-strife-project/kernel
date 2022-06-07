@@ -42,4 +42,14 @@ void Bootstrap::bootstrap() {
 	pp.release();
 	pci->dispatchSaving();
 	printf("[OK]\n");
+
+	// --- AHCI ---
+	PID ahciPID = run("AHCI", BootModules::MODULE_ID_AHCI);
+	pp = getTask(ahciPID);
+	pp.acquire();
+	Task* ahci = pp.get()->task;
+	thisCoreIsNowRunning(ahciPID);
+	pp.release();
+	ahci->dispatchSaving();
+	printf("[OK]\n");
 }

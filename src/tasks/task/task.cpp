@@ -70,6 +70,7 @@ void Task::saveStateSyscall() {
 	// Three things: SavedState (regs + rflags), rip, rsp
 	pmemcpy(&state, paging, savedState[whoami()], sizeof(SavedState));
 	rip = getState().regs.rcx; // On syscall, rcx=rip
+	rpcFlags = getState().regs.r11; // And r11=flags
 	// The stack before syscall is as follows (go read asmhandler.asm)
 	uint64_t newrsp = (uint64_t)savedState[whoami()];
 	newrsp += sizeof(SavedState);

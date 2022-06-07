@@ -84,6 +84,7 @@ void Paging::PageMapping::map4K(uint64_t phys) {
 	if(user) pte->setUser();
 	if(ro) pte->setRO();
 	if(nx) pte->setNX();
+	if(pcd) pte->setPCD();
 }
 
 void Paging::PageMapping::map2M(uint64_t phys) {

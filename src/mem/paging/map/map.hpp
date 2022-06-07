@@ -19,6 +19,7 @@ private:
 	bool nx = false;
 	bool user = false;
 	bool present = true;
+	bool pcd = false;
 
 	PML4E* data;
 	uint64_t virt;
@@ -31,6 +32,7 @@ public:
 	inline void setNX() { nx = true; }
 	inline void setUser() { user = true; }
 	inline void setNotPresent() { present = false; }
+	inline void setPCD() { pcd = true; }
 
 	void map4K(uint64_t phys);
 	void map2M(uint64_t phys);

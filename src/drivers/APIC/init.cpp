@@ -18,7 +18,7 @@ static void disablePIC() {
 	outb(0x21, 0xFF);
 }
 
-static const size_t mapflags = Paging::MapFlag::NX;
+static const size_t mapflags = Paging::MapFlag::NX | Paging::MapFlag::PCD;
 static bool mapped = false;
 static void enableLAPIC() {
 	uint64_t base = rdmsr(APIC::BASE_MSR);

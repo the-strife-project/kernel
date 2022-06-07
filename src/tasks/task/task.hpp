@@ -80,6 +80,7 @@ public:
 	[[noreturn]] void kill(size_t reason);
 
 	uint64_t mmap(size_t npages, size_t prot);
+	uint64_t mapPhys(uint64_t phys, size_t npages, size_t prot);
 
 	SharedSegment* getShared() { return shared; }
 	void setShared(SharedSegment* ptr) { shared = ptr; }

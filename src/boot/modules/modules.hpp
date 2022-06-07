@@ -12,6 +12,7 @@ namespace BootModules {
 		MODULE_ID_STDLIB,
 		MODULE_ID_TERM,
 		MODULE_ID_PCI,
+		MODULE_ID_AHCI,
 		NMODULES
 	};
 

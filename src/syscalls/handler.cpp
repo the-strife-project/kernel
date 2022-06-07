@@ -99,6 +99,7 @@ extern "C" uint64_t syscallHandler(size_t op, size_t arg1, size_t arg2,
 		ret = IPC::resolve(arg1);
 		break;
 	case std::Syscalls::HALT:
+		stask.task->saveStateSyscall();
 		stask.task->freeStack();
 		goBack = false;
 		break;
@@ -128,6 +129,10 @@ extern "C" uint64_t syscallHandler(size_t op, size_t arg1, size_t arg2,
 	case std::Syscalls::GET_IO:
 		// A check would go here (running as system?)
 		ret = getIO(pid, stask.task);
+		break;
+	case std::Syscalls::MAP_PHYS:
+		// Another check here
+		ret = stask.task->mapPhys(arg1, arg2, arg3);
 		break;
 
 	default:

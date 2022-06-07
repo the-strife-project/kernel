@@ -78,6 +78,8 @@ public:
 	inline uint64_t getPhys() { return phys; }
 	inline void setNX() { nx = 1; }
 	inline bool isNX() { return nx; }
+	inline void setPCD() { cacheDisable = 1; }
+	inline bool isPCD() { return cacheDisable; }
 
 	// OS-dependent
 	inline void setUsedChunks(uint16_t x) {

@@ -20,6 +20,7 @@ public:
 		static const uint64_t RO = 1 << 1;
 		static const uint64_t NX = 1 << 2;
 		static const uint64_t USER = 1 << 3;
+		static const uint64_t PCD = 1 << 4; // Page Cache Disable
 	};
 
 private:
