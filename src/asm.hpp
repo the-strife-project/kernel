@@ -5,8 +5,6 @@
 
 #define N_CALLEE_SAVED 6
 
-inline void bochs() { asm volatile("xchgw %bx, %bx"); }
-
 inline uint64_t rflags_read() {
 	uint64_t ret;
 	asm volatile("pushfq\n"

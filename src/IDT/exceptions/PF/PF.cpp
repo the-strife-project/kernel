@@ -30,7 +30,7 @@ extern "C" void catchPF(size_t err, uint64_t iretqs, size_t rax) {
 	// Remember that PF in ring 0 is not necessarily bad
 
 	panic(Panic::UNKNOWN_PAGE_FAULT, true);
-	printf("\nAt: 0x%x\n", getCR2());
+	printf("\nFor: 0x%x\n", getCR2());
 
 	// Top of iretq struct has rip
 	uint64_t rip = *(uint64_t*)iretqs;

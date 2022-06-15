@@ -3,8 +3,7 @@
 
 #include <common.hpp>
 
-extern "C" void* memcpy(void* dst, void* orig, size_t n);
-extern "C" void* memmove(void* dst, void* orig, size_t n);
-extern "C" void* memset(void* ptr, char value, size_t n);
+// memcpy and such headers from stdlib
+#include <cstring>
 
 #endif

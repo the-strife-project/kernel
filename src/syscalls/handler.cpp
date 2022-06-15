@@ -130,6 +130,10 @@ extern "C" uint64_t syscallHandler(size_t op, size_t arg1, size_t arg2,
 		// A check would go here (running as system?)
 		ret = getIO(pid, stask.task);
 		break;
+	case std::Syscalls::GET_PHYS:
+		// Check here
+		ret = stask.task->getPaging().getPhys(arg1);
+		break;
 	case std::Syscalls::MAP_PHYS:
 		// Another check here
 		ret = stask.task->mapPhys(arg1, arg2, arg3);

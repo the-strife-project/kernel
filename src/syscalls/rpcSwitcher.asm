@@ -361,6 +361,7 @@ badPIDnorelease:
     call whoami
     shl eax, 3
     lea rbx, [rel privStacks]
+    mov rbx, qword [rbx]
     add rax, rbx
     mov rsp, qword [rbx]
 

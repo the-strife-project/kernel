@@ -1,11 +1,10 @@
 #include "bootstrap.hpp"
 #include <boot/modules/modules.hpp>
 #include <tasks/PIDs/PIDs.hpp>
-//#include <CPU/SMP/SMP.hpp>
 #include <panic/bruh.hpp>
 
 void Bootstrap::bootstrap() {
-	// --- TERM ---
+	// --- term ---
 	PID termPID = run("term", BootModules::MODULE_ID_TERM);
 	auto pp = getTask(termPID);
 	pp.acquire();
@@ -19,8 +18,9 @@ void Bootstrap::bootstrap() {
 	term->getPaging().map(fb, PHYS_VIDEO_BASE, fbsize, flags);
 
 	// Map cursor sync for kernel
-	uint64_t kcursor = VMM::Private::calloc();
-	uint64_t pkcursor = term->getASLR().get(1, GROWS_UPWARD, PAGE_SIZE);
+	uint64_t vkcursor = VMM::Public::calloc(); // Used by the kernel
+	uint64_t kcursor = kpaging.getPhys(vkcursor); // Its physical
+	uint64_t pkcursor = term->getASLR().get(1, GROWS_UPWARD, PAGE_SIZE); // Process
 	term->getPaging().map(pkcursor, kcursor, 4096, flags);
 	nowSyncWithTerm((uint64_t*)kcursor);
 
@@ -51,5 +51,36 @@ void Bootstrap::bootstrap() {
 	thisCoreIsNowRunning(ahciPID);
 	pp.release();
 	ahci->dispatchSaving();
+	printf("[OK]\n");
+
+	// --- block ---
+	PID blockPID = run("block", BootModules::MODULE_ID_BLOCK);
+	pp = getTask(blockPID);
+	pp.acquire();
+	Task* block = pp.get()->task;
+	thisCoreIsNowRunning(blockPID);
+	pp.release();
+	block->dispatchSaving();
+	printf("[OK]\n");
+
+	// --- ISO9660 ---
+	PID isoPID = run("ISO9660", BootModules::MODULE_ID_ISO9660);
+	pp = getTask(isoPID);
+	pp.acquire();
+	Task* iso = pp.get()->task;
+	iso->getState().regs.rdi = true; // Let it know it's from bootstrapping
+	thisCoreIsNowRunning(isoPID);
+	pp.release();
+	iso->dispatchSaving();
+	printf("[OK]\n");
+
+	// --- VFS ---
+	PID vfsPID = run("VFS", BootModules::MODULE_ID_VFS);
+	pp = getTask(vfsPID);
+	pp.acquire();
+	Task* vfs = pp.get()->task;
+	thisCoreIsNowRunning(vfsPID);
+	pp.release();
+	vfs->dispatchSaving();
 	printf("[OK]\n");
 }

@@ -61,6 +61,7 @@ asmSyscallHandler:
 
     ; Get address of the private stack. rbx is free to use
     lea rbx, [rel privStacks]
+    mov rbx, qword [rbx]
     add rax, rbx
 
     ; Go into the kernel page table
