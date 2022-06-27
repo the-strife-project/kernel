@@ -1,7 +1,8 @@
 #include "stivale2.h"
+#include <types>
 
 __attribute__((section(".stack"), used))
-uint8_t stack[4096];
+uint8_t stack[PAGE_SIZE];
 
 stivale2_tag rsdp_tag {
 	.identifier = STIVALE2_STRUCT_TAG_RSDP_ID,

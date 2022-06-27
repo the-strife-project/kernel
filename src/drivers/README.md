@@ -1,4 +1,4 @@
-# jotaOS kernel drivers
+# Strife kernel drivers
 
 These are drivers that are either:
 

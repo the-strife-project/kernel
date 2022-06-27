@@ -36,7 +36,7 @@ private:
 		size_t psl = 0;
 	};
 
-	static const size_t BUCKETS_PER_PAGE = 4096 / sizeof(BucketNode);
+	static const size_t BUCKETS_PER_PAGE = PAGE_SIZE / sizeof(BucketNode);
 
 	uint64_t space = 0; // Base page of free consecutive virtual memory
 	size_t howMuch = 0; // How many bytes?

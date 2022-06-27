@@ -2,8 +2,6 @@
 #include <panic/panic.hpp>
 #include <klibc/klibc.hpp>
 
-#define PAGE_SIZE 4096
-
 struct FreePage {
 	uint64_t npages;
 	FreePage* next;

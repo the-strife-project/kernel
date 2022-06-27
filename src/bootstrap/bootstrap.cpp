@@ -21,7 +21,7 @@ void Bootstrap::bootstrap() {
 	uint64_t vkcursor = VMM::Public::calloc(); // Used by the kernel
 	uint64_t kcursor = kpaging.getPhys(vkcursor); // Its physical
 	uint64_t pkcursor = term->getASLR().get(1, GROWS_UPWARD, PAGE_SIZE); // Process
-	term->getPaging().map(pkcursor, kcursor, 4096, flags);
+	term->getPaging().map(pkcursor, kcursor, PAGE_SIZE, flags);
 	nowSyncWithTerm((uint64_t*)kcursor);
 
 	// Send framebuffer address and cursor sync

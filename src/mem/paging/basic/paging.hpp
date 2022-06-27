@@ -2,8 +2,8 @@
 #define PAGING_HPP
 
 #include <asm.hpp>
+#include <types>
 
-#define PAGE_SIZE 4096
 #define PAGE_ENTRIES 512
 
 // Important point: Paging does shallow copy. You will see a lot of

@@ -1,8 +1,8 @@
 #ifndef COMMON_HPP
 #define COMMON_HPP
 
-#include <stdint.h>
-#include <stddef.h>
+// Right out of the stdlib
+#include <types>
 
 typedef unsigned short PID;
 #define NULL_PID 0

@@ -8,7 +8,7 @@
 ; How to organize registers?
 ; Sys-V function call: rdi, rsi, rdx, rcx, r8, r9
 ; Syscall-tainted: rcx, r11
-; jotaOS syscall always comes with rdi=syscall id. The rest is customizable.
+; Strife syscall always comes with rdi=syscall id. The rest is customizable.
 ; In an RPC, let's set rax=server PID, rsi=remote procedure ID.
 
 ; If server always expects first Sys-V argument (rdi) as client's PID, then

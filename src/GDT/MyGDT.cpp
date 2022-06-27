@@ -11,7 +11,7 @@ void initGDT() {
 	GDT::CoolDescriptor nulldesc;
 	gdt.addDescriptor(nulldesc);
 
-	// The order has to be this because of syscall
+	// The order cannot be changed because of syscall
 
 	// Kernel code
 	GDT::CoolDescriptor kcode;

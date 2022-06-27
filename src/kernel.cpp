@@ -21,7 +21,7 @@ __attribute__((section(".memmap"), used))
 stivale2_mmap_entry savedmemmap[PAGE_SIZE / sizeof(stivale2_mmap_entry)];
 
 extern "C" void kmain(stivale2_struct* bootData) {
-	printf("Hold on to your seats, as jotaOS is booting\n\n");
+	printf("Hold on to your seats, as Strife is booting\n\n");
 
 	MemoryMap memmap(bootData);
 	if(memmap.empty())
