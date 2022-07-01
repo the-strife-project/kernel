@@ -43,26 +43,7 @@ extern generalTask
 extern running
 extern asmSyscallHandler
 
-; Acquire a lock
-; rax <- ptr to uint64_t to acquire
-%macro acquireTheLock 0
-  %%.acquire:
-    lock bts qword [rax], 0
-    jnc %%.acquired
-  %%.spinloop:
-    pause
-    test qword [rax], 1
-    jnz %%.spinloop
-    jmp %%.acquire
-  %%.acquired:
-    ; Got it :)
-%endmacro
-
-; Release a lock
-; rax <- ptr to uint64_t to release
-%macro releaseTheLock 0
-    btr qword [rax], 0
-%endmacro
+%include "aux.asm"
 
 global rpcSwitcher
 rpcSwitcher:
@@ -71,6 +52,9 @@ rpcSwitcher:
     ;   isn't one, get the remote handler, and jump.
     ; Critical: most of the time, RPC doesn't go through kernel's page table,
     ;   which gives only one context switch.
+
+    ; This is ring 0, about to write to userspace pages
+    SMAPOFF
 
     ; Save all registers. I didn't do this in the beginning, and let the
     ;   server painfully crash the client if it wanted to. However, some
@@ -248,6 +232,9 @@ rpcSwitcher:
     lea rax, [TASKS + rbp*8]
     releaseTheLock
 
+    ; Finished touching userspace
+    SMAPON
+
     ; There we go!
     o64 sysret
     ; That doesn't return
@@ -258,6 +245,9 @@ rpcReturn:
     ; We're on remote page table, and remote stack (top of first page)
     ; First page is kernel only and lower half, checked at page fault,
     ;   so it's safe to proceed.
+
+    ; Ring 0, about to read from userspace pages
+    SMAPOFF
 
     ; Get back to top of the return ticket
     mov r11, rsp ; Saving it for releasing later
@@ -342,6 +332,9 @@ rpcReturn:
     pop rcx
     pop rbx
 
+    ; Finished reading from userspace
+    SMAPON
+
     ; And get back
     o64 sysret
 
@@ -367,6 +360,7 @@ badPIDnorelease:
 
     mov rbx, qword [rel kpaging]
     mov cr3, rbx
+    SMAPON
 
     ; That's it, no need to save state
     jmp RPCerr

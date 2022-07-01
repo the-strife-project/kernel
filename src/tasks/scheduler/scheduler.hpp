@@ -30,13 +30,6 @@ public:
 		// Physical (kernel private) address of the task
 		Task* task = nullptr;
 
-		// Exported procedures (page)
-		uint64_t* procs = nullptr;
-		uint64_t nprocs = 0;
-
-		// Stacks for concurrency
-		uint64_t* stacks = nullptr;
-
 		// Whether last burst ended in I/O wait (true) or used all quantum (false)
 		bool ioBurst = true;
 		size_t lastPrio = 0; // For regular scheduling only

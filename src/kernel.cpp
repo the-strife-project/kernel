@@ -16,6 +16,7 @@
 #include <IPC/IPC.hpp>
 #include <drivers/ACPI/ACPI.hpp>
 #include <drivers/APIC/APIC.hpp>
+#include <CPU/sec/sec.hpp>
 
 __attribute__((section(".memmap"), used))
 stivale2_mmap_entry savedmemmap[PAGE_SIZE / sizeof(stivale2_mmap_entry)];
@@ -51,6 +52,7 @@ extern "C" void kmain(stivale2_struct* bootData) {
 
 	printf("Initializing APIC... ");
 	APIC::init();
+	// IOAPIC here
 	printf("[OK]\n");
 
 	printf("Finishing memory... ");
@@ -76,7 +78,10 @@ extern "C" void kmain(stivale2_struct* bootData) {
 
 	initScheduler();
 	enableSyscalls();
-	IPC::initPSNS();
+	IPC::initPSNS(); // TODO CHANGE
+
+	Security::enableSMEP();
+	Security::enableSMAP();
 
 	printf("Bootstrapping the loader... ");
 	Loader::bootstrapLoader();

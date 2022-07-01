@@ -14,6 +14,8 @@ global asmSyscallHandler
 extern rpcSwitcher
 extern syscallHandler
 
+%include "aux.asm"
+
 asmSyscallHandler:
     ; Welcome to the syscall routine. This function is executed on each "syscall".
 
@@ -23,6 +25,9 @@ asmSyscallHandler:
 
     ; At this point, the syscall is not RPC.
     ; The page table will change to a private stack soon.
+
+    ; This is ring 0, about to write to user pages, SMAP off
+    SMAPOFF
 
     ; Time to save everything. This is an actual SavedState repr.
     push r15
@@ -68,6 +73,9 @@ asmSyscallHandler:
     mov rbx, qword [rel kpaging]
     mov cr3, rbx
 
+    ; Finished accesing user pages
+    SMAPON
+
     ; We can now dereference the private stack
     mov rbx, rsp
     mov rsp, qword [rax]
@@ -99,6 +107,9 @@ returnToAsm:
     mov cr3, rdi
     mov rsp, rsi
 
+    ; This is ring 0, about to read userspace pages. SMAP off
+    SMAPOFF
+
     ; Restore segments
     pop rbx
     mov ds, bx
@@ -126,6 +137,9 @@ returnToAsm:
     ; Kernel syscall?
     cmp rdi, 0x0C
     jz .ret
+
+    ; Finished touching userspace
+    SMAPON
 
     ; Usual case, syscall from userspace
     o64 sysret
