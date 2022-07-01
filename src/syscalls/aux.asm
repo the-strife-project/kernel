@@ -1,5 +1,10 @@
 ; Some auxiliary macros
 
+%define SYSCALL_RPC 9
+%define SYSCALL_RPC_MORE_STACKS 11
+
+
+
 extern smapSupported
 
 %macro SMAPOFF 0

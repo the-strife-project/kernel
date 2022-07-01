@@ -8,6 +8,7 @@
 #include <IPC/IPC.hpp>
 #include <kkill>
 #include <panic/bruh.hpp>
+#include <bootstrap/bootstrap.hpp>
 
 // These kill current task, which is done lock-free
 inline static void onlyLoader(PID pid, Task* task) {
@@ -92,11 +93,8 @@ extern "C" uint64_t syscallHandler(size_t op, size_t arg1, size_t arg2,
 		break;
 
 	// --- IPC ---
-	case std::Syscalls::PUBLISH:
-		ret = IPC::publish(pid, arg1);
-		break;
-	case std::Syscalls::RESOLVE:
-		ret = IPC::resolve(arg1);
+	case std::Syscalls::FIND_PSNS:
+		ret = psnsPID;
 		break;
 	case std::Syscalls::HALT:
 		stask.task->saveStateSyscall();

@@ -1,6 +1,5 @@
 #include "sec.hpp"
 #include <asm.hpp>
-#include <klibc/klibc.hpp> // TEMPORAL
 
 bool smapSupported = false;
 
@@ -31,7 +30,6 @@ void Security::enableSMEP() {
 
 void Security::enableSMAP() {
 	if(cpuid7b() & 1 << CPUID_SMAP) {
-		printf("SMAP IS ON\n"); // TEMPORAL
 		setCR4(getCR4() | 1 << CPU_CR4_SMAP_BIT);
 		smapSupported = true;
 		SMAPon();

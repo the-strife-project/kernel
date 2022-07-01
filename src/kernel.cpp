@@ -78,7 +78,6 @@ extern "C" void kmain(stivale2_struct* bootData) {
 
 	initScheduler();
 	enableSyscalls();
-	IPC::initPSNS(); // TODO CHANGE
 
 	Security::enableSMEP();
 	Security::enableSMAP();

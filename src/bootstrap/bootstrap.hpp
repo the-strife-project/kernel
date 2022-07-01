@@ -12,6 +12,8 @@
 #include <panic/panic.hpp>
 #include <tasks/task/task.hpp>
 
+extern PID psnsPID;
+
 namespace Bootstrap {
 	PID run(const char* name, size_t moduleID);
 	void bootstrap();

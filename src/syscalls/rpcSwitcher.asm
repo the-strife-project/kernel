@@ -24,7 +24,6 @@
 ; Task array is at last GB of virtual memory
 %define TASKS ((1 << 64) - (1 << 30) - 1)
 %define NTASKS (1 << 16)
-%define SYS_RPC_MORE_STACKS 12
 
 ; SchedulerTask: offset: paging
 %define Off_paging 0
@@ -154,7 +153,7 @@ rpcSwitcher:
     ; Stack is now working
 
     mov r11, rsi ; Instead of pushing
-    mov rdi, SYS_RPC_MORE_STACKS
+    mov rdi, SYSCALL_RPC_MORE_STACKS
     mov rsi, rbp ; rax at entry time
     push rax ; Remote cr3
 

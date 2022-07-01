@@ -3,10 +3,22 @@
 #include <tasks/PIDs/PIDs.hpp>
 #include <panic/bruh.hpp>
 
+PID psnsPID = 0;
+
 void Bootstrap::bootstrap() {
+	// --- PSNS ---
+	psnsPID = run("PSNS", BootModules::MODULE_ID_PSNS);
+	auto pp = getTask(psnsPID);
+	pp.acquire();
+	Task* psns = pp.get()->task;
+	thisCoreIsNowRunning(psnsPID);
+	pp.release();
+	psns->dispatchSaving();
+	printf("[OK]\n");
+
 	// --- term ---
 	PID termPID = run("term", BootModules::MODULE_ID_TERM);
-	auto pp = getTask(termPID);
+	pp = getTask(termPID);
 	pp.acquire();
 	Task* term = pp.get()->task;
 

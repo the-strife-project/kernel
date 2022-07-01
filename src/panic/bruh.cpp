@@ -2,9 +2,6 @@
 #include <klibc/klibc.hpp>
 
 const char* const msgs[] = {
-	"HT64: NULL KEY",
-	"HT64: NO SPACE",
-	"HT64: FULL ON LOOKUP",
 	"Syscall from PID 0",
 	"getTask() on empty SchedulerTask*",
 	"On bootstrap, acquisition got null",

@@ -10,6 +10,7 @@ namespace BootModules {
 	enum {
 		MODULE_ID_LOADER,
 		MODULE_ID_STDLIB,
+		MODULE_ID_PSNS,
 		MODULE_ID_TERM,
 		MODULE_ID_PCI,
 		MODULE_ID_AHCI,

@@ -1,6 +1,5 @@
 %define KDATA 0x10
 %define UDATA 0x1b
-%define SYSCALL_RPC 10
 
 extern privStacks
 extern kpaging
@@ -135,7 +134,7 @@ returnToAsm:
     pop r15
 
     ; Kernel syscall?
-    cmp rdi, 0x0C
+    cmp rdi, SYSCALL_RPC_MORE_STACKS
     jz .ret
 
     ; Finished touching userspace
