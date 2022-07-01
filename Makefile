@@ -10,5 +10,5 @@ all: $(RESULT)
 	@
 
 %: force
-	@$(MAKE) -f ../helper/Makefile $@ --no-print-directory
+	@$(MAKE) -f $(STRIFE_HELPER)/Makefile $@ --no-print-directory
 force: ;
