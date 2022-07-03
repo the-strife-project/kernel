@@ -25,7 +25,10 @@ void BootModules::save(stivale2_struct* bootData) {
 		size_t end = arr[i].end + HIGHER_HALF;
 		size_t sz = end - begin;
 
-		size_t code = arr[i].string[0] - '0'; // ugly atoi()
+		// ugly atoi()
+		size_t code = arr[i].string[0] - '0';
+		code *= 10;
+		code += arr[i].string[1] - '0';
 		if(code <= NMODULES) {
 			begins[code] = begin;
 			sizes[code] = sz;

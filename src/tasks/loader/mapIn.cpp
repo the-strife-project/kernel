@@ -17,19 +17,25 @@ bool Loader::mapIn(PID pid, uint64_t local, uint64_t remote) {
 
 	auto ppr = getTask(pid);
 	ppr.acquire();
-	if(ppr.isNull())
+	if(ppr.isNull()) {
+		ppr.release();
 		return false;
+	}
 	Paging rp = ppr.get()->paging;
 
 	uint64_t phys = lp.getPhys(local);
 
 	// Just make sure it's not zero
-	if(!phys)
+	if(!phys) {
+		ppr.release();
 		return false;
+	}
 
 	// Should be zero in remote
-	if(rp.getPhys(remote))
+	if(rp.getPhys(remote)) {
+		ppr.release();
 		return false;
+	}
 
 	// Map in remote, unmap in local
 	size_t flags = 0;

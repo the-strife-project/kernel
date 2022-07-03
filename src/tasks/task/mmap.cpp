@@ -8,15 +8,17 @@ uint64_t Task::mmap(size_t npages, size_t prot) {
 		return 0;
 
 	// Permissions
-		size_t flags = 0;
-		if(!(prot & std::MMAP_WRITE)) flags |= Paging::MapFlag::RO;
-		if(!(prot & std::MMAP_EXEC))  flags |= Paging::MapFlag::NX;
-		flags |= Paging::MapFlag::USER;
+	size_t flags = 0;
+	if(!(prot & std::MMAP_WRITE)) flags |= Paging::MapFlag::RO;
+	if(!(prot & std::MMAP_EXEC))  flags |= Paging::MapFlag::NX;
+	flags |= Paging::MapFlag::USER;
 
 	uint64_t virt = ret;
 	while(npages--) {
 		// Allocate
 		uint64_t page = PMM::calloc();
+		if(!page)
+			return 0;
 
 		// Map time
 		paging.map(virt, page, PAGE_SIZE, flags);

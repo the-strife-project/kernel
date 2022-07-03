@@ -34,7 +34,7 @@ void Bootstrap::bootstrap() {
 	uint64_t kcursor = kpaging.getPhys(vkcursor); // Its physical
 	uint64_t pkcursor = term->getASLR().get(1, GROWS_UPWARD, PAGE_SIZE); // Process
 	term->getPaging().map(pkcursor, kcursor, PAGE_SIZE, flags);
-	nowSyncWithTerm((uint64_t*)kcursor);
+	nowSyncWithTerm((uint64_t*)vkcursor);
 
 	// Send framebuffer address and cursor sync
 	term->getState().regs.rdi = fb;
@@ -65,6 +65,16 @@ void Bootstrap::bootstrap() {
 	ahci->dispatchSaving();
 	printf("[OK]\n");
 
+	// --- ramblock ---
+	PID ramblockPID = run("ramblock", BootModules::MODULE_ID_RAMBLOCK);
+	pp = getTask(ramblockPID);
+	pp.acquire();
+	Task* ramblock = pp.get()->task;
+	thisCoreIsNowRunning(ramblockPID);
+	pp.release();
+	ramblock->dispatchSaving();
+	printf("[OK]\n");
+
 	// --- block ---
 	PID blockPID = run("block", BootModules::MODULE_ID_BLOCK);
 	pp = getTask(blockPID);
@@ -86,11 +96,22 @@ void Bootstrap::bootstrap() {
 	iso->dispatchSaving();
 	printf("[OK]\n");
 
+	// --- STRIFEFS ---
+	PID fsPID = run("StrifeFS", BootModules::MODULE_ID_STRIFEFS);
+	pp = getTask(fsPID);
+	pp.acquire();
+	Task* fs = pp.get()->task;
+	thisCoreIsNowRunning(fsPID);
+	pp.release();
+	fs->dispatchSaving();
+	printf("[OK]\n");
+
 	// --- VFS ---
 	PID vfsPID = run("VFS", BootModules::MODULE_ID_VFS);
 	pp = getTask(vfsPID);
 	pp.acquire();
 	Task* vfs = pp.get()->task;
+	vfs->getState().regs.rdi = true; // Booting from ISO
 	thisCoreIsNowRunning(vfsPID);
 	pp.release();
 	vfs->dispatchSaving();
