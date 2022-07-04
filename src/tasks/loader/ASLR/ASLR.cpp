@@ -1,5 +1,5 @@
 #include "ASLR.hpp"
-#include <klibc/random/random.hpp>
+#include <rng/rng.hpp>
 
 #define MIN_ADDRESS 0x0000000000100000
 #define MAX_ADDRESS 0x00007FFFFFFFFFFF

@@ -17,6 +17,7 @@
 #include <drivers/ACPI/ACPI.hpp>
 #include <drivers/APIC/APIC.hpp>
 #include <CPU/sec/sec.hpp>
+#include <rng/rng.hpp>
 
 __attribute__((section(".memmap"), used))
 stivale2_mmap_entry savedmemmap[PAGE_SIZE / sizeof(stivale2_mmap_entry)];
@@ -81,6 +82,10 @@ extern "C" void kmain(stivale2_struct* bootData) {
 
 	Security::enableSMEP();
 	Security::enableSMAP();
+
+	printf("Gathering entropy... ");
+	initRandom();
+	printf("[OK]\n");
 
 	printf("Bootstrapping the loader... ");
 	Loader::bootstrapLoader();

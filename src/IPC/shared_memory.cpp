@@ -1,5 +1,5 @@
 #include "IPC.hpp"
-#include <klibc/random/random.hpp>
+#include <rng/rng.hpp>
 #include <tasks/PIDs/PIDs.hpp>
 
 static Task::SharedSegment getSM(Task* target, std::SMID smid, bool create=false) {
