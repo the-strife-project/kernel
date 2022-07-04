@@ -11,9 +11,5 @@
 	printf("Should kill now because of 0x%x\n", reason);
 
 	hlt();
-
-	hlt();
 	while(true);
 }
-
-// exit() would be here

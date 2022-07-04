@@ -4,6 +4,7 @@
 #include <panic/bruh.hpp>
 
 PID psnsPID = 0;
+PID vfsPID = 0;
 
 void Bootstrap::bootstrap() {
 	// --- PSNS ---
@@ -107,7 +108,7 @@ void Bootstrap::bootstrap() {
 	printf("[OK]\n");
 
 	// --- VFS ---
-	PID vfsPID = run("VFS", BootModules::MODULE_ID_VFS);
+	vfsPID = run("VFS", BootModules::MODULE_ID_VFS);
 	pp = getTask(vfsPID);
 	pp.acquire();
 	Task* vfs = pp.get()->task;

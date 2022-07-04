@@ -5,6 +5,8 @@
 #include "alg/MLFQ.hpp"
 #include <klibc/memory/memory.hpp>
 #include <CPU/SMP/SMP.hpp>
+#include <loader>
+#include <kkill>
 
 #define NULL_PID 0
 
@@ -25,7 +27,20 @@ public:
 		// Used by RPC outside of paging (no access to task)
 		Paging paging;
 
+		// Who called LOAD_EXEC on me
 		PID parent = 0;
+
+		// If I called LOAD_EXEC, the return value of the loader
+		size_t lastLoaderError = std::Loader::Error::NONE;
+
+		// Children
+		struct Child {
+			PID pid = NULL_PID;
+			size_t kr = std::kkill::OK; // Kill reason
+			size_t ret = ~0ull; // Exit value
+			bool waiting = false; // Is parent waiting?
+		};
+		List<Child> children;
 
 		// Physical (kernel private) address of the task
 		Task* task = nullptr;
@@ -33,6 +48,9 @@ public:
 		// Whether last burst ended in I/O wait (true) or used all quantum (false)
 		bool ioBurst = true;
 		size_t lastPrio = 0; // For regular scheduling only
+
+		// Some methods
+		void exit(size_t code);
 	};
 
 private:

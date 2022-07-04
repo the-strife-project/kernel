@@ -33,6 +33,13 @@ const char* const msgs[] = {
 	"No APIC detected",
 	"Turns out APIC address was already in use",
 	"APIC address is weird",
+
+	"AHCI driver detected no devices.\n"
+	"Strife does not support IDE, which is what you're probably using.\n"
+	"If this is a VM, configure it to use AHCI instead of IDE.\n"
+	"VirtualBox might also cause some problems. If it doesn't work, try qemu.",
+
+	"Critical process died",
 };
 
 void panic(size_t id, bool doNotHalt) {

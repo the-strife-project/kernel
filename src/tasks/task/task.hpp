@@ -78,6 +78,7 @@ public:
 
 	inline void jump(uint64_t addr) { rip = addr; }
 	[[noreturn]] void kill(size_t reason);
+	void destroy();
 
 	uint64_t mmap(size_t npages, size_t prot);
 	uint64_t mapPhys(uint64_t phys, size_t npages, size_t prot);

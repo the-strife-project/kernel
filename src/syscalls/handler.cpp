@@ -57,8 +57,8 @@ extern "C" uint64_t syscallHandler(size_t op, size_t arg1, size_t arg2,
 	switch(op) {
 	// --- GENERIC ---
 	case std::Syscalls::EXIT:
-		printf("Exit value: 0x%x\n", arg1);
-		hlt();
+		stask.exit(arg1);
+		goBack = false;
 		break;
 	case std::Syscalls::MORE_HEAP:
 		ret = stask.task->moreHeap(arg1);
