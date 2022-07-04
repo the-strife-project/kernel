@@ -15,7 +15,7 @@
 extern PID psnsPID;
 
 namespace Bootstrap {
-	PID run(const char* name, size_t moduleID);
+	PID run(const char* name, size_t moduleID, bool noprint=false);
 	void bootstrap();
 };
 

@@ -20,6 +20,9 @@ asmRestoreKernel:
     mov r13, qword [rax+8*3]
     mov r14, qword [rax+8*4]
     mov r15, qword [rax+8*5]
+
+    ; State has been consumed
+    mov qword [rel savedKernelState_rsp], 0
     ret
 asmDispatchSaving:
     mov qword [rel savedKernelState_rsp], rsp

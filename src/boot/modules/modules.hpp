@@ -19,6 +19,7 @@ namespace BootModules {
 		MODULE_ID_ISO9660,
 		MODULE_ID_STRIFEFS,
 		MODULE_ID_VFS,
+		MODULE_ID_INIT,
 		NMODULES
 	};
 

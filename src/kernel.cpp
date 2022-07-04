@@ -92,7 +92,5 @@ extern "C" void kmain(stivale2_struct* bootData) {
 
 	// Bootstrapping is done. Time to fire up the rest of the cores.
 
-	printf("\nThat's all for now folks!\n");
-	hlt();
-	//schedule();
+	schedule();
 }

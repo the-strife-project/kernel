@@ -5,8 +5,10 @@
 
 // Common function for all critical processes
 
-PID Bootstrap::run(const char* name, size_t moduleID) {
-	printf("* %s ", name);
+PID Bootstrap::run(const char* name, size_t moduleID, bool noprint) {
+	if(!noprint)
+		printf("* %s ", name);
+
 	uint64_t beg = BootModules::begins[moduleID];
 	uint64_t sz = BootModules::sizes[moduleID];
 	if(!beg) {

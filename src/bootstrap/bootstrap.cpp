@@ -116,4 +116,9 @@ void Bootstrap::bootstrap() {
 	pp.release();
 	vfs->dispatchSaving();
 	printf("[OK]\n");
+
+	// --- INIT ---
+	printf("\nGoing for init\n");
+	PID initPID = run(nullptr, BootModules::MODULE_ID_INIT, true);
+	sched.add(initPID);
 }
