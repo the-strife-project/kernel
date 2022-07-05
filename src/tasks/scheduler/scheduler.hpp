@@ -27,10 +27,10 @@ public:
 		// Used by RPC outside of paging (no access to task)
 		Paging paging;
 
-		// Who called LOAD_EXEC on me
+		// Who called EXEC on me
 		PID parent = 0;
 
-		// If I called LOAD_EXEC, the return value of the loader
+		// If I called EXEC, the return value of the loader
 		size_t lastLoaderError = std::Loader::Error::NONE;
 
 		// Children
@@ -51,6 +51,8 @@ public:
 
 		// Some methods
 		void exit(size_t code);
+		void kill(PID me, size_t reason);
+		void _commonDie(PID me, size_t reason, size_t code);
 	};
 
 private:
@@ -92,9 +94,17 @@ public:
 };
 
 extern Scheduler sched;
-extern "C" PID* running; // Which PID is running on each CPU
-inline void thisCoreIsNowRunning(PID pid) { running[whoami()] = pid; }
-inline PID whatIsThisCoreRunning() { return running[whoami()]; }
+extern "C" PID* origRunning; // Which PID is running on each CPU
+extern "C" PID* runningAs; // RPC PID
+
+inline void setOrigRunning(PID pid) {
+	auto who = whoami();
+	origRunning[who] = runningAs[who] = pid;
+}
+inline PID getOrigRunning() { return origRunning[whoami()]; }
+inline void setRunningAs(PID pid) { runningAs[whoami()] = pid; }
+inline PID getRunningAs() { return runningAs[whoami()]; }
+
 void initScheduler();
 
 extern "C" uint64_t savedKernelState_rsp;

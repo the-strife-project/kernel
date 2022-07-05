@@ -11,16 +11,16 @@
 #include <bootstrap/bootstrap.hpp>
 
 // These kill current task, which is done lock-free
-inline static void onlyLoader(PID pid, Task* task) {
+inline static void onlyLoader(PID pid, Scheduler::SchedulerTask& stask) {
 	if(pid != Loader::LOADER_PID)
-		task->kill(std::kkill::LOADER_SYSCALL);
+		stask.kill(pid, std::kkill::LOADER_SYSCALL);
 }
 
-extern "C" void RPCerr(Task* task) {
-	task->kill(std::kkill::RPC_BAD_PID);
+extern "C" void RPCerr(Scheduler::SchedulerTask* task) {
+	task->kill(getRunningAs(), std::kkill::RPC_BAD_PID);
 }
 
-inline void onlyKernel(Scheduler::SchedulerTask& stask) {
+inline void onlyKernel(PID pid, Scheduler::SchedulerTask& stask) {
 	// Check if syscall was called by the kernel
 	// That is, RIP must have been at higher half
 	// RIP is one of the fields at the SavedState, as RCX
@@ -28,14 +28,14 @@ inline void onlyKernel(Scheduler::SchedulerTask& stask) {
 	SavedState copy;
 	pmemcpy(&copy, stask.paging, ss, sizeof(SavedState));
 	if((copy.regs.rcx & (1ull << 63)) == 0)
-		stask.task->kill(std::kkill::KERNEL_SYSCALL);
+		stask.kill(pid, std::kkill::KERNEL_SYSCALL);
 }
 
 // Just add arguments as they needed. va_list doesn't work here.
 extern "C" uint64_t syscallHandler(size_t op, size_t arg1, size_t arg2,
 								   size_t arg3) {
 	uint64_t ret = 0; // Return value of this syscall
-	PID pid = whatIsThisCoreRunning();
+	PID pid = getRunningAs();
 	if(!pid)
 		bruh(Bruh::SYSCALL_FROM_PID_0);
 
@@ -69,16 +69,16 @@ extern "C" uint64_t syscallHandler(size_t op, size_t arg1, size_t arg2,
 
 	// --- LOADER ONLY ---
 	case std::Syscalls::BACK_FROM_LOADER:
-		onlyLoader(pid, stask.task);
+		onlyLoader(pid, stask);
 		Loader::imBack(arg1, arg2, arg3);
 		goBack = false; // That's it for now
 		break;
 	case std::Syscalls::MAKE_PROCESS:
-		onlyLoader(pid, stask.task);
+		onlyLoader(pid, stask);
 		ret = Loader::makeProcess();
 		break;
 	case std::Syscalls::ASLR_GET: {
-		onlyLoader(pid, stask.task);
+		onlyLoader(pid, stask);
 		auto ppaslr = getTask(arg1);
 		ppaslr.acquire();
 		if(ppaslr.isNull())
@@ -88,7 +88,7 @@ extern "C" uint64_t syscallHandler(size_t op, size_t arg1, size_t arg2,
 		ppaslr.release();
 		} break;
 	case std::Syscalls::MAP_IN:
-		onlyLoader(pid, stask.task);
+		onlyLoader(pid, stask);
 		ret = Loader::mapIn(arg1, arg2, arg3);
 		break;
 
@@ -105,7 +105,7 @@ extern "C" uint64_t syscallHandler(size_t op, size_t arg1, size_t arg2,
 		stask.task->setRPCentry(arg1);
 		break;
 	case std::Syscalls::RPC_MORE_STACKS:
-		onlyKernel(stask);
+		onlyKernel(pid, stask);
 		ret = IPC::rpcMoreStacks(arg1);
 		break;
 
@@ -123,22 +123,34 @@ extern "C" uint64_t syscallHandler(size_t op, size_t arg1, size_t arg2,
 		ret = IPC::smMap(stask.task, arg1);
 		break;
 
-	// --- OTHER STUFF ---
-	case std::Syscalls::GET_IO:
+	// --- SPECIAL PERMISSIONS ---
+	case std::Syscalls::ALLOW_IO:
 		// A check would go here (running as system?)
 		ret = getIO(pid, stask.task);
 		break;
+	case std::Syscalls::ALLOW_PHYS:
+		// Check here!
+		stask.task->allowPhys();
+		ret = 1;
+		break;
 	case std::Syscalls::GET_PHYS:
-		// Check here
+		if(!stask.task->isPhysAllowed())
+			stask.kill(pid, std::kkill::PHYS_NOT_ALLOWED);
+
 		ret = stask.task->getPaging().getPhys(arg1);
 		break;
 	case std::Syscalls::MAP_PHYS:
-		// Another check here
+		if(!stask.task->isPhysAllowed())
+			stask.kill(pid, std::kkill::PHYS_NOT_ALLOWED);
+
 		ret = stask.task->mapPhys(arg1, arg2, arg3);
 		break;
 
+	// --- TASK-RELATED ---
+	
+
 	default:
-		stask.task->kill(std::kkill::UNKNOWN_SYSCALL);
+		stask.kill(pid, std::kkill::UNKNOWN_SYSCALL);
 		goBack = false;
 	}
 

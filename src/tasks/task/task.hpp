@@ -43,6 +43,7 @@ private:
 	SavedState state; // regs + rflags
 	uint64_t rip, rsp;
 	uint64_t heapBottom, stackTop;
+	PID as; // Who am I running as?
 
 	// Properties
 	uint64_t prog, heap, stack;
@@ -50,6 +51,7 @@ private:
 	ASLR aslr;
 
 	SharedSegment* shared = nullptr;
+	bool physAllowed = false;
 
 	void mapGeneralTask(Paging, uint64_t whereami);
 
@@ -64,6 +66,9 @@ public:
 		  aslr(load.aslr)
 	{ mapGeneralTask(load.paging, whereami); }
 
+	inline void setAs(PID pid) { as = pid; }
+	inline PID getAs() const { return as; }
+
 	inline uint64_t* getRPCStacks() { return rpcStacks; }
 	inline Paging getPaging() { return paging; }
 	uint64_t moreHeap(size_t npages);
@@ -77,7 +82,6 @@ public:
 	inline void setRPCentry(uint64_t x) { rpcEntry = x; }
 
 	inline void jump(uint64_t addr) { rip = addr; }
-	[[noreturn]] void kill(size_t reason);
 	void destroy();
 
 	uint64_t mmap(size_t npages, size_t prot);
@@ -85,6 +89,9 @@ public:
 
 	SharedSegment* getShared() { return shared; }
 	void setShared(SharedSegment* ptr) { shared = ptr; }
+
+	bool isPhysAllowed() const { return physAllowed; }
+	void allowPhys() { physAllowed = true; }
 };
 
 extern "C" void asmRestoreKernel();

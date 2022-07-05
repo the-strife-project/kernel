@@ -27,8 +27,9 @@ uint64_t savedKernelState[N_CALLEE_SAVED]; // callee-saved only
 	}
 
 	// Got it
-	thisCoreIsNowRunning(pid);
 	Task* task = pp.get()->task;
+	setOrigRunning(pid);
+	setRunningAs(task->getAs());
 	pp.release();
 
 	task->dispatch();

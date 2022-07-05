@@ -4,7 +4,8 @@
 
 Task* generalTask;
 Scheduler sched;
-PID* running;	// Which PID is running each CPU
+PID* origRunning;
+PID* runningAs;
 
 void initScheduler() {
 	// generalTask starts as nullptr
@@ -12,8 +13,9 @@ void initScheduler() {
 	generalTask = nullptr;
 
 	sched = Scheduler();
+	origRunning = (PID*)VMM::Private::calloc();
 	// This must be public memory, it's changed in RPC
-	running = (PID*)VMM::Public::calloc();
+	runningAs = (PID*)VMM::Public::calloc();
 
 	// Reserve null PID
 	assignPID(Scheduler::SchedulerTask());

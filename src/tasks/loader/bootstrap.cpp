@@ -18,7 +18,7 @@
 // ↓ 1GB ↓
 #define LOADER_HEAP (1ull << 30)
 // ↓ 64 GB ↓
-#define LOADER_STACK (64 * (1ull << 30))
+#define LOADER_STACK (64ull * (1ull << 30))
 
 PID Loader::LOADER_PID;
 
@@ -83,6 +83,7 @@ void Loader::bootstrapLoader() {
 	paging.setData((Paging::PML4E*)PMM::calloc());
 	// Add the kernel global entry (last PML4E), in case the TLB gets flushed
 	paging.getData()[PAGE_ENTRIES - 1] = kpaging.getData()[PAGE_ENTRIES - 1];
+	// No need to worry about generalTask, loader doesn't RPC
 
 	// ASLR object
 	ASLR aslr;
@@ -123,9 +124,10 @@ void Loader::bootstrapLoader() {
 	schedTask.paging = paging;
 
 	Loader::LOADER_PID = assignPID(schedTask);
+	task->setAs(Loader::LOADER_PID);
 
 	// Run!
-	thisCoreIsNowRunning(Loader::LOADER_PID);
+	setOrigRunning(Loader::LOADER_PID);
 	schedTask.task->dispatchSaving();
 
 	auto pp = getTask(Loader::LOADER_PID);

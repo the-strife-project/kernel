@@ -49,7 +49,7 @@ void Task::freeStack() {
 		auto phys = paging.getPhys(current);
 		paging.unmap(current);
 		// Might be some issues with offsets: stackTop might be in a non-allocated
-		//   page, which is perfectly valid. That's why there's a check below
+		//   page, which is perfectly valid. That's why the check below
 		if(phys)
 			PMM::free(phys);
 		current += PAGE_SIZE;

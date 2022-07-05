@@ -25,7 +25,7 @@ PID Bootstrap::run(const char* name, size_t moduleID, bool noprint) {
 	Task* loader = pp.get()->task;
 	loader->getState().regs.rax = sz;
 
-	thisCoreIsNowRunning(Loader::LOADER_PID);
+	setOrigRunning(Loader::LOADER_PID);
 	pp.release();
 	loader->dispatchSaving();
 	pp.acquire();
@@ -41,7 +41,7 @@ PID Bootstrap::run(const char* name, size_t moduleID, bool noprint) {
 
 	Loader::freeELF();
 	PID ret = Loader::last_pid;
-	thisCoreIsNowRunning(NULL_PID);
+	setOrigRunning(NULL_PID);
 	pp.release();
 
 	pp = getTask(ret);

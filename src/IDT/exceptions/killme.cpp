@@ -4,15 +4,19 @@
 
 // Many exceptions result in the death of the process that caused them
 [[noreturn]] void exceptionKill(size_t reason) {
-	auto pp = getTask(whatIsThisCoreRunning());
+	PID me = getRunningAs();
+
+	auto pp = getTask(me);
 	pp.acquire();
 	if(pp.isNull()) {
 		// No biggie
-		thisCoreIsNowRunning(NULL_PID);
+		setOrigRunning(NULL_PID);
 		pp.release();
 		schedule();
 	}
 
-	Task* task = pp.get()->task;
-	task->kill(reason);
+	pp.get()->kill(me, reason);
+	pp.release();
+
+	schedule();
 }

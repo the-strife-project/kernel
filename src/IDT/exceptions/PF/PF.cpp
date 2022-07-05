@@ -13,7 +13,8 @@ struct PFErr {
 
 extern "C" void catchPF(size_t err, uint64_t iretqs, size_t rax) {
 	// First check: caused by user, at lower half, in kernel-only
-	if(err & (1 << PFErr::U)) { // Caused by user
+	if(err & (1 << PFErr::U)) {
+		// Caused by user
 		if(!(getCR2() >> 63)) { // Lower half
 			if(err & (1 << PFErr::P)) { // Page protection
 				if(!(getCR2() & 0xFFF)) { // Fault at page beginning
@@ -25,6 +26,11 @@ extern "C" void catchPF(size_t err, uint64_t iretqs, size_t rax) {
 				}
 			}
 		}
+
+		// TODO: Check more stack here
+
+		// Unrecognized page fault by user
+		//exceptionKill(std::kkill::SEGFAULT);
 	}
 	// Some checks would go here
 	// Remember that PF in ring 0 is not necessarily bad
@@ -56,13 +62,6 @@ extern "C" void catchPF(size_t err, uint64_t iretqs, size_t rax) {
 
 	// Time to return to the kernel
 	kpaging.load();
-
-	// TODO This check would need to be at the top of the function.
-	if(err & (1 << PFErr::U)) {
-		// PF from userspace. No biggie.
-		// Assume segfault by now.
-		exceptionKill(std::kkill::SEGFAULT);
-	}
 
 	hlt();
 }

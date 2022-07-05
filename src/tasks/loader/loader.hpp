@@ -24,7 +24,7 @@ namespace Loader {
 	extern size_t last_entry;
 
 	// Place where ELFs are loaded in the loader
-	const uint64_t ELF_BASE = 128 * (1ull << 30);
+	const uint64_t ELF_BASE = 128ull * (1ull << 30);
 	// Max ELF size
 	const uint64_t MAX_ELF_SIZE = 1ull << 30;
 

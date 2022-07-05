@@ -43,12 +43,6 @@ private:
 		T** out;
 	} u;
 
-	void checkAcquired() const {
-		uint64_t ptr = (uint64_t)*(u.out);
-		if((ptr & 1) == 0)
-			bruh(Bruh::PROTPTR_NOT_ACQUIRED);
-	}
-
 public:
 	ProtPtr() = default;
 	ProtPtr(T** ptr) { u.in = ptr; }
@@ -56,22 +50,31 @@ public:
 	inline void acquire() { u.lock->acquire(); }
 	inline void release() { u.lock->release(); }
 
+	void assertAcquired() const {
+		uint64_t ptr = (uint64_t)*(u.out);
+		if((ptr & 1) == 0)
+			bruh(Bruh::PROTPTR_NOT_ACQUIRED);
+	}
+
 	// Object access
-	//T* operator->() const {
 	T* get() const {
 		// As the lock has been acquired, LSB=0
-		checkAcquired();
+		assertAcquired();
 		uint64_t ret = (uint64_t)*(u.out);
 		ret &= ~1;
 		return (T*)ret;
 	}
 
 	bool isNull() const {
-		checkAcquired();
+		assertAcquired();
 		uint64_t ret = (uint64_t)*(u.out);
 		return ret == 1; // Acquired, so not 0, but 1
 	}
 
+	void setNull() {
+		assertAcquired();
+		*(u.out) = (T*)1; // Acquired, so not 0, but 1
+	}
 };
 
 #endif

@@ -39,7 +39,7 @@ extern kpaging
 extern whoami
 extern RPCerr
 extern generalTask
-extern running
+extern runningAs
 extern asmSyscallHandler
 
 %include "aux.asm"
@@ -78,7 +78,7 @@ rpcSwitcher:
     mov rbp, rax
 
     ; Who is client?
-    mov rbx, [rel running]
+    mov rbx, [rel runningAs]
     call whoami
     mov r15, qword [rbx + rax*8]
     ; Client PID will always be in r15 now
@@ -199,8 +199,8 @@ rpcSwitcher:
     mov rax, qword [rel generalTask]
     mov rcx, qword [rax + Off_rpcEntry] ; Ready for sysret
 
-    ; Change "running" value to server
-    mov rbx, [rel running]
+    ; Change "runningAs" value to server now, since we know it's ok
+    mov rbx, [rel runningAs]
     call whoami
     mov qword [rbx + rax*8], rbp
     ; Congrats, we are now running as remote PID
@@ -268,9 +268,9 @@ rpcReturn:
     test rax, rax
     jz badRPCReturn ; It's dead!
 
-    ; Ok, we're fine. Mark as running
+    ; Ok, we're fine. Mark as runningAs
     call whoami
-    mov rcx, [rel running]
+    mov rcx, [rel runningAs]
     mov qword [rcx + rax*8], r15
     ; We're now running as client once again
 

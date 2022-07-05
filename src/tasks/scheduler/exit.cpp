@@ -5,7 +5,7 @@ extern PID vfsPID;
 
 void Scheduler::SchedulerTask::exit(size_t code) {
 	// If exit() was called, it surely was in this core, no doubt
-	PID me = whatIsThisCoreRunning();
+	PID me = getRunningAs();
 
 	// Special case: VFS and code 99
 	if(me == vfsPID && code == 99)
@@ -13,18 +13,41 @@ void Scheduler::SchedulerTask::exit(size_t code) {
 
 	// Critical process?
 	if(!parent)
-		panic(Panic::CRITICAL_PROCESS_EXITED);
+		panic(Panic::CRITICAL_PROCESS_DIED);
+
+	_commonDie(me, std::kkill::OK, code);
+}
+
+void Scheduler::SchedulerTask::kill(PID me, size_t reason) {
+	// Here it's not possible to get the PID so it's necessary as parameter
+	if(!parent) {
+		panic(Panic::CRITICAL_PROCESS_DIED, true);
+		printf("\nIt was PID 0x%x, reason: 0x%x", me, reason);
+		hlt();
+		while(true);
+	}
+
+	_commonDie(me, reason, ~0ull);
+}
+
+void Scheduler::SchedulerTask::_commonDie(PID me, size_t reason, size_t code) {
+	// My protected pointer
+	auto mypp = getTask(me);
+	// Must be acquired at this point!
+	mypp.assertAcquired();
+
+	// Let cores know I have died (TODO, IPIs)
 
 	// Let parent know their child exited
-	auto pp = getTask(parent);
-	pp.acquire();
+	auto ppp = getTask(parent);
+	ppp.acquire();
 	// Alive? 🤨
-	if(!pp.isNull()) {
+	if(!ppp.isNull()) {
 		// Good, set return value
-		SchedulerTask* stask = pp.get();
+		SchedulerTask* stask = ppp.get();
 		for(auto& x : stask->children) {
 			if(x.pid == me) {
-				x.kr = std::kkill::OK; // Not killed
+				x.kr = reason;
 				x.ret = code;
 				if(x.waiting) {
 					// Parent is waiting, wake them up (TODO)
@@ -32,9 +55,17 @@ void Scheduler::SchedulerTask::exit(size_t code) {
 			}
 		}
 	}
-	pp.release();
+	ppp.release();
 
-	// Finally, destroy the task
+	// Destroy the PCB
 	this->task->destroy();
-	// TODO: remember to set null pointer in PID table
+
+	// Free myself
+	// free() PUBLIC MEMORY TODO
+
+	// Set nullptr in PID table for whoever comes next
+	mypp.setNull();
+	// And we're done
+
+	// TODO: if runningAs != origRunning, kill callers
 }

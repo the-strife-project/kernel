@@ -12,7 +12,7 @@ void Bootstrap::bootstrap() {
 	auto pp = getTask(psnsPID);
 	pp.acquire();
 	Task* psns = pp.get()->task;
-	thisCoreIsNowRunning(psnsPID);
+	setOrigRunning(psnsPID);
 	pp.release();
 	psns->dispatchSaving();
 	printf("[OK]\n");
@@ -41,7 +41,7 @@ void Bootstrap::bootstrap() {
 	term->getState().regs.rdi = fb;
 	term->getState().regs.rsi = pkcursor;
 
-	thisCoreIsNowRunning(termPID);
+	setOrigRunning(termPID);
 	pp.release();
 	term->dispatchSaving();
 	printf("[OK]\n");
@@ -51,7 +51,7 @@ void Bootstrap::bootstrap() {
 	pp = getTask(pciPID);
 	pp.acquire();
 	Task* pci = pp.get()->task;
-	thisCoreIsNowRunning(pciPID);
+	setOrigRunning(pciPID);
 	pp.release();
 	pci->dispatchSaving();
 	printf("[OK]\n");
@@ -61,7 +61,7 @@ void Bootstrap::bootstrap() {
 	pp = getTask(ahciPID);
 	pp.acquire();
 	Task* ahci = pp.get()->task;
-	thisCoreIsNowRunning(ahciPID);
+	setOrigRunning(ahciPID);
 	pp.release();
 	ahci->dispatchSaving();
 	printf("[OK]\n");
@@ -71,7 +71,7 @@ void Bootstrap::bootstrap() {
 	pp = getTask(ramblockPID);
 	pp.acquire();
 	Task* ramblock = pp.get()->task;
-	thisCoreIsNowRunning(ramblockPID);
+	setOrigRunning(ramblockPID);
 	pp.release();
 	ramblock->dispatchSaving();
 	printf("[OK]\n");
@@ -81,7 +81,7 @@ void Bootstrap::bootstrap() {
 	pp = getTask(blockPID);
 	pp.acquire();
 	Task* block = pp.get()->task;
-	thisCoreIsNowRunning(blockPID);
+	setOrigRunning(blockPID);
 	pp.release();
 	block->dispatchSaving();
 	printf("[OK]\n");
@@ -92,7 +92,7 @@ void Bootstrap::bootstrap() {
 	pp.acquire();
 	Task* iso = pp.get()->task;
 	iso->getState().regs.rdi = true; // Let it know it's from bootstrapping
-	thisCoreIsNowRunning(isoPID);
+	setOrigRunning(isoPID);
 	pp.release();
 	iso->dispatchSaving();
 	printf("[OK]\n");
@@ -102,7 +102,7 @@ void Bootstrap::bootstrap() {
 	pp = getTask(fsPID);
 	pp.acquire();
 	Task* fs = pp.get()->task;
-	thisCoreIsNowRunning(fsPID);
+	setOrigRunning(fsPID);
 	pp.release();
 	fs->dispatchSaving();
 	printf("[OK]\n");
@@ -113,7 +113,7 @@ void Bootstrap::bootstrap() {
 	pp.acquire();
 	Task* vfs = pp.get()->task;
 	vfs->getState().regs.rdi = true; // Booting from ISO
-	thisCoreIsNowRunning(vfsPID);
+	setOrigRunning(vfsPID);
 	pp.release();
 	vfs->dispatchSaving();
 	printf("[OK]\n");

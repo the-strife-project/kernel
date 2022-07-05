@@ -52,6 +52,7 @@ PID Loader::makeProcess() {
 	schedTask.task = task;
 	schedTask.paging = paging;
 	PID pid = assignPID(schedTask); // SchedTask is public
+	task->setAs(pid);
 
 	// That's it. It wasn't so hard, was it?
 	return pid;
