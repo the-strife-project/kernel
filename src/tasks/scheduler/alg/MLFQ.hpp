@@ -10,7 +10,7 @@ private:
 	size_t nprio;
 
 	// The RoundRobin class is well protected by locks
-	RoundRobin* rr;
+	RoundRobin* rr = nullptr;
 	size_t approxSize = 0;
 
 public:

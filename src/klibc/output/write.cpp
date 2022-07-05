@@ -31,10 +31,7 @@ inline static char* getVideo() { return getChar(*row, *col); }
 
 inline static void clearRow(size_t r) {
 	char* buffer = getChar(r, 0);
-	for(size_t i=0; i<FB_COLS; ++i) {
-		*buffer++ = ' ';
-		*buffer++ = color;
-	}
+	memset(buffer, 0, FB_COLS*2);
 }
 
 inline static void scroll() {

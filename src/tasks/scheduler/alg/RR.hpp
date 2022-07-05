@@ -5,7 +5,7 @@ private:
 	// It's a good idea that this is a list,
 	//   because it's never iterated, so all used operations are O(1).
 	// Pretty much zero cache misses, which is the main problem of lists.
-	PubList<PID> list;
+	List<PID> list;
 	Spinlock lock;
 
 public:

@@ -147,7 +147,32 @@ extern "C" uint64_t syscallHandler(size_t op, size_t arg1, size_t arg2,
 		break;
 
 	// --- TASK-RELATED ---
-	
+	case std::Syscalls::EXEC:
+		exec(pid, arg1, arg2);
+		// That might return in case of bad buffer
+		ret = NULL_PID;
+		break;
+	case std::Syscalls::GET_LAST_LOADER_ERROR:
+		ret = stask.lastLoaderError;
+		break;
+	case std::Syscalls::GET_KILL_REASON:
+		ret = std::kkill::OK;
+		for(auto const& x : stask.children) {
+			if(x.pid == arg1) {
+				ret = x.kr;
+				break;
+			}
+		}
+		break;
+	case std::Syscalls::GET_EXIT_VALUE:
+		ret = ~0ull;
+		for(auto const& x : stask.children) {
+			if(x.pid == arg1) {
+				ret = x.ret;
+				break;
+			}
+		}
+		break;
 
 	default:
 		stask.kill(pid, std::kkill::UNKNOWN_SYSCALL);

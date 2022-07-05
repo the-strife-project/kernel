@@ -68,3 +68,19 @@ bool Loader::mapELF(uint64_t elf, size_t sz, bool doNotPanic) {
 	copyELF(paging, elf, sz);
 	return true;
 }
+
+// A softer version of mapELF
+static const size_t mpflags =
+	Paging::MapFlag::NX |
+	Paging::MapFlag::RO |
+	Paging::MapFlag::USER;
+bool Loader::movePage(uint64_t phys, size_t idx) {
+	auto pp = getTask(Loader::LOADER_PID);
+	// Must be already acquired
+	auto paging = pp.get()->paging;
+	uint64_t virt = Loader::ELF_BASE + idx * PAGE_SIZE;
+	if(paging.getPhys(virt))
+		return false;
+	pp.get()->paging.map(virt, phys, PAGE_SIZE, mpflags);
+	return true;
+}

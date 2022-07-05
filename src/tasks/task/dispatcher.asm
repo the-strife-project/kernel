@@ -5,6 +5,8 @@ global asmDispatchSaving
 global asmDispatch
 extern savedKernelState_rsp
 extern savedKernelState
+extern whoami
+extern pubStacks
 
 %define USER_CPL 3
 %define USER_DATA (0x18 | USER_CPL)
@@ -41,6 +43,11 @@ asmDispatchSaving:
 ; rcx <- rflags
 ; r8  <- Paging
 asmDispatch:
+    ; Switch to a public stack, so when cr3 is changed, pop can be done
+    call whoami
+    mov r15, qword [rel pubStacks]
+    mov rsp, qword [r15 + rax * 8]
+
     mov ax, USER_DATA
     mov ds, ax
     mov es, ax

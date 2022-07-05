@@ -6,7 +6,8 @@ const char* const msgs[] = {
 	"getTask() on empty SchedulerTask*",
 	"On bootstrap, acquisition got null",
 	"Protected pointer get() or isNull() while not acquired",
-	"smAllow reached an impossible flow"
+	"smAllow reached an impossible flow",
+	"Loader::movePage says page already mapped!",
 };
 
 [[noreturn]] void bruh(size_t id) {

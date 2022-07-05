@@ -2,12 +2,11 @@
 #include <algorithm>
 #include <tasks/PIDs/PIDs.hpp>
 
-static void* remoteToKernel(void* ptr, Paging remote) {
-	uint64_t iptr = (uint64_t)ptr;
-	uint64_t ret = remote.getPhys(iptr & ~0xFFF);
+static void* remoteToKernel(uint64_t ptr, Paging remote) {
+	uint64_t ret = remote.getPhys(ptr & ~0xFFF);
 	if(!ret)
 		return nullptr;
-	ret += iptr & 0xFFF;
+	ret += ptr & 0xFFF;
 	return (void*)ret;
 }
 
@@ -22,7 +21,7 @@ bool pmemcpy(void* dst, Paging remote, void* orig, size_t n) {
 
 	// First page
 	size_t sz = std::min(n, PAGE_SIZE - (((size_t)orig) & 0xFFF));
-	void* remotePage = remoteToKernel(corig, remote);
+	void* remotePage = remoteToKernel((uint64_t)corig, remote);
 	if(!remotePage)
 		return false;
 	memcpy(cdst, remotePage, sz);
@@ -31,7 +30,7 @@ bool pmemcpy(void* dst, Paging remote, void* orig, size_t n) {
 
 	for(size_t i=1; i<npages; ++i) {
 		sz = std::min(n, (size_t)PAGE_SIZE);
-		remotePage = remoteToKernel(corig, remote);
+		remotePage = remoteToKernel((uint64_t)corig, remote);
 		if(!remotePage)
 			return false;
 		memcpy(cdst, remotePage, sz);

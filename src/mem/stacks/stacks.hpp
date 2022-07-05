@@ -13,6 +13,7 @@
 
 extern "C" uint64_t* pubStacks;	// Public stacks for each TSS
 extern uint64_t* privStacks;	// Private stacks for everything
+extern "C" uint64_t* loaderStacks; // Private stacks when switching to loader
 
 void prepareStacks(size_t CPUs);
 

@@ -65,6 +65,8 @@ public:
 	inline List(List&& other) { *this = other; }
 
 	List& operator=(const List& other) {
+		first = last = nullptr;
+		_size = 0;
 		for(auto const& x : other)
 			push_back(x);
 		return *this;

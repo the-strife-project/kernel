@@ -2,6 +2,7 @@
 #include <CPU/SMP/SMP.hpp>
 #include <tasks/PIDs/PIDs.hpp>
 
+// TODO: Make this multicore
 uint64_t savedKernelState_rsp = 0;
 uint64_t savedKernelState[N_CALLEE_SAVED]; // callee-saved only
 
@@ -23,6 +24,7 @@ uint64_t savedKernelState[N_CALLEE_SAVED]; // callee-saved only
 	pp.acquire();
 	if(pp.isNull()) {
 		// Just take it out and go for another
+		pp.release();
 		schedule();
 	}
 

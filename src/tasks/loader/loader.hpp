@@ -31,6 +31,7 @@ namespace Loader {
 	extern PID LOADER_PID;
 	void freeELF();
 	bool mapELF(uint64_t elf, size_t sz, bool doNotPanic=false);
+	bool movePage(uint64_t phys, size_t idx);
 
 	PID makeProcess();
 	bool mapIn(PID pid, uint64_t local, uint64_t remote);
