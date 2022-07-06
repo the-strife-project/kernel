@@ -82,6 +82,7 @@ public:
 	inline void setRPCentry(uint64_t x) { rpcEntry = x; }
 
 	inline void jump(uint64_t addr) { rip = addr; }
+	inline void setStack(uint64_t addr) { rsp = addr; }
 	void destroy();
 
 	uint64_t mmap(size_t npages, size_t prot);

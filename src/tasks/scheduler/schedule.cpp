@@ -1,6 +1,7 @@
 #include "scheduler.hpp"
 #include <CPU/SMP/SMP.hpp>
 #include <tasks/PIDs/PIDs.hpp>
+#include <drivers/APIC/APIC.hpp>
 
 // TODO: Make this multicore
 uint64_t savedKernelState_rsp = 0;
@@ -33,6 +34,9 @@ uint64_t savedKernelState[N_CALLEE_SAVED]; // callee-saved only
 	setOrigRunning(pid);
 	setRunningAs(task->getAs());
 	pp.release();
+
+	// Start quantum
+	APIC::startQuantum();
 
 	task->dispatch();
 	// Never returns

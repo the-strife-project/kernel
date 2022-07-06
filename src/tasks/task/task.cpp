@@ -1,6 +1,7 @@
 #include "task.hpp"
 #include <CPU/SMP/SMP.hpp>
 #include <panic/bruh.hpp>
+#include <tasks/PIDs/PIDs.hpp>
 
 extern "C" void asmDispatchSaving(uint64_t rsp, uint64_t rip, GeneralRegisters*, uint64_t rflags, Paging);
 extern "C" void asmDispatch(uint64_t rsp, uint64_t rip, GeneralRegisters*, uint64_t rflags, Paging);
@@ -63,7 +64,26 @@ void Task::dispatchSaving() {
 }
 
 void Task::dispatch() {
-	asmDispatch(rsp, rip, &(state.regs), state.rflags, paging);
+	// If this is about to dispatch, then origRunning (myself) is set
+	PID myself = origRunning[whoami()];
+
+	if(myself == as) {
+		// Regular dispatching
+		asmDispatch(rsp, rip, &(state.regs), state.rflags, paging);
+	} else {
+		// Similar, but different page table
+		auto pp = getTask(as);
+		pp.acquire();
+		if(pp.isNull()) {
+			printf("TODO");
+			while(true);
+		}
+
+		Paging p = pp.get()->paging;
+		pp.release();
+
+		asmDispatch(rsp, rip, &(state.regs), state.rflags, p);
+	}
 }
 
 void Task::saveStateSyscall() {
@@ -71,6 +91,7 @@ void Task::saveStateSyscall() {
 	pmemcpy(&state, paging, savedState[whoami()], sizeof(SavedState));
 	rip = getState().regs.rcx; // On syscall, rcx=rip
 	rpcFlags = getState().regs.r11; // And r11=flags
+	as = runningAs[whoami()]; // There's the last runningAs
 	// The stack before syscall is as follows (go read asmhandler.asm)
 	uint64_t newrsp = (uint64_t)savedState[whoami()];
 	newrsp += sizeof(SavedState);

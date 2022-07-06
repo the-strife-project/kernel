@@ -29,7 +29,7 @@ namespace ACPI {
 		char* cptr;
 		RSDPDescriptor* v1;
 		RSDPDescriptor20* v2;
-	};
+	} __attribute__((packed));
 
 	// Both
 	struct SDTHeader {
@@ -42,7 +42,7 @@ namespace ACPI {
 		uint32_t OEMRevision;
 		uint32_t CreatorID;
 		uint32_t CreatorRevision;
-	};
+	} __attribute__((packed));
 
 	extern bool atLeastv2;
 	extern size_t entries;

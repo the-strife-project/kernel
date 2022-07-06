@@ -23,6 +23,8 @@ ACPI::SDTHeader* ACPI::get(const char* signature) {
 			}
 		}
 
+		// TODO: Checksum
+
 		if(match)
 			return header;
 	}

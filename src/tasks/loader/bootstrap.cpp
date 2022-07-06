@@ -118,6 +118,8 @@ void Loader::bootstrapLoader() {
 	// Parameters
 	task->getState().regs.rdi = ELF_BASE;
 	task->getState().regs.rsi = size;
+	// Loader is the only task not preemptable, so clear IF
+	task->getState().rflags &= ~(1 << RFLAGS::IF);
 
 	Scheduler::SchedulerTask schedTask;
 	schedTask.task = task;

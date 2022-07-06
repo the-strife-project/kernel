@@ -4,7 +4,6 @@
 #include "IDT.hpp"
 
 void initIDT();
-void IDTsetIST(size_t, uint8_t);
 void IDTset(size_t, const IDT::CoolDescriptor&);
 
 #endif

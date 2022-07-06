@@ -40,6 +40,10 @@ const char* const msgs[] = {
 	"VirtualBox might also cause some problems. If it doesn't work, try qemu.",
 
 	"Critical process died",
+	"No MADT table in the ACPI",
+	"Could not find IOAPIC",
+	"Only one IOAPIC supported for now",
+	"Could not find the GSI of the PIC",
 };
 
 void panic(size_t id, bool doNotHalt) {

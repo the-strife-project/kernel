@@ -56,13 +56,6 @@ void initIDT() {
 }
 
 static Spinlock lock;
-void IDTsetIST(size_t i, uint8_t ist) {
-	lock.acquire();
-	// TODO: strict aliasing violation
-	((IDT::LameDescriptor*)_idt)[i].ist = ist;
-	lock.release();
-}
-
 void IDTset(size_t i, const IDT::CoolDescriptor& desc) {
 	lock.acquire();
 	idt.set(i, desc);

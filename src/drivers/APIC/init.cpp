@@ -53,6 +53,7 @@ void APIC::init() {
 	}
 
 	enableLAPIC();
+	APIC::IOAPIC::init();
 
 	// TODO: When SMP, check BSP, add lock around disabledPIC
 }
