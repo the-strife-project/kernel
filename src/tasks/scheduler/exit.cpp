@@ -41,6 +41,7 @@ void Scheduler::SchedulerTask::_commonDie(PID me, size_t reason, size_t code) {
 	// Let parent know their child exited
 	auto ppp = getTask(parent);
 	ppp.acquire();
+	bool released = false;
 	// Alive? 🤨
 	if(!ppp.isNull()) {
 		// Good, set return value
@@ -49,13 +50,19 @@ void Scheduler::SchedulerTask::_commonDie(PID me, size_t reason, size_t code) {
 			if(x.pid == me) {
 				x.kr = reason;
 				x.ret = code;
+				x.exited = true;
 				if(x.waiting) {
-					// Parent is waiting, wake them up (TODO)
+					// Parent is waiting, wake them up
+					ppp.release();
+					sched.add(parent);
+					released = true;
 				}
 			}
 		}
 	}
-	ppp.release();
+
+	if(!released)
+		ppp.release();
 
 	// Destroy the PCB
 	this->task->destroy();

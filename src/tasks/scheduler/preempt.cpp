@@ -2,8 +2,6 @@
 #include <drivers/APIC/APIC.hpp>
 #include <tasks/PIDs/PIDs.hpp>
 
-// TODO: Set "as" field to runningAs
-
 extern "C" void preempt(SavedState* state, uint64_t rip, uint64_t rsp) {
 	kpaging.load();
 

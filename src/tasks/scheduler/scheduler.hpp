@@ -39,6 +39,7 @@ public:
 			size_t kr = std::kkill::OK; // Kill reason
 			size_t ret = ~0ull; // Exit value
 			bool waiting = false; // Is parent waiting?
+			bool exited = false; // Did this child exit?
 		};
 		List<Child> children;
 

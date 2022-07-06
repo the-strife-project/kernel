@@ -173,6 +173,10 @@ extern "C" uint64_t syscallHandler(size_t op, size_t arg1, size_t arg2,
 			}
 		}
 		break;
+	case std::Syscalls::WAIT:
+		ret = 0;
+		wait(pid, arg1);
+		break;
 
 	default:
 		stask.kill(pid, std::kkill::UNKNOWN_SYSCALL);
