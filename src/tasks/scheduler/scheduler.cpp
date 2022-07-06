@@ -20,3 +20,23 @@ void initScheduler() {
 	// Reserve null PID
 	assignPID(Scheduler::SchedulerTask());
 }
+
+void Scheduler::add(PID pid) {
+	auto pp = getTask(pid);
+	pp.acquire();
+	size_t prioType = pp.get()->prioType;
+	size_t prio = pp.get()->prio;
+	pp.release();
+
+	switch(prioType) {
+	case 0:
+		addVSRT(pid, prio);
+		break;
+	case 1:
+		addRegular(pid);
+		break;
+	case 2:
+		addBackground(pid, prio);
+		break;
+	}
+}

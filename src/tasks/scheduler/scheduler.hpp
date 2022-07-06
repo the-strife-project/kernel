@@ -47,7 +47,8 @@ public:
 
 		// Whether last burst ended in I/O wait (true) or used all quantum (false)
 		bool ioBurst = true;
-		size_t lastPrio = 0; // For regular scheduling only
+		size_t prio = 0;
+		size_t prioType = 1; // Default is regular
 
 		// Some methods
 		void exit(size_t code);
@@ -73,8 +74,10 @@ public:
 	// TODO: try to assign the same CPU to a SRT process. This has nothing
 	//   to do with this scheduler, more with the currently non-existing multicore one.
 	inline void addVSRT(PID pid, size_t prio) { vsrt[prio].push(pid); }
-	inline void add(PID pid) { regular.add(pid); }
+	inline void addRegular(PID pid) { regular.add(pid); }
 	inline void addBackground(PID pid, size_t prio) { background[prio].push(pid); }
+
+	void add(PID pid);
 
 	inline PID get() {
 		PID ret;
