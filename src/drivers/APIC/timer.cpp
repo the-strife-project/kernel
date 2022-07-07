@@ -6,6 +6,8 @@
 extern "C" void asmPreemption();
 uint32_t APIC::ticks10ms = 0;
 
+static const uint8_t LAPIC_TIMER_VEC = 0x22;
+
 // Calibrates the APIC timer
 void APIC::initTimer() {
 	// Initialize PIT so it's possible to sleep later
@@ -24,19 +26,31 @@ void APIC::initTimer() {
 	ticks10ms = readReg(TIMER_CURRENT_COUNT);
 	ticks10ms = ~0 - ticks10ms;
 
+	// Disable until quantums start
+	writeReg(APIC::TIMER_LVT, APIC::TIMER_MASK);
+
 	// Now, set the new ISR
 	IDT::CoolDescriptor entry;
 	entry.setPresent();
 	entry.offset = (uint64_t)&asmPreemption;
 	entry.ist = IST_APIC_TIMER;
-	IDTset(PIT::VEC, entry); // IRQ 0 again
+	IDTset(LAPIC_TIMER_VEC, entry);
 
 	// That's it. When dispatching, a one-shot mode will be set
 }
 
 void APIC::startQuantum() {
+	printf("Start quantum");
 	// Start one-shot timer on IRQ 0, divider 16
-	writeReg(TIMER_LVT, 32 | MODE_ONESHOT);
+	writeReg(TIMER_LVT, LAPIC_TIMER_VEC | MODE_ONESHOT);
 	writeReg(TIMER_DIVIDER, 0x3);
-	writeReg(TIMER_INITIAL_COUNT, ticks10ms);
+	writeReg(TIMER_INITIAL_COUNT, ticks10ms/2);
+}
+
+void APIC::anotherChance() {
+	printf("Another chance");
+	// 1ms one-shot
+	writeReg(TIMER_LVT, LAPIC_TIMER_VEC | MODE_ONESHOT);
+	writeReg(TIMER_DIVIDER, 0x3);
+	writeReg(TIMER_INITIAL_COUNT, ticks10ms/10);
 }

@@ -5,8 +5,16 @@
 extern "C" void preempt(SavedState* state, uint64_t rip, uint64_t rsp) {
 	kpaging.load();
 
+	if(rip & (1ull << 63)) {
+		// Kernel preemption
+		APIC::EOI();
+		// Try again in 1ms
+		APIC::anotherChance();
+		return;
+	}
+
 	PID pid = origRunning[whoami()];
-	auto pp = getTask(origRunning[whoami()]);
+	auto pp = getTask(pid);
 	pp.acquire();
 	if(pp.isNull()) {
 		// How? Doesn't matter...

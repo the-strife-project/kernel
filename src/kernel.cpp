@@ -72,8 +72,9 @@ extern "C" void kmain(stivale2_struct* bootData) {
 		// This possibly isn't done like this in SMP. Just a stub
 		TSS tss = newTSS();
 		tss.setRSP0(pubStacks[i]);
-		for(size_t i=1; i<=N_ISTS; ++i)
-			tss.setIST(i, VMM::Public::alloc() + PAGE_SIZE);
+		tss.setRSP1(VMM::Public::alloc() + PAGE_SIZE);
+		for(size_t j=1; j<=N_ISTS; ++j)
+			tss.setIST(j, VMM::Public::alloc() + PAGE_SIZE);
 		tss.load();
 	}
 

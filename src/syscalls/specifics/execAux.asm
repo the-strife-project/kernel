@@ -2,6 +2,6 @@ extern execPartTwo
 
 global execSwitchStack
 execSwitchStack:
-    mov rsp, rdx
+    mov rsp, rcx
     ; Arguments are left intact
     jmp execPartTwo

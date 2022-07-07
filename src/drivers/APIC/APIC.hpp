@@ -17,6 +17,7 @@ namespace APIC {
 	const size_t TIMER_INITIAL_COUNT = 0x380;
 	const size_t TIMER_CURRENT_COUNT = 0x390;
 	const size_t TIMER_LVT = 0x320;
+	const size_t TIMER_MASK = 1 << 16;
 	const size_t MODE_PERIODIC = 1 << 17;
 	const size_t MODE_ONESHOT = 0;
 
@@ -89,7 +90,7 @@ namespace APIC {
 	void initTimer();
 	extern "C" uint32_t ticks10ms;
 	void startQuantum();
-	void timerEOI();
+	void anotherChance();
 };
 
 #endif

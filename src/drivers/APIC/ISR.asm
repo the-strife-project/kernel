@@ -4,22 +4,6 @@ extern whoami
 
 global asmPreemption
 asmPreemption:
-    cli
-
-    ; First of all, check if this happened in the kernel
-    push rax
-    ; Interrupt stack frame starts at [rsp + 8]
-    mov rax, qword [rsp+8] ; That's RIP
-    test rax, rax
-    jns .notKernel
-
-    ; It was indeed the kernel, just ignore it
-    pop rax
-    iretq
-
-  .notKernel:
-    pop rax
-
     ; This is preemption, have to save everything
     ; This is the same way the syscall routine does it
     ; I want rsp to be a SavedState*
@@ -39,8 +23,7 @@ asmPreemption:
     push rbx
     push rax
     ; That's 15 values pushed. rsp=&rax, so interrupt stack frame starts
-    ;   start at [rsp + 15*8]. Let's get and save the flags so SavedState
-    ;   is complete.
+    ;   start at [rsp + 15*8]. Let's get and save the flags.
     push qword [rsp + 15*8 + 2*8]
 
     ; Segment field; ignore, it's just used in syscalls
@@ -54,5 +37,32 @@ asmPreemption:
     mov rsi, qword [rsp + 17*8 + 0*8] ; rip
     mov rdx, qword [rsp + 17*8 + 3*8] ; rsp
 
-    jmp preempt
-    ; That doesn't return
+    ; Save page table
+    mov rax, cr3
+    mov rbp, rax
+
+    ; There we go
+    call preempt ; This is in tasks/scheduler/preempt.cpp
+    ; If it was a kernel preemption, this returns
+
+    ; Reset page table
+    mov rax, rbp
+    mov cr3, rax
+
+    add rsp, 2*8
+    pop rax
+    pop rbx
+    pop rcx
+    pop rdx
+    pop rsi
+    pop rdi
+    pop rbp
+    pop r8
+    pop r9
+    pop r10
+    pop r11
+    pop r12
+    pop r13
+    pop r14
+    pop r15
+    iretq

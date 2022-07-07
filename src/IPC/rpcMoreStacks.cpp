@@ -36,12 +36,8 @@ uint64_t IPC::rpcMoreStacks(PID remote) {
 			page = PMM::calloc();
 			flags |= Paging::MapFlag::USER;
 			task->getPaging().map(virt, page, PAGE_SIZE, flags);
+			break;
 		}
-	}
-
-	if(!ret) {
-		// That's unfortunate, no space left
-		return 0;
 	}
 
 	return ret;

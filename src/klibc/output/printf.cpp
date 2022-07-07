@@ -29,7 +29,7 @@ void dump(uint64_t addr, size_t sz) {
 static Spinlock lock;
 
 void printf(const char* fmt, ...) {
-	lock.acquire();
+	//lock.acquire();
 	va_list args;
 	va_start(args, fmt);
 
@@ -66,5 +66,5 @@ void printf(const char* fmt, ...) {
 			_writec(*fmt);
 		}
 	}
-	lock.release();
+	//lock.release();
 }

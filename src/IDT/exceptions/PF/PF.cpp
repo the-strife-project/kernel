@@ -12,7 +12,7 @@ struct PFErr {
 };
 
 extern "C" void catchPF(size_t err, uint64_t iretqs, size_t rax) {
-	// First check: caused by user, at lower half, in kernel-only
+	// First check: RPC return
 	if(err & (1 << PFErr::U)) {
 		// Caused by user
 		if(!(getCR2() >> 63)) { // Lower half

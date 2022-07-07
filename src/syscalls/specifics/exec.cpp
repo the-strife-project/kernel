@@ -68,34 +68,46 @@ extern "C" void execPartTwo(PID parent, uint64_t buffer, size_t sz) {
 	loaderpp.release();
 	loaderLock.release();
 
-	// Acquire child
-	auto childpp = getTask(child);
-	childpp.acquire();
-	// And set the values
-	auto& childst = *(childpp.get());
-	childst.parent = parent;
-	childst.task->jump(entry);
-	childpp.release();
+	if(!error) {
+		// Acquire child
+		auto childpp = getTask(child);
+		childpp.acquire();
+		// And set the values
+		auto& childst = *(childpp.get());
+		childst.parent = parent;
+		childst.task->jump(entry);
+		childpp.release();
 
-	// It's now free to run
-	sched.add(child);
+		// It's now free to run
+		sched.add(child);
 
-	// Acquire parent again
-	parentpp.acquire();
-	if(parentpp.isNull()) {
-		// Damn
+		// Acquire parent again
+		parentpp.acquire();
+		if(parentpp.isNull()) {
+			// Damn
+			parentpp.release();
+			schedule();
+		}
+
+		// Add child
+		Scheduler::SchedulerTask::Child childEntry;
+		childEntry.pid = child;
+		parentst.children.push_back(childEntry);
+		// Loader error and PID of child
+		parentst.lastLoaderError = error;
+		parentst.task->getState().regs.rax = child;
 		parentpp.release();
-		schedule();
-	}
+	} else {
+		parentpp.acquire();
+		if(parentpp.isNull()) {
+			// Damn
+			parentpp.release();
+			schedule();
+		}
 
-	// Add child
-	Scheduler::SchedulerTask::Child childEntry;
-	childEntry.pid = child;
-	parentst.children.push_back(childEntry);
-	// Loader error and PID of child
-	parentst.lastLoaderError = error;
-	parentst.task->getState().regs.rax = child;
-	parentpp.release();
+		parentst.lastLoaderError = error;
+		parentpp.release();
+	}
 
 	// It's free to run now as well
 	sched.add(parent);

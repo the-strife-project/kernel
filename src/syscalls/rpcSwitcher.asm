@@ -133,11 +133,12 @@ rpcSwitcher:
     dec r11
     test r11, r11
     jz .needMoreStacks
+
     ; Got it!
     inc r11 ; Valid stack again
     ; Mark as used
     lea rax, [rax + Off_rpcStacks]
-    mov qword [rax + rcx*8], 0
+    mov qword [rax + rcx*8], 0 ; Mark as used
     jmp .gotStack
   .needMoreStacks:
     ; All expectations on making this fast are now lost
@@ -249,7 +250,6 @@ rpcReturn:
     SMAPOFF
 
     ; Get back to top of the return ticket
-    mov r11, rsp ; Saving it for releasing later
     pop rsp
 
     ; Getting those PIDs back
