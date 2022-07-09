@@ -10,12 +10,13 @@ void Loader::freeELF() {
 
 	while(true) {
 		uint64_t phys = paging.getPhys(page);
-		if(!phys) break;
+		if(!phys)
+			break;
 
 		// Unmap
 		paging.unmap(page);
-		// Free, from PMM (private pages)
-		PMM::free(phys);
+		// Free, from private pages
+		PhysMM::freeOne(phys);
 
 		page += PAGE_SIZE;
 	}
@@ -42,14 +43,14 @@ static void copyELF(Paging paging, uint64_t begin, size_t sz) {
 
 	// Copy all pages but the last one
 	while(--npages) {
-		uint64_t page = PMM::alloc();	// No need to calloc() here.
+		uint64_t page = PhysMM::alloc();	// No need to calloc() here.
 		memcpy((void*)page, (void*)begin, PAGE_SIZE);
 		map.map4K(page);
 		begin += PAGE_SIZE;
 	}
 
 	// Last page
-	uint64_t page = PMM::calloc();
+	uint64_t page = PhysMM::calloc();
 	memcpy((void*)page, (void*)begin, lastpagesz);
 	map.map4K(page);
 }

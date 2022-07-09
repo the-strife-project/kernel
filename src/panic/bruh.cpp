@@ -8,6 +8,7 @@ const char* const msgs[] = {
 	"Protected pointer get() or isNull() while not acquired",
 	"smAllow reached an impossible flow",
 	"Loader::movePage says page already mapped!",
+	"PhysMM::free() with page from inexisting region",
 };
 
 [[noreturn]] void bruh(size_t id) {

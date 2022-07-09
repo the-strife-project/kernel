@@ -13,9 +13,9 @@ void initScheduler() {
 	generalTask = nullptr;
 
 	sched = Scheduler();
-	origRunning = (PID*)VMM::Private::calloc();
+	origRunning = (PID*)PhysMM::calloc();
 	// This must be public memory, it's changed in RPC
-	runningAs = (PID*)VMM::Public::calloc();
+	runningAs = (PID*)PublicMM::calloc();
 
 	// Reserve null PID
 	assignPID(Scheduler::SchedulerTask());

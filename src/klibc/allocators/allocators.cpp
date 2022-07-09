@@ -19,8 +19,8 @@ size_t getAllocIdx(size_t sz) {
 
 void initAllocators() {
 	for(size_t i=0; i<N_ALLOCATORS; ++i) {
-		Allocator pub(16 << i, VMM::Public::alloc, VMM::Public::free);
-		Allocator priv(16 << i, VMM::Private::alloc, VMM::Private::free);
+		Allocator pub(16 << i, PublicMM::alloc, PublicMM::free);
+		Allocator priv(16 << i, PhysMM::alloc, PhysMM::free);
 		pubAllocators[i] = pub;
 		privAllocators[i] = priv;
 	}

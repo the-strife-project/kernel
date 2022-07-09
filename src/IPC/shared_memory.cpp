@@ -8,7 +8,7 @@ static Task::SharedSegment getSM(Task* target, std::SMID smid, bool create=false
 		return Task::SharedSegment();
 
 	if(!shared) {
-		shared = (Task::SharedSegment*)VMM::Private::calloc();
+		shared = (Task::SharedSegment*)PhysMM::calloc();
 		target->setShared(shared);
 		return Task::SharedSegment();
 	}
@@ -40,7 +40,9 @@ static uint8_t newSM(Task* target, std::SMID smid, uint64_t kptr) {
 
 static const size_t SHARED_MEMORY_MAX_PAGES = 1 << 11;
 std::SMID IPC::smMake(Task* me) {
-	uint64_t kptr = VMM::Private::calloc();
+	uint64_t kptr = PhysMM::calloc();
+	if(!kptr)
+		return 0;
 
 	while(true) {
 		std::SMID ret = getRandom64();
@@ -52,7 +54,7 @@ std::SMID IPC::smMake(Task* me) {
 			break;
 	}
 
-	VMM::Private::free(kptr);
+	PhysMM::freeOne(kptr);
 	return 0;
 }
 

@@ -16,7 +16,7 @@ uint64_t Task::mmap(size_t npages, size_t prot) {
 	uint64_t virt = ret;
 	while(npages--) {
 		// Allocate
-		uint64_t page = PMM::calloc();
+		uint64_t page = PhysMM::calloc();
 		if(!page)
 			return 0;
 

@@ -30,7 +30,7 @@ uint64_t Task::moreHeap(size_t npages) {
 	// Map
 	uint64_t flags = Paging::MapFlag::NX | Paging::MapFlag::USER;
 	for(size_t i=0; i<npages; ++i)
-		paging.map(heapBottom+i*PAGE_SIZE, PMM::calloc(), PAGE_SIZE, flags);
+		paging.map(heapBottom+i*PAGE_SIZE, PhysMM::calloc(), PAGE_SIZE, flags);
 
 	uint64_t ret = heapBottom;
 	heapBottom += sz;
@@ -52,7 +52,7 @@ void Task::freeStack() {
 		// Might be some issues with offsets: stackTop might be in a non-allocated
 		//   page, which is perfectly valid. That's why the check below
 		if(phys)
-			PMM::free(phys);
+			PhysMM::freeOne(phys);
 		current += PAGE_SIZE;
 	}
 

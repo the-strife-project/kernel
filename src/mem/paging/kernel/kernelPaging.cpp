@@ -20,7 +20,7 @@ void initKernelPaging(MemoryMap mm) {
 	wrmsr(EFER_ADDR, efer);
 
 	// Initialize the kpaging object
-	kpaging.setData((Paging::PML4E*)PMM::calloc());
+	kpaging.setData((Paging::PML4E*)PhysMM::calloc());
 
 	// Map the framebuffer
 	kpaging.map(0xFFFFFFFF800B8000, 0xB8000, 80*25*2, Paging::MapFlag::NX);

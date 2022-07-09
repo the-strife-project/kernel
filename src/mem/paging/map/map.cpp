@@ -18,7 +18,7 @@ void Paging::PageMapping::nextPML4E() {
 	if(!pml4e->isPresent()) {
 		*pml4e = PML4E();
 		pml4e->setPresent();
-		pml4e->setNext(clear(PMM::calloc() >> 12));
+		pml4e->setNext(clear(PhysMM::calloc() >> 12));
 	}
 
 	if(user)
@@ -37,7 +37,7 @@ void Paging::PageMapping::nextPDPE() {
 	if(!pdpe->isPresent()) {
 		*pdpe = PDPE();
 		pdpe->setPresent();
-		pdpe->setNext(clear(PMM::calloc() >> 12));
+		pdpe->setNext(clear(PhysMM::calloc() >> 12));
 	}
 
 	if(user) pdpe->setUser();
@@ -57,7 +57,7 @@ void Paging::PageMapping::nextPDE(bool huge) {
 		pde->setPresent();
 
 		if(!huge)
-			pde->setNext(clear(PMM::calloc() >> 12));
+			pde->setNext(clear(PhysMM::calloc() >> 12));
 	}
 
 	if(user) pde->setUser();

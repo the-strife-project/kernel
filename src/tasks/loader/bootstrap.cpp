@@ -37,14 +37,14 @@ static void _mapInLoader(Paging paging, uint64_t begin, size_t npages, size_t la
 
 	// Copy all pages but the last one
 	while(--npages) {
-		uint64_t page = PMM::alloc();	// No need to calloc() here.
+		uint64_t page = PhysMM::alloc();	// No need to calloc() here.
 		memcpy((void*)page, (void*)begin, PAGE_SIZE);
 		map.map4K(page);
 		begin += PAGE_SIZE;
 	}
 
 	// Last page
-	uint64_t page = PMM::calloc();
+	uint64_t page = PhysMM::calloc();
 	memcpy((void*)page, (void*)begin, lastpagesz);
 	map.map4K(page);
 }
@@ -80,7 +80,7 @@ void Loader::bootstrapLoader() {
 
 	// Paging object
 	Paging paging;
-	paging.setData((Paging::PML4E*)PMM::calloc());
+	paging.setData((Paging::PML4E*)PhysMM::calloc());
 	// Add the kernel global entry (last PML4E), in case the TLB gets flushed
 	paging.getData()[PAGE_ENTRIES - 1] = kpaging.getData()[PAGE_ENTRIES - 1];
 	// No need to worry about generalTask, loader doesn't RPC
@@ -93,7 +93,7 @@ void Loader::bootstrapLoader() {
 
 	// Map stack (no need to map heap, it is done on demand)
 	auto stackFlags = Paging::MapFlag::USER | Paging::MapFlag::NX;
-	paging.map(LOADER_STACK - PAGE_SIZE, PMM::calloc(), PAGE_SIZE, stackFlags);
+	paging.map(LOADER_STACK - PAGE_SIZE, PhysMM::calloc(), PAGE_SIZE, stackFlags);
 	aslr.set(LOADER_STACK, MAX_STACK_PAGES);
 	aslr.set(LOADER_HEAP, MAX_HEAP_PAGES);
 
@@ -112,7 +112,7 @@ void Loader::bootstrapLoader() {
 
 	// Task
 	LoaderInfo loaderInfo(paging, aslr, LOADER_BASE, LOADER_HEAP, LOADER_STACK);
-	Task* task = (Task*)PMM::calloc();
+	Task* task = (Task*)PhysMM::calloc();
 	*task = Task(loaderInfo, LOADER_BASE + entrypoint, (uint64_t)task);
 
 	// Parameters

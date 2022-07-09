@@ -25,7 +25,7 @@ uint64_t IPC::rpcMoreStacks(PID remote) {
 			// Allocate first page, kernel only. Contains return ticket
 			uint64_t virt = ret & ~0xFFF;
 			virt -= PAGE_SIZE;
-			uint64_t page = PMM::calloc();
+			uint64_t page = PhysMM::calloc();
 			size_t flags = 0;
 			flags |= Paging::MapFlag::NX;
 			//flags |= Paging::MapFlag::USER;
@@ -33,7 +33,7 @@ uint64_t IPC::rpcMoreStacks(PID remote) {
 
 			// Second page, user
 			virt -= PAGE_SIZE;
-			page = PMM::calloc();
+			page = PhysMM::calloc();
 			flags |= Paging::MapFlag::USER;
 			task->getPaging().map(virt, page, PAGE_SIZE, flags);
 			break;

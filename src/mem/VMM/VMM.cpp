@@ -1,10 +1,6 @@
 #include "VMM.hpp"
 #include <klibc/spinlock.hpp>
 
-uint64_t VMM::Private::alloc() { return PMM::alloc(); }
-uint64_t VMM::Private::calloc() { return PMM::calloc(); }
-void VMM::Private::free(uint64_t x) { return PMM::free(x); }
-
 static Spinlock lock = Spinlock();
 inline void atomicMap(uint64_t virt, uint64_t phys) {
 	lock.acquire();
@@ -12,28 +8,30 @@ inline void atomicMap(uint64_t virt, uint64_t phys) {
 	lock.release();
 }
 
-uint64_t VMM::Public::alloc() {
-	uint64_t phys = PMM::alloc();
+uint64_t PublicMM::alloc(size_t npages) {
+	uint64_t phys = PhysMM::alloc(npages);
 	uint64_t ret = HIGHER_HALF + phys;
 	atomicMap(ret, phys);
 	return ret;
 }
 
-uint64_t VMM::Public::calloc() {
-	uint64_t phys = PMM::calloc();
+uint64_t PublicMM::calloc(size_t npages) {
+	uint64_t phys = PhysMM::calloc(npages);
 	uint64_t ret = HIGHER_HALF + phys;
 	atomicMap(ret, phys);
 	return ret;
 }
 
-void VMM::Public::free(uint64_t x) {
+void PublicMM::free(uint64_t x, size_t npages) {
 	// Unmap and free
 	lock.acquire();
 	uint64_t page = x & ~0xFFF;
-	Paging::PageMapping mapping(kpaging, page);
-	mapping.setNotPresent();
-	mapping.map4K((uint64_t)nullptr);
-	invlpg(page);
-	PMM::free(page - HIGHER_HALF);
+	PhysMM::free(page - HIGHER_HALF, npages);
+
+	while(npages--) {
+		kpaging.unmap(page);
+		invlpg(page);
+		page += PAGE_SIZE;
+	}
 	lock.release();
 }

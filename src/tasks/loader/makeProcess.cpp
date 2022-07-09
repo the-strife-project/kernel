@@ -8,7 +8,7 @@
 PID Loader::makeProcess() {
 	// First, a paging object
 	Paging paging;
-	paging.setData((Paging::PML4E*)PMM::calloc());
+	paging.setData((Paging::PML4E*)PhysMM::calloc());
 	// Kernel global entry
 	paging.getData()[PAGE_ENTRIES - 1] = kpaging.getData()[PAGE_ENTRIES - 1];
 
@@ -33,15 +33,15 @@ PID Loader::makeProcess() {
 	// Give it some stack. One or two pages are given, next are on demand
 	uint64_t stack = aslr.get(MAX_STACK_PAGES, GROWS_DOWNWARD, STACK_ALIGNMENT, DO_PANIC);
 	auto stackFlags = Paging::MapFlag::USER | Paging::MapFlag::NX;
-	paging.map((stack & ~0xFFF) - PAGE_SIZE, PMM::calloc(), PAGE_SIZE, stackFlags);
-	paging.map(stack & ~0xFFF, PMM::calloc(), PAGE_SIZE, stackFlags);
+	paging.map((stack & ~0xFFF) - PAGE_SIZE, PhysMM::calloc(), PAGE_SIZE, stackFlags);
+	paging.map(stack & ~0xFFF, PhysMM::calloc(), PAGE_SIZE, stackFlags);
 
 	// And some heap, allocated on demand
 	uint64_t heap = aslr.get(MAX_HEAP_PAGES, GROWS_UPWARD, HEAP_ALIGNMENT, DO_PANIC);
 
 	// Create task
 	LoaderInfo info(paging, aslr, base, heap, stack);
-	Task* task = (Task*)PMM::calloc(); // Task is private
+	Task* task = (Task*)PhysMM::calloc(); // Task is private
 	uint64_t entrypoint = 0; // Unknown this soon
 	*task = Task(info, entrypoint, (uint64_t)task);
 

@@ -15,7 +15,7 @@ PID assignPID(const Scheduler::SchedulerTask& task) {
 	if(givenPIDs % (PAGE_SIZE / sizeof(void*)) == 0) {
 		// Need a new page
 		uint64_t virt = (uint64_t)&tasks[givenPIDs];
-		kpaging.map(virt, PMM::calloc(), PAGE_SIZE, Paging::MapFlag::NX | Paging::MapFlag::GLOBAL);
+		kpaging.map(virt, PhysMM::calloc(), PAGE_SIZE, Paging::MapFlag::NX | Paging::MapFlag::GLOBAL);
 	}
 
 	tasks[givenPIDs] = (Scheduler::SchedulerTask*)alloc(sizeof(Scheduler::SchedulerTask), PUBLIC);

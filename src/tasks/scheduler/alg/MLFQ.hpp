@@ -16,7 +16,7 @@ private:
 public:
 	MLFQ(size_t nprio_) {
 		nprio = nprio_;
-		rr = (RoundRobin*)VMM::Private::calloc();
+		rr = (RoundRobin*)PhysMM::calloc();
 		for(size_t i=0; i<nprio; ++i)
 			rr[i] = RoundRobin();
 	}

@@ -20,7 +20,7 @@ void Allocator::pop() {
 }
 
 void Allocator::more() {
-	push(_alloc());
+	push(_alloc(1));
 
 	// Add some nodes
 	uint64_t current = (uint64_t)top + size;
@@ -75,6 +75,6 @@ void Allocator::free(void* addr) {
 			current += size;
 		}
 
-		_free(page);
+		_free(page, 1);
 	}
 }

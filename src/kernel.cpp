@@ -43,7 +43,7 @@ extern "C" void kmain(stivale2_struct* bootData) {
 	printf("[OK]\n");
 
 	printf("First memory initialization... ");
-	PMM::init(memmap);
+	PhysMM::init(memmap);
 	initKernelPaging(memmap);
 	printf("[OK]\n");
 
@@ -52,7 +52,6 @@ extern "C" void kmain(stivale2_struct* bootData) {
 	printf("[OK]\n");
 
 	printf("Finishing memory... ");
-	PMM::finalizeInit(memmap);	// Bootloader pages are now free to use.
 	initAllocators();
 
 	ncores = 1;
@@ -60,23 +59,22 @@ extern "C" void kmain(stivale2_struct* bootData) {
 		panic(Panic::TOO_MANY_CORES);
 
 	prepareStacks(ncores);
-	printf("[OK]\n");
-
-	printf("Initializing APIC... ");
-	APIC::init();
-	APIC::initTimer();
-	// IOAPIC here
-	printf("[OK]\n");
 
 	for(size_t i=0; i<ncores; ++i) {
 		// This possibly isn't done like this in SMP. Just a stub
 		TSS tss = newTSS();
 		tss.setRSP0(pubStacks[i]);
-		tss.setRSP1(VMM::Public::alloc() + PAGE_SIZE);
+		tss.setRSP1(PublicMM::alloc() + PAGE_SIZE);
 		for(size_t j=1; j<=N_ISTS; ++j)
-			tss.setIST(j, VMM::Public::alloc() + PAGE_SIZE);
+			tss.setIST(j, PublicMM::alloc() + PAGE_SIZE);
 		tss.load();
 	}
+	printf("[OK]\n");
+
+	printf("Initializing APIC... ");
+	APIC::init();
+	APIC::initTimer();
+	printf("[OK]\n");
 
 	initScheduler();
 	enableSyscalls();
