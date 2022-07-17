@@ -23,7 +23,7 @@ uint64_t IPC::rpcMoreStacks(PID remote) {
 				break;
 
 			// Allocate first page, kernel only. Contains return ticket
-			uint64_t virt = ret & ~0xFFF;
+			uint64_t virt = PAGE(ret);
 			virt -= PAGE_SIZE;
 			uint64_t page = PhysMM::calloc();
 			size_t flags = 0;

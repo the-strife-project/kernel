@@ -40,7 +40,6 @@ void APIC::initTimer() {
 }
 
 void APIC::startQuantum() {
-	printf("Start quantum");
 	// Start one-shot timer on IRQ 0, divider 16
 	writeReg(TIMER_LVT, LAPIC_TIMER_VEC | MODE_ONESHOT);
 	writeReg(TIMER_DIVIDER, 0x3);
@@ -48,7 +47,6 @@ void APIC::startQuantum() {
 }
 
 void APIC::anotherChance() {
-	printf("Another chance");
 	// 1ms one-shot
 	writeReg(TIMER_LVT, LAPIC_TIMER_VEC | MODE_ONESHOT);
 	writeReg(TIMER_DIVIDER, 0x3);

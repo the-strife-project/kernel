@@ -3,10 +3,10 @@
 #include <tasks/PIDs/PIDs.hpp>
 
 static void* remoteToKernel(uint64_t ptr, Paging remote) {
-	uint64_t ret = remote.getPhys(ptr & ~0xFFF);
+	uint64_t ret = remote.getPhys(PAGE(ptr));
 	if(!ret)
 		return nullptr;
-	ret += ptr & 0xFFF;
+	ret += PAGEOFF(ptr);
 	return (void*)ret;
 }
 
@@ -20,7 +20,7 @@ bool pmemcpy(void* dst, Paging remote, void* orig, size_t n) {
 	char* corig = (char*)orig;
 
 	// First page
-	size_t sz = std::min(n, PAGE_SIZE - (((size_t)orig) & 0xFFF));
+	size_t sz = std::min(n, PAGE_SIZE - PAGEOFF((size_t)orig));
 	void* remotePage = remoteToKernel((uint64_t)corig, remote);
 	if(!remotePage)
 		return false;

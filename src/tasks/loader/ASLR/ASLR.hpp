@@ -34,6 +34,9 @@ public:
 
 	void setID(size_t id, size_t npages);
 	uint64_t getFromID(size_t id, size_t npages); // Syscall handler
+
+	// Debugging
+	inline const PrivList<std::pair<size_t, uint64_t>>& getIDs() const { return ids; }
 };
 
 #endif

@@ -21,7 +21,7 @@ uint64_t align(uint64_t x, uint64_t alignment) {
 
 	uint64_t below = x - diff;
 	uint64_t above = x + (alignment - diff);
-	if((x & ~0xFFF) == (below & ~0xFFF))
+	if(PAGE(x) == PAGE(below))
 		return below;
 	return above;
 }
@@ -34,8 +34,8 @@ uint64_t ASLR::get(size_t max_pages, bool direction, uint64_t alignment, bool do
 		candidate %= MAX_ADDRESS - MIN_ADDRESS;
 		candidate += MIN_ADDRESS;
 
-		uint64_t begin = candidate & ~0xFFF;
-		uint64_t end = (candidate + max_pages*PAGE_SIZE) & ~0xFFF;
+		uint64_t begin = PAGE(candidate);
+		uint64_t end = PAGE(candidate + max_pages*PAGE_SIZE);
 
 		for(auto const& x : list) {
 			if(overlaps(begin, end, x.begin, x.end))

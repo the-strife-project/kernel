@@ -15,6 +15,21 @@ void Task::mapGeneralTask(Paging p, uint64_t whereami) {
 	}
 }
 
+Task::Task(const Loader::LoaderInfo& load, uint64_t entry, uint64_t whereami)
+	: paging(load.paging), rip(entry), rsp(load.stack),
+	  heapBottom(load.heap), stackTop(PAGE(load.stack)),
+	  prog(load.base), heap(load.heap), stack(load.stack),
+	  maxHeapBottom(load.heap + MAX_HEAP_PAGES*PAGE_SIZE),
+	  maxStackTop(load.stack - MAX_STACK_PAGES*PAGE_SIZE),
+	  aslr(load.aslr)
+{
+	mapGeneralTask(load.paging, whereami);
+
+	// No RPC stacks allocated
+	for(size_t i=0; i<257; ++i)
+		rpcStacks[i] = 1;
+}
+
 uint64_t Task::moreHeap(size_t npages) {
 	if(npages == 0)
 		return heapBottom;
@@ -40,12 +55,12 @@ uint64_t Task::moreHeap(size_t npages) {
 // TODO void Task::moreStack() {}
 
 void Task::freeStack() {
-	size_t npages = stackTop & ~0xFFF;
-	npages -= stack & ~0xFFF;
+	size_t npages = PAGE(stackTop);
+	npages -= PAGE(stack);
 	npages /= PAGE_SIZE;
 	++npages;
 
-	auto current = stackTop & ~0xFFF;
+	auto current = PAGE(stackTop);
 	while(npages--) {
 		auto phys = paging.getPhys(current);
 		paging.unmap(current);
@@ -87,11 +102,19 @@ void Task::dispatch() {
 }
 
 void Task::saveStateSyscall() {
-	// Three things: SavedState (regs + rflags), rip, rsp
-	pmemcpy(&state, paging, savedState[whoami()], sizeof(SavedState));
+	// Who am I running as?
+	as = getRunningAs();
+
+	// Get the SavedState
+	auto pp = getTask(as);
+	// Must be acquired at this point (handler does it at the beginning)
+	Paging p = pp.get()->paging;
+	// And there it goes
+	pmemcpy(&state, p, savedState[whoami()], sizeof(SavedState));
+
+	// Finally, rip, flags, and rsp
 	rip = getState().regs.rcx; // On syscall, rcx=rip
 	rpcFlags = getState().regs.r11; // And r11=flags
-	as = runningAs[whoami()]; // There's the last runningAs
 	// The stack before syscall is as follows (go read asmhandler.asm)
 	uint64_t newrsp = (uint64_t)savedState[whoami()];
 	newrsp += sizeof(SavedState);

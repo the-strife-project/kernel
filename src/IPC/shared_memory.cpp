@@ -20,7 +20,7 @@ static Task::SharedSegment getSM(Task* target, std::SMID smid, bool create=false
 	return Task::SharedSegment();
 }
 
-static uint8_t newSM(Task* target, std::SMID smid, uint64_t kptr) {
+static uint8_t newSM(Task* target, std::SMID smid, uint64_t kptr, size_t npages) {
 	if(getSM(target, smid, true).smid)
 		return 0; // Already exists
 
@@ -30,6 +30,8 @@ static uint8_t newSM(Task* target, std::SMID smid, uint64_t kptr) {
 			// Free slot!
 			shared[i].smid = smid;
 			shared[i].kptr = kptr;
+			shared[i].npages = npages;
+			shared[i].allowed = 0;
 			return 1; // OK
 		}
 	}
@@ -39,22 +41,26 @@ static uint8_t newSM(Task* target, std::SMID smid, uint64_t kptr) {
 };
 
 static const size_t SHARED_MEMORY_MAX_PAGES = 1 << 11;
-std::SMID IPC::smMake(Task* me) {
-	uint64_t kptr = PhysMM::calloc();
+std::SMID IPC::smMake(Task* me, size_t npages) {
+	uint64_t kptr = PhysMM::calloc(npages);
 	if(!kptr)
 		return 0;
 
 	while(true) {
 		std::SMID ret = getRandom64();
 
-		auto err = newSM(me, ret, kptr);
-		if(err == 1)
-			return ret;
-		else if(err == 2)
-			break;
+		auto err = newSM(me, ret, kptr, npages);
+		if(err == 1) {
+			// Set used to 0
+			for(size_t i=0; i<npages; ++i)
+				kpaging.getPTE(kptr + i * PAGE_SIZE)->setUsedChunks(0);
+
+			return ret; // OK
+		} else if(err == 2)
+			break; // No free slots
 	}
 
-	PhysMM::freeOne(kptr);
+	PhysMM::free(kptr, npages);
 	return 0;
 }
 
@@ -94,18 +100,14 @@ bool IPC::smRequest(Task* me, PID myself, PID pid, std::SMID smid) {
 	// Can release now
 	pp.release();
 
-	if(!sm.smid) {
-		// Not found in client's SMIDs
-		return false;
-	}
+	if(!sm.smid)
+		return false; // Not found in client's SMIDs
 
-	if(sm.allowed != myself) {
-		// Not allowed :(
-		return false;
-	}
+	if(sm.allowed != myself)
+		return false; // Not allowed :(
 
 	// Looks good to me
-	auto err = newSM(me, smid, sm.kptr);
+	auto err = newSM(me, smid, sm.kptr, sm.npages);
 	return err == 1;
 }
 
@@ -115,11 +117,29 @@ uint64_t IPC::smMap(Task* me, std::SMID smid) {
 	if(!sm.smid)
 		return 0;
 
-	uint64_t tptr = me->getASLR().get(1, GROWS_UPWARD, PAGE_SIZE, DO_NOT_PANIC);
+	uint64_t tptr = me->getASLR().get(sm.npages, GROWS_UPWARD, PAGE_SIZE, DO_NOT_PANIC);
 	if(!tptr)
 		return 0;
 
-	me->getPaging().map(tptr, sm.kptr, PAGE_SIZE, mapflags);
-	kpaging.getPTE(sm.kptr)->incUsedChunks();
+	me->getPaging().map(tptr, sm.kptr, PAGE_SIZE * sm.npages, mapflags);
+	for(size_t i=0; i<sm.npages; ++i)
+		kpaging.getPTE(sm.kptr + i * PAGE_SIZE)->incUsedChunks();
 	return tptr;
+}
+
+size_t IPC::smGetSize(Task* me, std::SMID smid) {
+	auto sm = getSM(me, smid);
+	if(!sm.smid)
+		return 0;
+	return sm.npages;
+}
+
+void IPC::smDrop(Task* me, std::SMID smid) {
+	auto* shared = me->getShared();
+	for(size_t i=0; i<Task::NUM_SHARED_SEGMENTS; ++i) {
+		if(shared[i].smid == smid) {
+			shared[i].smid = 0;
+			return;
+		}
+	}
 }

@@ -24,4 +24,7 @@ void exec(PID parent, uint64_t buffer, size_t sz);
 extern "C" uint64_t* loaderStacks;
 void wait(PID parent, PID child);
 
+void lockCurrent();
+bool wake(PID);
+
 #endif

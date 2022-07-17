@@ -2,5 +2,5 @@
 #include <klibc/klibc.hpp> // Temporal
 
 void Task::destroy() {
-	printf("Should destroy task here.\n");
+	//printf("Should destroy task here.\n");
 }

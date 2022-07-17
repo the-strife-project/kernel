@@ -17,7 +17,7 @@ extern "C" void catchPF(size_t err, uint64_t iretqs, size_t rax) {
 		// Caused by user
 		if(!(getCR2() >> 63)) { // Lower half
 			if(err & (1 << PFErr::P)) { // Page protection
-				if(!(getCR2() & 0xFFF)) { // Fault at page beginning
+				if(!PAGEOFF(getCR2())) { // Fault at page beginning
 					// That's rpcReturn!
 					asm volatile("mov %%rbp, %%rdi\n"
 								 "mov %%cr2, %%rsp\n"
@@ -30,6 +30,7 @@ extern "C" void catchPF(size_t err, uint64_t iretqs, size_t rax) {
 		// TODO: Check more stack here
 
 		// Unrecognized page fault by user
+		printf("Unrecognized page fault in userland. Panicking for debugging purposes.");
 		//exceptionKill(std::kkill::SEGFAULT);
 	}
 	// Some checks would go here
@@ -62,6 +63,25 @@ extern "C" void catchPF(size_t err, uint64_t iretqs, size_t rax) {
 
 	// Time to return to the kernel
 	kpaging.load();
+
+	// This is debug
+	if(err & (1 << PFErr::U)) {
+		auto core = whoami();
+		printf("That was %x as %x\n", origRunning[core], runningAs[core]);
+		auto pp = getTask(runningAs[core]);
+		pp.acquire();
+		if(pp.isNull()) {
+			printf("NULL!?!?!?!?!\n");
+			hlt();
+		}
+
+		printf("ASLR dump:\n");
+		for(auto const& x : pp.get()->task->getASLR().getIDs())
+			printf("%x - %x\n", x.f, x.s);
+
+		pp.release();
+		exceptionKill(std::kkill::SEGFAULT);
+	}
 
 	hlt();
 }

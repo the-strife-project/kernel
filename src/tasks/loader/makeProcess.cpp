@@ -33,8 +33,8 @@ PID Loader::makeProcess() {
 	// Give it some stack. One or two pages are given, next are on demand
 	uint64_t stack = aslr.get(MAX_STACK_PAGES, GROWS_DOWNWARD, STACK_ALIGNMENT, DO_PANIC);
 	auto stackFlags = Paging::MapFlag::USER | Paging::MapFlag::NX;
-	paging.map((stack & ~0xFFF) - PAGE_SIZE, PhysMM::calloc(), PAGE_SIZE, stackFlags);
-	paging.map(stack & ~0xFFF, PhysMM::calloc(), PAGE_SIZE, stackFlags);
+	paging.map(PAGE(stack) - PAGE_SIZE, PhysMM::calloc(), PAGE_SIZE, stackFlags);
+	paging.map(PAGE(stack), PhysMM::calloc(), PAGE_SIZE, stackFlags);
 
 	// And some heap, allocated on demand
 	uint64_t heap = aslr.get(MAX_HEAP_PAGES, GROWS_UPWARD, HEAP_ALIGNMENT, DO_PANIC);

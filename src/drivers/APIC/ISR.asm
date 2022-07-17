@@ -49,7 +49,7 @@ asmPreemption:
     mov rax, rbp
     mov cr3, rax
 
-    add rsp, 2*8
+    add rsp, 2*8 ; Ignore segment and flags
     pop rax
     pop rbx
     pop rcx

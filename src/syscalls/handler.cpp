@@ -35,14 +35,14 @@ inline void onlyKernel(PID pid, Scheduler::SchedulerTask& stask) {
 extern "C" uint64_t syscallHandler(size_t op, size_t arg1, size_t arg2,
 								   size_t arg3) {
 	uint64_t ret = 0; // Return value of this syscall
-	PID pid = getRunningAs();
-	if(!pid)
+	PID as = getRunningAs();
+	if(!as)
 		bruh(Bruh::SYSCALL_FROM_PID_0);
 
 	// Got a syscall. Task is not executing anymore.
 	// Its PCB is now free to be modified. However, it will be accesed
 	//   right away, so no need to release the lock.
-	auto pp = getTask(pid);
+	auto pp = getTask(as);
 	pp.acquire(); // No one does anything with PID
 	if(pp.isNull()) {
 		// damn, got killed
@@ -66,19 +66,22 @@ extern "C" uint64_t syscallHandler(size_t op, size_t arg1, size_t arg2,
 	case std::Syscalls::MMAP:
 		ret = stask.task->mmap(arg1, arg2);
 		break;
+	case std::Syscalls::MUNMAP:
+		stask.task->munmap(arg1, arg2);
+		break;
 
 	// --- LOADER ONLY ---
 	case std::Syscalls::BACK_FROM_LOADER:
-		onlyLoader(pid, stask);
+		onlyLoader(as, stask);
 		Loader::imBack(arg1, arg2, arg3);
 		goBack = false; // That's it for now
 		break;
 	case std::Syscalls::MAKE_PROCESS:
-		onlyLoader(pid, stask);
+		onlyLoader(as, stask);
 		ret = Loader::makeProcess();
 		break;
 	case std::Syscalls::ASLR_GET: {
-		onlyLoader(pid, stask);
+		onlyLoader(as, stask);
 		auto ppaslr = getTask(arg1);
 		ppaslr.acquire();
 		if(ppaslr.isNull())
@@ -88,7 +91,7 @@ extern "C" uint64_t syscallHandler(size_t op, size_t arg1, size_t arg2,
 		ppaslr.release();
 		} break;
 	case std::Syscalls::MAP_IN:
-		onlyLoader(pid, stask);
+		onlyLoader(as, stask);
 		ret = Loader::mapIn(arg1, arg2, arg3);
 		break;
 
@@ -105,19 +108,26 @@ extern "C" uint64_t syscallHandler(size_t op, size_t arg1, size_t arg2,
 		stask.task->setRPCentry(arg1);
 		break;
 	case std::Syscalls::RPC_MORE_STACKS:
-		onlyKernel(pid, stask);
+		onlyKernel(as, stask);
 		ret = IPC::rpcMoreStacks(arg1);
 		break;
 
 	// --- SHARED MEMORY ---
 	case std::Syscalls::SM_MAKE:
-		ret = IPC::smMake(stask.task);
+		if(arg1)
+			ret = IPC::smMake(stask.task, arg1);
 		break;
 	case std::Syscalls::SM_ALLOW:
 		ret = IPC::smAllow(stask.task, arg1, arg2);
 		break;
 	case std::Syscalls::SM_REQUEST:
-		ret = IPC::smRequest(stask.task, pid, arg1, arg2);
+		ret = IPC::smRequest(stask.task, as, arg1, arg2);
+		break;
+	case std::Syscalls::SM_GETSIZE:
+		ret = IPC::smGetSize(stask.task, arg1);
+		break;
+	case std::Syscalls::SM_DROP:
+		IPC::smDrop(stask.task, arg1);
 		break;
 	case std::Syscalls::SM_MAP:
 		ret = IPC::smMap(stask.task, arg1);
@@ -126,7 +136,7 @@ extern "C" uint64_t syscallHandler(size_t op, size_t arg1, size_t arg2,
 	// --- SPECIAL PERMISSIONS ---
 	case std::Syscalls::ALLOW_IO:
 		// A check would go here (running as system?)
-		ret = getIO(pid, stask.task);
+		ret = getIO(as, stask.task);
 		break;
 	case std::Syscalls::ALLOW_PHYS:
 		// Check here!
@@ -135,20 +145,26 @@ extern "C" uint64_t syscallHandler(size_t op, size_t arg1, size_t arg2,
 		break;
 	case std::Syscalls::GET_PHYS:
 		if(!stask.task->isPhysAllowed())
-			stask.kill(pid, std::kkill::PHYS_NOT_ALLOWED);
+			stask.kill(as, std::kkill::PHYS_NOT_ALLOWED);
 
 		ret = stask.task->getPaging().getPhys(arg1);
 		break;
 	case std::Syscalls::MAP_PHYS:
 		if(!stask.task->isPhysAllowed())
-			stask.kill(pid, std::kkill::PHYS_NOT_ALLOWED);
+			stask.kill(as, std::kkill::PHYS_NOT_ALLOWED);
 
 		ret = stask.task->mapPhys(arg1, arg2, arg3);
 		break;
 
 	// --- TASK-RELATED ---
+	case std::Syscalls::GET_PID:
+		ret = as;
+		break;
+	case std::Syscalls::GET_ORIG_PID:
+		ret = getOrigRunning();
+		break;
 	case std::Syscalls::EXEC:
-		exec(pid, arg1, arg2);
+		exec(as, arg1, arg2);
 		// That might return in case of bad buffer
 		ret = NULL_PID;
 		break;
@@ -175,11 +191,20 @@ extern "C" uint64_t syscallHandler(size_t op, size_t arg1, size_t arg2,
 		break;
 	case std::Syscalls::WAIT:
 		ret = 0;
-		wait(pid, arg1);
+		wait(as, arg1);
+		break;
+
+	// --- LOCKS ---
+	case std::Syscalls::LOCK:
+		lockCurrent();
+		goBack = false;
+		break;
+	case std::Syscalls::WAKE:
+		ret = wake(arg1);
 		break;
 
 	default:
-		stask.kill(pid, std::kkill::UNKNOWN_SYSCALL);
+		stask.kill(as, std::kkill::UNKNOWN_SYSCALL);
 		goBack = false;
 	}
 

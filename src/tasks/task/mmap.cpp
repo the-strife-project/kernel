@@ -23,10 +23,37 @@ uint64_t Task::mmap(size_t npages, size_t prot) {
 		// Map time
 		paging.map(virt, page, PAGE_SIZE, flags);
 
+		kpaging.getPTE(page)->setUsedChunks(0);
+
 		virt += PAGE_SIZE;
 	}
 
 	return ret;
+}
+
+void Task::munmap(size_t base, size_t npages) {
+	if(PAGEOFF(base))
+		return;
+
+	aslr.free(base);
+
+	while(npages--) {
+		uint64_t phys = paging.getPhys(base);
+		paging.unmap(base);
+
+		auto* pte = kpaging.getPTE(phys);
+		size_t used = pte->getUsedChunks();
+		if(used < 2) {
+			// 0, not shared, so free
+			// 1, shared, once, so free
+
+			PhysMM::free(phys, 1);
+		} else {
+			kpaging.getPTE(phys)->decUsedChunks();
+		}
+
+		base += PAGE_SIZE;
+	}
 }
 
 uint64_t Task::mapPhys(uint64_t phys, size_t npages, size_t prot) {

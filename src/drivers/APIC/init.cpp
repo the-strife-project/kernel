@@ -25,7 +25,7 @@ static void enableLAPIC() {
 	base |= APIC::LAPIC_ENABLE;
 
 	// Get APIC base address and map it to virtual memory
-	uint64_t address = base & ~0xFFF;
+	uint64_t address = PAGE(base);
 	if(address != (uint64_t)APIC::ADDRESS)
 		panic(Panic::APIC_WEIRD_ADDRESS);
 	if(!mapped && kpaging.getPhys(address))

@@ -42,12 +42,12 @@ void* Allocator::alloc() {
 
 	uint64_t ret = (uint64_t)top;
 	pop();
-	kpaging.getPTE(ret & ~0xFFF)->incUsedChunks();
+	kpaging.getPTE(PAGE(ret))->incUsedChunks();
 	return (void*)ret;
 }
 
 void Allocator::free(void* addr) {
-	uint64_t page = ((uint64_t)addr) & ~0xFFF;
+	uint64_t page = PAGE((uint64_t)addr);
 
 	auto* pte = kpaging.getPTE(page);
 	pte->decUsedChunks();

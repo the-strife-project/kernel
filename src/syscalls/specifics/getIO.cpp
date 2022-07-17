@@ -16,7 +16,7 @@ size_t getIO(std::PID pid, Task* task) {
 
 	// Now that it surely is in one page, get the physical
 	uint64_t phys = task->getPaging().getPhys(r11);
-	uint64_t* rflags = (uint64_t*)(phys + (r11 & 0xFFF));
+	uint64_t* rflags = (uint64_t*)(phys + PAGEOFF(r11));
 
 	// Set IOPL=3
 	*rflags |= (1 << RFLAGS::IOPL0) | (1 << RFLAGS::IOPL1);

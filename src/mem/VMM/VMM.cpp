@@ -25,7 +25,7 @@ uint64_t PublicMM::calloc(size_t npages) {
 void PublicMM::free(uint64_t x, size_t npages) {
 	// Unmap and free
 	lock.acquire();
-	uint64_t page = x & ~0xFFF;
+	uint64_t page = PAGE(x);
 	PhysMM::free(page - HIGHER_HALF, npages);
 
 	while(npages--) {

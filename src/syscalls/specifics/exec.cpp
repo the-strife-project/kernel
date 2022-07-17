@@ -8,7 +8,7 @@ void exec(PID parent, uint64_t buffer, size_t sz) {
 	// Check valid values
 	if(sz >= Loader::MAX_ELF_SIZE)
 		return;
-	if(buffer & 0xFFF)
+	if(PAGEOFF(buffer))
 		return; // Must be page-aligned
 
 	// Start checking if the buffer is correct

@@ -12,8 +12,11 @@ void Scheduler::SchedulerTask::exit(size_t code) {
 		panic(Panic::NO_AHCI);
 
 	// Critical process?
-	if(!parent)
-		panic(Panic::CRITICAL_PROCESS_DIED);
+	if(!parent) {
+		panic(Panic::CRITICAL_PROCESS_DIED, true);
+		printf("\nIt was PID 0x%x, exit value: 0x%x", me, code);
+		hlt();
+	}
 
 	_commonDie(me, std::kkill::OK, code);
 }
@@ -24,7 +27,6 @@ void Scheduler::SchedulerTask::kill(PID me, size_t reason) {
 		panic(Panic::CRITICAL_PROCESS_DIED, true);
 		printf("\nIt was PID 0x%x, reason: 0x%x", me, reason);
 		hlt();
-		while(true);
 	}
 
 	_commonDie(me, reason, ~0ull);

@@ -15,6 +15,7 @@ public:
 		uint64_t kptr = 0;
 		uint64_t tptr = 0;
 		std::PID allowed = 0;
+		size_t npages = 0;
 	} __attribute__((packed));
 	static const size_t NUM_SHARED_SEGMENTS = PAGE_SIZE / sizeof(SharedSegment);
 
@@ -36,7 +37,7 @@ private:
 			1: from here on, there are no free stacks
 			any other: available stack
 	*/
-	uint64_t rpcStacks[257] = {1}; // 256 + last one is always 1
+	uint64_t rpcStacks[257]; // 256 + last one is always 1
 
 	// State
 	Paging paging;
@@ -44,6 +45,7 @@ private:
 	uint64_t rip, rsp;
 	uint64_t heapBottom, stackTop;
 	PID as; // Who am I running as?
+	bool locked = false; // Whether the process is waiting for WAKE
 
 	// Properties
 	uint64_t prog, heap, stack;
@@ -57,17 +59,13 @@ private:
 
 public:
 	Task() = default;
-	inline Task(const Loader::LoaderInfo& load, uint64_t entry, uint64_t whereami)
-		: paging(load.paging), rip(entry), rsp(load.stack),
-		  heapBottom(load.heap), stackTop(load.stack & ~0xFFF),
-		  prog(load.base), heap(load.heap), stack(load.stack),
-		  maxHeapBottom(load.heap + MAX_HEAP_PAGES*PAGE_SIZE),
-		  maxStackTop(load.stack - MAX_STACK_PAGES*PAGE_SIZE),
-		  aslr(load.aslr)
-	{ mapGeneralTask(load.paging, whereami); }
+	Task(const Loader::LoaderInfo& load, uint64_t entry, uint64_t whereami);
 
 	inline void setAs(PID pid) { as = pid; }
 	inline PID getAs() const { return as; }
+
+	inline void setLocked(bool v) { locked = v; }
+	inline bool getLocked() const { return locked; }
 
 	inline uint64_t* getRPCStacks() { return rpcStacks; }
 	inline Paging getPaging() { return paging; }
@@ -86,6 +84,7 @@ public:
 	void destroy();
 
 	uint64_t mmap(size_t npages, size_t prot);
+	void munmap(uint64_t base, size_t npages);
 	uint64_t mapPhys(uint64_t phys, size_t npages, size_t prot);
 
 	SharedSegment* getShared() { return shared; }

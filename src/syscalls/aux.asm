@@ -1,7 +1,7 @@
 ; Some auxiliary macros
 
-%define SYSCALL_RPC 9
-%define SYSCALL_RPC_MORE_STACKS 11
+%define SYSCALL_RPC 10
+%define SYSCALL_RPC_MORE_STACKS 12
 
 
 

@@ -30,7 +30,7 @@ void initKernelPaging(MemoryMap mm) {
 		if(x.type == STIVALE2_MMAP_USABLE || x.type == STIVALE2_MMAP_BOOTLOADER_RECLAIMABLE) {
 			kpaging.map(x.base, x.base, x.length, Paging::MapFlag::NX);
 		} else if(x.type == STIVALE2_MMAP_KERNEL_AND_MODULES) {
-			uint64_t base = x.base & ~0xFFF;
+			uint64_t base = PAGE(x.base);
 			uint64_t baseoff = x.base - base;
 			kpaging.map(HIGHER_HALF + base, base, x.length + baseoff, Paging::MapFlag::GLOBAL);
 		}
