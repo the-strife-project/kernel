@@ -4,7 +4,7 @@
 #include <types>
 
 #define CPUID_RDRAND (1 << 30)
-#define ENTROPY_BITS 128
+#define ENTROPY_BITS 256
 #define ENTROPY_BYTES (ENTROPY_BITS / 8)
 #define ENTROPY_QUADS (ENTROPY_BYTES / sizeof(uint64_t))
 
@@ -15,12 +15,7 @@ union Entropy {
 extern Entropy entropy;
 
 void initRandom();
+uint64_t getRandom64();
 void getRandom(uint8_t* data, size_t bytes);
-
-inline uint64_t getRandom64() {
-	volatile uint64_t ret;
-	getRandom((uint8_t*)&ret, sizeof(uint64_t));
-	return ret;
-}
 
 #endif
