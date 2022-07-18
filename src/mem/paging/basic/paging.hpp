@@ -40,7 +40,7 @@ public:
 	uint64_t getFlags(uint64_t virt);
 	inline void load() { setCR3((uint64_t)data); }
 	void dump();
-	// TODO: destroy()
+	void destroy();
 
 	// Sign stuff (36 bits)
 	static const uint64_t shift = 0x1000000000;

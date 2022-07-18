@@ -1,6 +1,12 @@
 #include "task.hpp"
-#include <klibc/klibc.hpp> // Temporal
 
 void Task::destroy() {
-	//printf("Should destroy task here.\n");
+	paging.destroy();
+
+	// rpcStacks are freed with paging too
+
+	if(shared) {
+		PhysMM::free((uint64_t)shared, 1);
+		shared = nullptr;
+	}
 }

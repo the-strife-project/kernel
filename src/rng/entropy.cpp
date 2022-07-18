@@ -9,6 +9,8 @@ static uint64_t rdrand() {
 	return ret;
 }
 
+void _initCSPRNG();
+
 void initRandom() {
 	size_t ecx;
 	asm volatile("cpuid"
@@ -25,4 +27,6 @@ void initRandom() {
 		for(size_t i=0; i<ENTROPY_QUADS; ++i)
 			entropy.q[i] = 42;
 	}
+
+	_initCSPRNG();
 }

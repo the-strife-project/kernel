@@ -68,9 +68,11 @@ void Scheduler::SchedulerTask::_commonDie(PID me, size_t reason, size_t code) {
 
 	// Destroy the PCB
 	this->task->destroy();
+	PhysMM::freeOne((uint64_t)(this->task));
+	this->task = nullptr;
 
-	// Free myself
-	// free() PUBLIC MEMORY TODO
+	// Free myself. Weird, huh?
+	free(this, sizeof(Scheduler::SchedulerTask), PUBLIC);
 
 	// Set nullptr in PID table for whoever comes next
 	mypp.setNull();
