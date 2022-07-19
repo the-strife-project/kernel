@@ -20,7 +20,7 @@ void enableSyscalls();
 
 // Specifics
 size_t getIO(std::PID pid, Task* task);
-void exec(PID parent, uint64_t buffer, size_t sz);
+void exec(PID parent, uint64_t buffer, size_t sz, uint64_t runtime, size_t rtsz);
 extern "C" uint64_t* loaderStacks;
 void wait(PID parent, PID child);
 

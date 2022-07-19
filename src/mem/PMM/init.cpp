@@ -12,7 +12,7 @@ static void initialize(uint64_t base, uint64_t length) {
 	uint64_t bmapSize = (npages + 8 - 1) / 8;
 	// How many pages for metadata?
 	uint64_t needed = sizeof(PhysMM::Frame) + bmapSize;
-	uint64_t metadata = (needed + PAGE_SIZE - 1) / PAGE_SIZE;
+	uint64_t metadata = NPAGES(needed);
 
 	// That's it, format the region
 	PhysMM::Frame* frame = (PhysMM::Frame*)base;
@@ -49,8 +49,7 @@ void PhysMM::init(const MemoryMap& memmap) {
 
 	// Let's get an array of regions
 	// This helps in freeing
-	size_t needed = nregions * sizeof(Frame*);
-	needed = (needed + PAGE_SIZE - 1) / PAGE_SIZE;
+	size_t needed = NPAGES(nregions * sizeof(Frame*));
 
 	// Set the first region for now
 	regions = &first; // In the stack. Cool, huh?
@@ -82,8 +81,7 @@ void PhysMM::init(const MemoryMap& memmap) {
 
 	// Recreate "regions"
 	Frame** old = regions;
-	size_t needed = (nregions + ctr) * sizeof(Frame*);
-	needed = (needed + PAGE_SIZE - 1) / PAGE_SIZE;
+	size_t needed = NPAGES((nregions + ctr) * sizeof(Frame*));
 	regions = (Frame**)PhysMM::calloc(needed);
 	Frame** ptr = regions;
 

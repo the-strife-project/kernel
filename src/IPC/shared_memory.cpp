@@ -51,10 +51,7 @@ std::SMID IPC::smMake(Task* me, size_t npages) {
 
 		auto err = newSM(me, ret, kptr, npages);
 		if(err == 1) {
-			// Set used to 0
-			for(size_t i=0; i<npages; ++i)
-				kpaging.getPTE(kptr + i * PAGE_SIZE)->setUsedChunks(0);
-
+			// PhysMM::alloc() sets counter to zero
 			return ret; // OK
 		} else if(err == 2)
 			break; // No free slots

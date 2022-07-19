@@ -33,7 +33,7 @@ inline void onlyKernel(PID pid, Scheduler::SchedulerTask& stask) {
 
 // Just add arguments as they needed. va_list doesn't work here.
 extern "C" uint64_t syscallHandler(size_t op, size_t arg1, size_t arg2,
-								   size_t arg3) {
+								   size_t arg3, size_t arg4) {
 	uint64_t ret = 0; // Return value of this syscall
 	PID as = getRunningAs();
 	if(!as)
@@ -164,7 +164,7 @@ extern "C" uint64_t syscallHandler(size_t op, size_t arg1, size_t arg2,
 		ret = getOrigRunning();
 		break;
 	case std::Syscalls::EXEC:
-		exec(as, arg1, arg2);
+		exec(as, arg1, arg2, arg3, arg4);
 		// That might return in case of bad buffer
 		ret = NULL_PID;
 		break;

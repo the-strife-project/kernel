@@ -4,6 +4,7 @@
 #define HIGHER_HALF 0xFFFFFFFF80000000
 
 extern "C" Paging kpaging;
+extern bool isPagingAvailable;
 void initKernelPaging(MemoryMap);
 
 // Specific memory regions in global page table:

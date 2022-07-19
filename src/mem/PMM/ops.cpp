@@ -2,6 +2,7 @@
 #include <bitmap>
 #include <klibc/spinlock.hpp>
 #include <klibc/memory/memory.hpp>
+#include <mem/paging/paging.hpp>
 
 static size_t allocInRegion(PhysMM::Frame* frame, size_t want) {
 	uint8_t* start = (uint8_t*)frame + sizeof(PhysMM::Frame);
@@ -46,6 +47,12 @@ uint64_t PhysMM::alloc(size_t npages) {
 		if(got != frame->pages) {
 			// Valid index!
 			ret = frame->first + got * PAGE_SIZE;
+
+			// Set used chunks to 0
+			if(isPagingAvailable)
+				for(size_t j=0; j<npages; ++j)
+					kpaging.getPTE(ret + j * PAGE_SIZE)->setUsedChunks(0);
+
 			break;
 		}
 	}

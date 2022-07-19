@@ -25,7 +25,7 @@ void Bootstrap::bootstrap() {
 
 	// Map framebuffer
 	size_t fbsize = FB_ROWS * FB_COLS * 2;
-	size_t fbpages = (fbsize + PAGE_SIZE - 1) / PAGE_SIZE;
+	size_t fbpages = NPAGES(fbsize);
 	uint64_t fb = term->getASLR().get(fbpages, GROWS_UPWARD, PAGE_SIZE);
 	uint64_t flags = Paging::MapFlag::USER | Paging::MapFlag::NX;
 	term->getPaging().map(fb, PHYS_VIDEO_BASE, fbsize, flags);

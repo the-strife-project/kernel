@@ -94,6 +94,7 @@ asmSyscallHandler:
     push r12
 
     mov rcx, r10 ; Third argument -> Third parameter
+    ; Fourth argument comes in r8, which is correct (fifth parameter)
     call syscallHandler
 
 wereBack:

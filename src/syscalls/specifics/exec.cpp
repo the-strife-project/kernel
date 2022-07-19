@@ -2,38 +2,44 @@
 #include <tasks/PIDs/PIDs.hpp>
 
 static Spinlock loaderLock;
-extern "C" [[noreturn]] void execSwitchStack(PID, uint64_t, size_t, uint64_t);
+extern "C" [[noreturn]] void execSwitchStack(PID, uint64_t, size_t, uint64_t, size_t, uint64_t);
 
-void exec(PID parent, uint64_t buffer, size_t sz) {
+void exec(PID parent, uint64_t buffer, size_t sz, uint64_t runtime, size_t rtsz) {
 	// Check valid values
 	if(sz >= Loader::MAX_ELF_SIZE)
 		return;
 	if(PAGEOFF(buffer))
 		return; // Must be page-aligned
+	if(PAGEOFF(runtime))
+		return; // Same
 
 	// Start checking if the buffer is correct
 	auto parentpp = getTask(parent);
 	auto& parentst = *(parentpp.get());
 
-	size_t npages = (sz + PAGE_SIZE - 1) / PAGE_SIZE;
-	for(size_t i=0; i<npages; ++i) {
-		uint64_t phys = parentst.paging.getPhys(buffer + i * PAGE_SIZE);
-		if(!phys)
+	size_t npages = NPAGES(sz);
+	for(size_t i=0; i<npages; ++i)
+		if(!parentst.paging.getPhys(buffer + i * PAGE_SIZE))
 			return;
-	}
+
+	// Runtime too
+	npages = NPAGES(rtsz);
+	for(size_t i=0; i<npages; ++i)
+		if(!parentst.paging.getPhys(runtime + i * PAGE_SIZE))
+			return;
 
 	// From this point on, this function doesn't return
 	// That's why, first of all, let's save the state
 	parentst.task->saveStateSyscall();
 
-	execSwitchStack(parent, buffer, sz, loaderStacks[whoami()]);
+	execSwitchStack(parent, buffer, sz, runtime, sz, loaderStacks[whoami()]);
 }
 
-extern "C" void execPartTwo(PID parent, uint64_t buffer, size_t sz) {
+extern "C" void execPartTwo(PID parent, uint64_t buffer, size_t sz, uint64_t runtime, size_t rtsz) {
 	// We're now on a public stack, independent of the syscall that called this
 	auto parentpp = getTask(parent);
 	auto& parentst = *(parentpp.get());
-	size_t npages = (sz + PAGE_SIZE - 1) / PAGE_SIZE;
+	size_t npages = NPAGES(sz);
 
 	// Acquire the loader
 	loaderLock.acquire();
@@ -42,16 +48,17 @@ extern "C" void execPartTwo(PID parent, uint64_t buffer, size_t sz) {
 
 	// Now, start steal pages from process to loader
 	for(size_t i=0; i<npages; ++i) {
-		uint64_t phys = parentst.paging.getPhys(buffer + i * PAGE_SIZE);
-		parentst.paging.unmap(buffer + i * PAGE_SIZE);
-		// phys is now a page not linked anywhere
+		uint64_t phys = parentst.paging.getPhys(buffer);
+		parentst.paging.unmap(buffer);
+		// phys is now an unlinked page
 		if(!Loader::movePage(phys, i))
 			bruh(Bruh::LOADER_MOVE_PAGE);
+
+		buffer += PAGE_SIZE;
 	}
 
-	// That's all for the parent
+	// That's all for the parent, keep it locked for later
 	setOrigRunning(Loader::LOADER_PID);
-	parentpp.release();
 	// Dispatch the loader
 	Task* loadert = loaderpp.get()->task;
 	loadert->getState().regs.rax = sz;
@@ -72,10 +79,29 @@ extern "C" void execPartTwo(PID parent, uint64_t buffer, size_t sz) {
 		// Acquire child
 		auto childpp = getTask(child);
 		childpp.acquire();
-		// And set the values
 		auto& childst = *(childpp.get());
+
+		// Put runtime information
+		npages = NPAGES(rtsz);
+		uint64_t rtbase = childst.task->getASLR().get(npages, GROWS_UPWARD, PAGE_SIZE);
+		uint64_t rtcur = rtbase;
+		for(size_t i=0; i<npages; ++i) {
+			uint64_t phys = parentst.paging.getPhys(runtime + i * PAGE_SIZE);
+			parentst.paging.unmap(runtime + i * PAGE_SIZE);
+			// phys is now an unlinked page
+			const size_t flags =
+				Paging::MapFlag::NX |
+				Paging::MapFlag::USER;
+			childst.task->getPaging().map(rtcur, phys, PAGE_SIZE, flags);
+
+			rtcur += PAGE_SIZE;
+		}
+		parentpp.release(); // That's it
+
+		// And set the values
 		childst.parent = parent;
 		childst.task->jump(entry);
+		childst.task->getState().regs.rdi = rtbase;
 		childpp.release();
 
 		// It's now free to run

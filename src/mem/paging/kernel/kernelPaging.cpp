@@ -10,6 +10,8 @@
 Paging kpaging;
 uint64_t kernelBegin, kernelEnd;
 
+bool isPagingAvailable = false;
+
 void initKernelPaging(MemoryMap mm) {
 	// Enable global-page extensions
 	setCR4(getCR4() | (1 << CR4_PAGE_GLOBAL));
@@ -37,4 +39,5 @@ void initKernelPaging(MemoryMap mm) {
 	}
 
 	kpaging.load();
+	isPagingAvailable = true;
 }
