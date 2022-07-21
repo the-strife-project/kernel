@@ -201,6 +201,12 @@ extern "C" uint64_t syscallHandler(size_t op, size_t arg1, size_t arg2,
 	case std::Syscalls::INFO:
 		taskInfo(as, stask.task, arg1, arg2);
 		break;
+	case std::Syscalls::SWITCH_USER:
+		if(stask.uid == UID_SYSTEM)
+			ret = switchUser(arg1, arg2);
+		else
+			ret = false; // Not allowed
+		break;
 
 	// --- LOCKS ---
 	case std::Syscalls::LOCK:
