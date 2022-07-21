@@ -4,6 +4,8 @@
 #include <klibc/memory/memory.hpp>
 #include <mem/paging/paging.hpp>
 
+static size_t usedPages = 0;
+
 static size_t allocInRegion(PhysMM::Frame* frame, size_t want) {
 	uint8_t* start = (uint8_t*)frame + sizeof(PhysMM::Frame);
 	uint64_t pages = frame->pages;
@@ -25,6 +27,7 @@ static size_t allocInRegion(PhysMM::Frame* frame, size_t want) {
 			// Nice. Set the bits.
 			for(size_t i=0; i<want; ++i)
 				bm.set(ret+i, true);
+			usedPages += want;
 			return ret;
 		}
 
@@ -70,6 +73,7 @@ static void freeFromFrame(uint64_t phys, size_t npages, PhysMM::Frame* frame) {
 	std::bitmap bm(pages, start);
 	for(size_t i=0; i<npages; ++i)
 		bm.set(begin+i, false);
+	usedPages -= npages;
 }
 
 void PhysMM::free(uint64_t phys, size_t npages) {
@@ -95,3 +99,5 @@ uint64_t PhysMM::calloc(size_t npages) {
 	memset((void*)ret, 0, PAGE_SIZE);
 	return ret;
 }
+
+size_t PhysMM::getUsedPages() { return usedPages; }

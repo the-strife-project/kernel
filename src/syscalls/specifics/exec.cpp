@@ -96,13 +96,14 @@ extern "C" void execPartTwo(PID parent, uint64_t buffer, size_t sz, uint64_t run
 
 			rtcur += PAGE_SIZE;
 		}
-		parentpp.release(); // That's it
 
 		// And set the values
 		childst.parent = parent;
+		childst.uid = parentst.uid; // Inherit UID
 		childst.task->jump(entry);
 		childst.task->getState().regs.rdi = rtbase;
 		childpp.release();
+		parentpp.release();
 
 		// It's now free to run
 		sched.add(child);

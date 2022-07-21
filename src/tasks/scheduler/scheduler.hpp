@@ -9,6 +9,7 @@
 #include <kkill>
 
 #define NULL_PID 0
+#define UID_SYSTEM 1
 
 /*
 	This task is a fixed pointer in all the OS.
@@ -26,6 +27,9 @@ public:
 	struct SchedulerTask {
 		// Used by RPC outside of paging (no access to task)
 		Paging paging;
+
+		// Who is the user responsible?
+		size_t uid = 0;
 
 		// Who called EXEC on me
 		PID parent = 0;

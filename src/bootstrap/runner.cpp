@@ -46,6 +46,7 @@ PID Bootstrap::run(const char* name, size_t moduleID, bool noprint) {
 
 	pp = getTask(ret);
 	pp.acquire();
+	pp.get()->uid = UID_SYSTEM;
 	pp.get()->task->jump(Loader::last_entry); // Set RIP
 	pp.release();
 

@@ -24,6 +24,10 @@ namespace PhysMM {
 
 	// Using free with npages=1 would be prone to errors
 	inline void freeOne(uint64_t addr) { free(addr, 1); }
+
+	// Information
+	size_t getUsablePages();
+	size_t getUsedPages();
 };
 
 #endif

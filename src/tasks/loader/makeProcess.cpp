@@ -34,7 +34,6 @@ PID Loader::makeProcess() {
 	uint64_t stack = aslr.get(MAX_STACK_PAGES, GROWS_DOWNWARD, STACK_ALIGNMENT, DO_PANIC);
 	auto stackFlags = Paging::MapFlag::USER | Paging::MapFlag::NX;
 	paging.map(PAGE(stack) - PAGE_SIZE, PhysMM::calloc(), PAGE_SIZE, stackFlags);
-	paging.map(PAGE(stack), PhysMM::calloc(), PAGE_SIZE, stackFlags);
 
 	// And some heap, allocated on demand
 	uint64_t heap = aslr.get(MAX_HEAP_PAGES, GROWS_UPWARD, HEAP_ALIGNMENT, DO_PANIC);
@@ -44,8 +43,7 @@ PID Loader::makeProcess() {
 	Task* task = (Task*)PhysMM::calloc(); // Task is private
 	uint64_t entrypoint = 0; // Unknown this soon
 	*task = Task(info, entrypoint, (uint64_t)task);
-
-	// TODO: Parameters?
+	task->incUsedPages(); // Stack
 
 	// Create scheduler task
 	Scheduler::SchedulerTask schedTask;

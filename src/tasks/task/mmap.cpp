@@ -13,21 +13,12 @@ uint64_t Task::mmap(size_t npages, size_t prot) {
 	if(!(prot & std::MMAP_EXEC))  flags |= Paging::MapFlag::NX;
 	flags |= Paging::MapFlag::USER;
 
-	uint64_t virt = ret;
-	while(npages--) {
-		// Allocate
-		uint64_t page = PhysMM::calloc();
-		if(!page)
-			return 0;
+	uint64_t phys = PhysMM::calloc(npages);
+	if(!phys)
+		return 0;
 
-		// Map time
-		paging.map(virt, page, PAGE_SIZE, flags);
-
-		kpaging.getPTE(page)->setUsedChunks(0);
-
-		virt += PAGE_SIZE;
-	}
-
+	paging.map(ret, phys, npages * PAGE_SIZE, flags);
+	incUsedPages(npages);
 	return ret;
 }
 
@@ -54,6 +45,8 @@ void Task::munmap(size_t base, size_t npages) {
 
 		base += PAGE_SIZE;
 	}
+
+	decUsedPages(npages);
 }
 
 uint64_t Task::mapPhys(uint64_t phys, size_t npages, size_t prot) {
@@ -74,6 +67,8 @@ uint64_t Task::mapPhys(uint64_t phys, size_t npages, size_t prot) {
 		virt += PAGE_SIZE;
 		phys += PAGE_SIZE;
 	}
+
+	// This doesn't count for usedPages
 
 	return ret;
 }

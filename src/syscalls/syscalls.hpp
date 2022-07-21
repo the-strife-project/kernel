@@ -26,5 +26,6 @@ void wait(PID parent, PID child);
 
 void lockCurrent();
 bool wake(PID);
+void taskInfo(PID me, Task*, PID pid, uint64_t);
 
 #endif

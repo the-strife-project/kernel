@@ -46,6 +46,7 @@ private:
 	uint64_t heapBottom, stackTop;
 	PID as; // Who am I running as?
 	bool locked = false; // Whether the process is waiting for WAKE
+	size_t usedPages = 0; // How many pages it's using
 
 	// Properties
 	uint64_t prog, heap, stack;
@@ -66,6 +67,10 @@ public:
 
 	inline void setLocked(bool v) { locked = v; }
 	inline bool getLocked() const { return locked; }
+
+	inline void incUsedPages(size_t n=1) { usedPages += n; }
+	inline void decUsedPages(size_t n=1) { usedPages -= n; }
+	inline size_t getUsedPages() { return usedPages; }
 
 	inline uint64_t* getRPCStacks() { return rpcStacks; }
 	inline Paging getPaging() { return paging; }

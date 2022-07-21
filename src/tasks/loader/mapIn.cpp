@@ -44,6 +44,8 @@ bool Loader::mapIn(PID pid, uint64_t local, uint64_t remote) {
 	flags |= Paging::MapFlag::USER;
 
 	rp.map(remote, phys, PAGE_SIZE, flags);
+	ppr.get()->task->incUsedPages();
+	ppl.get()->task->decUsedPages();
 	ppr.release();
 
 	lp.unmap(local);

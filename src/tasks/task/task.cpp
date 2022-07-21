@@ -44,11 +44,14 @@ uint64_t Task::moreHeap(size_t npages) {
 
 	// Map
 	uint64_t flags = Paging::MapFlag::NX | Paging::MapFlag::USER;
-	for(size_t i=0; i<npages; ++i)
-		paging.map(heapBottom+i*PAGE_SIZE, PhysMM::calloc(), PAGE_SIZE, flags);
+	uint64_t phys = PhysMM::calloc(npages);
+	if(!phys)
+		return 0;
+	paging.map(heapBottom, phys, npages * PAGE_SIZE, flags);
 
 	uint64_t ret = heapBottom;
 	heapBottom += sz;
+	incUsedPages(npages);
 	return ret;
 }
 
@@ -69,6 +72,7 @@ void Task::freeStack() {
 		if(phys)
 			PhysMM::freeOne(phys);
 		current += PAGE_SIZE;
+		decUsedPages();
 	}
 
 	aslr.free(stack);

@@ -6,8 +6,11 @@
 PhysMM::Frame** PhysMM::regions = nullptr;
 uint64_t PhysMM::nregions = 0;
 
+static size_t usablePages = 0;
+
 static void initialize(uint64_t base, uint64_t length) {
 	uint64_t npages = length / PAGE_SIZE;
+	usablePages += npages;
 
 	uint64_t bmapSize = (npages + 8 - 1) / 8;
 	// How many pages for metadata?
@@ -66,6 +69,8 @@ void PhysMM::init(const MemoryMap& memmap) {
 		}
 	}
 }
+
+size_t PhysMM::getUsablePages() { return usablePages; }
 
 /*void PhysMM::finish(const MemoryMap& memmap) {
 	size_t ctr = 0;

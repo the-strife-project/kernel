@@ -135,13 +135,18 @@ extern "C" uint64_t syscallHandler(size_t op, size_t arg1, size_t arg2,
 
 	// --- SPECIAL PERMISSIONS ---
 	case std::Syscalls::ALLOW_IO:
-		// A check would go here (running as system?)
-		ret = getIO(as, stask.task);
+		if(stask.uid == UID_SYSTEM)
+			ret = getIO(as, stask.task);
+		else
+			ret = 1; // Not allowed
 		break;
 	case std::Syscalls::ALLOW_PHYS:
-		// Check here!
-		stask.task->allowPhys();
-		ret = 1;
+		if(stask.uid == UID_SYSTEM) {
+			stask.task->allowPhys();
+			ret = true;
+		} else {
+			ret = false;
+		}
 		break;
 	case std::Syscalls::GET_PHYS:
 		if(!stask.task->isPhysAllowed())
@@ -192,6 +197,9 @@ extern "C" uint64_t syscallHandler(size_t op, size_t arg1, size_t arg2,
 	case std::Syscalls::WAIT:
 		ret = 0;
 		wait(as, arg1);
+		break;
+	case std::Syscalls::INFO:
+		taskInfo(as, stask.task, arg1, arg2);
 		break;
 
 	// --- LOCKS ---

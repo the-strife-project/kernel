@@ -76,6 +76,7 @@ void Loader::bootstrapLoader() {
 	uint64_t entrypoint = header->entrypoint;
 	uint64_t begin = rawbegin + sizeof(Header) + LOADER_SKIP;
 	uint64_t size = rawsize - (sizeof(Header) + LOADER_SKIP);
+	uint64_t loaderSize = size;
 
 
 	// Paging object
@@ -120,6 +121,10 @@ void Loader::bootstrapLoader() {
 	task->getState().regs.rsi = size;
 	// Loader is the only task not preemptable, so clear IF
 	task->getState().rflags &= ~(1 << RFLAGS::IF);
+
+	// Used pages
+	task->incUsedPages(NPAGES(loaderSize));
+	task->incUsedPages(); // Stack
 
 	Scheduler::SchedulerTask schedTask;
 	schedTask.task = task;
