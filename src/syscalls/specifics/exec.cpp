@@ -50,6 +50,7 @@ extern "C" void execPartTwo(PID parent, uint64_t buffer, size_t sz, uint64_t run
 	for(size_t i=0; i<npages; ++i) {
 		uint64_t phys = parentst.paging.getPhys(buffer);
 		parentst.paging.unmap(buffer);
+		parentst.task->decUsedPages();
 		// phys is now an unlinked page
 		if(!Loader::movePage(phys, i))
 			bruh(Bruh::LOADER_MOVE_PAGE);
@@ -88,11 +89,13 @@ extern "C" void execPartTwo(PID parent, uint64_t buffer, size_t sz, uint64_t run
 		for(size_t i=0; i<npages; ++i) {
 			uint64_t phys = parentst.paging.getPhys(runtime + i * PAGE_SIZE);
 			parentst.paging.unmap(runtime + i * PAGE_SIZE);
+			parentst.task->decUsedPages();
 			// phys is now an unlinked page
 			const size_t flags =
 				Paging::MapFlag::NX |
 				Paging::MapFlag::USER;
 			childst.task->getPaging().map(rtcur, phys, PAGE_SIZE, flags);
+			childst.task->incUsedPages();
 
 			rtcur += PAGE_SIZE;
 		}

@@ -28,7 +28,7 @@ void Task::munmap(size_t base, size_t npages) {
 
 	aslr.free(base);
 
-	while(npages--) {
+	for(size_t i=0; i<npages; ++i) {
 		uint64_t phys = paging.getPhys(base);
 		paging.unmap(base);
 

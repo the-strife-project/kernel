@@ -121,6 +121,8 @@ uint64_t IPC::smMap(Task* me, std::SMID smid) {
 	me->getPaging().map(tptr, sm.kptr, PAGE_SIZE * sm.npages, mapflags);
 	for(size_t i=0; i<sm.npages; ++i)
 		kpaging.getPTE(sm.kptr + i * PAGE_SIZE)->incUsedChunks();
+
+	me->incUsedPages(sm.npages);
 	return tptr;
 }
 
