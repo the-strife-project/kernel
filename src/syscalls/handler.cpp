@@ -217,6 +217,11 @@ extern "C" uint64_t syscallHandler(size_t op, size_t arg1, size_t arg2,
 		ret = wake(arg1);
 		break;
 
+	// --- GENERIC ---
+	case std::Syscalls::CSPRNG:
+		ret = sysCSPRNG(stask.task, arg1, arg2);
+		break;
+
 	default:
 		stask.kill(as, std::kkill::UNKNOWN_SYSCALL);
 		goBack = false;

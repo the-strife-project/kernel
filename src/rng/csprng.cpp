@@ -8,7 +8,7 @@ static inline uint64_t rol64(uint64_t x, size_t k) {
 	return (x << k) | (x >> (64 - k));
 }
 
-static uint64_t xorshiro256ss(uint64_t* s) {
+static uint64_t xoshiro256ss(uint64_t* s) {
 	uint64_t ret = rol64(s[1] * 5, 7) * 9;
 	uint64_t t = s[1] << 17;
 
@@ -43,7 +43,7 @@ void _initCSPRNG() {
 }
 
 uint64_t getRandom64() {
-	return xorshiro256ss(entropy.q);
+	return xoshiro256ss(entropy.q);
 }
 
 void getRandom(uint8_t* data, size_t bytes) {
